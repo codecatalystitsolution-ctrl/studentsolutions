@@ -1,0 +1,103 @@
+<div class="manage-orders-container fade-in">
+  
+  <div class="page-header">
+    <div class="header-text">
+      <h2>Manage Orders</h2>
+      <p>Track, process, and view complete details of student file requests.</p>
+    </div>
+    <div class="header-actions">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input 
+          type="text" 
+          [(ngModel)]="searchTerm" 
+          (keyup)="filterOrders()" 
+          placeholder="Search by ID or Name..." 
+          class="search-input"
+        >
+        <button class="clear-btn" *ngIf="searchTerm" (click)="clearSearch()">✖</button>
+      </div>
+      <div class="total-badge">Total Orders: {{ filteredOrders.length }}</div>
+    </div>
+  </div>
+
+  <div class="table-card glass-card">
+    
+    <div class="loading-state" *ngIf="isLoading">
+      <div class="spinner"></div>
+      <p>Loading active orders...</p>
+    </div>
+
+    <div class="table-responsive" *ngIf="!isLoading">
+      <table class="premium-table">
+        <thead>
+          <tr>
+            <th>Order ID & Date</th>
+            <th>Student Info <span style="color:#60a5fa;">(Front Page)</span></th>
+            <th>Project Details</th>
+            <th>Format & Price</th>
+            <th>Live Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let order of filteredOrders">
+            
+            <td>
+              <a class="order-id clickable-link" 
+                [routerLink]="['/admin/order-details']" 
+                [queryParams]="{ search: (order.id + '').substring(1,9) }">
+                #{{ (order.id + '') | slice:1:9 | uppercase }}
+                <span class="link-icon">↗</span>
+                </a>
+              <div class="order-date">{{ order.createdAt | date:'MMM d, y, h:mm a' }}</div>
+            </td>
+
+            <td>
+              <div class="primary-text" style="color: #60a5fa;">👤 {{ order.projectDetails?.submittedBy || 'Unknown' }}</div>
+              <div class="secondary-text">Roll: <strong style="color: #cbd5e1;">{{ order.projectDetails?.rollNumber || 'N/A' }}</strong></div>
+              <div class="secondary-text">Course: {{ order.projectDetails?.course || 'N/A' }}</div>
+            </td>
+
+            <td>
+              <div class="primary-text">{{ order.projectDetails?.subject || 'N/A' }}</div>
+              <div class="secondary-text">
+                <span class="file-type-badge">{{ order.fileType | titlecase }}</span>
+                {{ (order.projectDetails?.topic || order.projectDetails?.experimentDetails || 'General') | slice:0:20 }}...
+              </div>
+              <div class="secondary-text" style="margin-top: 4px;">To: {{ order.projectDetails?.submittedTo || 'N/A' }}</div>
+            </td>
+
+            <td>
+              <div class="price-text">₹{{ order.pricing?.totalAmount || 0 }}</div>
+              <div class="secondary-text">{{ order.printSettings?.pagesLabel || order.projectDetails?.estimatedPages || 0 }} Pages</div>
+              <div class="secondary-text">{{ order.printSettings?.binding | titlecase }} Binding</div>
+            </td>
+
+            <td>
+              <select 
+                [(ngModel)]="order.status" 
+                (change)="updateOrderStatus(order.id, order.status)"
+                class="status-dropdown"
+                [ngClass]="(order.status || 'pending').toLowerCase()">
+                <option value="Pending">🟡 Pending</option>
+                <option value="Printing">🟠 Printing</option>
+                <option value="Delivered">🟢 Delivered</option>
+                <option value="Cancelled">🔴 Cancelled</option>
+              </select>
+            </td>
+
+          </tr>
+
+          <tr *ngIf="filteredOrders.length === 0">
+            <td colspan="5" class="empty-state">
+              <span class="empty-icon">🔍</span>
+              <p *ngIf="searchTerm">No orders found matching "{{ searchTerm }}"</p>
+              <p *ngIf="!searchTerm">No orders received yet.</p>
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

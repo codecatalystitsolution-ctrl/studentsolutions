@@ -1,0 +1,68 @@
+<div class="dashboard-layout">
+  
+  <aside class="sidebar glass-panel" [class.open]="isSidebarOpen">
+    <div class="sidebar-header">
+      <h2 class="logo">FileCrafters</h2>
+      <button class="close-btn mobile-only" (click)="toggleSidebar()">✕</button>
+    </div>
+
+    <nav class="nav-menu">
+      <a routerLink="./home" routerLinkActive="active" class="nav-item"><span class="icon">🏠</span> Home</a>
+      <a routerLink="./profile" routerLinkActive="active" class="nav-item"><span class="icon">👤</span> My Profile</a>
+      <a routerLink="./settings" routerLinkActive="active" class="nav-item"><span class="icon">⚙️</span> Settings</a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-mini-profile">
+        <div class="avatar">{{ userName.charAt(0).toUpperCase() }}</div>
+        <div class="info">
+          <span class="name">{{ userName }}</span>
+          <span class="role">Student Panel</span>
+        </div>
+      </div>
+      <button class="logout-btn" (click)="logout()">Log Out</button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="top-header glass-panel">
+      <div class="header-left">
+        <button class="menu-btn mobile-only" (click)="toggleSidebar()">☰</button>
+        <h1 class="page-title">Dashboard</h1>
+      </div>
+      
+      <div class="header-right">
+        <a routerLink="/new-order" class="btn-primary-sm">New Order</a>
+        <!-- <button class="icon-btn">🔔<span class="badge">0</span></button> -->
+
+        <div class="navbar-profile">
+          <div class="avatar-btn" (click)="toggleProfileMenu()">
+            {{ userName.charAt(0).toUpperCase() }}
+          </div>
+
+          <!-- <div class="profile-dropdown glass-card" *ngIf="isProfileMenuOpen">
+            <div class="dropdown-header">
+              <span class="d-name">{{ userName }}</span>
+              <span class="d-email">{{ userEmail }}</span>
+            </div>
+            <div class="divider"></div>
+            <a routerLink="./profile" class="dropdown-item" (click)="toggleProfileMenu()"><span class="icon">👤</span> My Profile</a>
+            <a routerLink="./settings" class="dropdown-item" (click)="toggleProfileMenu()"><span class="icon">⚙️</span> Settings</a>
+            <div class="divider"></div>
+            <button class="dropdown-item text-danger" (click)="logout()">
+              <span class="icon">🚪</span> Log Out
+            </button>
+          </div> -->
+          
+        </div>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <router-outlet></router-outlet>
+    </div>
+
+  </main>
+
+  <div class="sidebar-overlay" *ngIf="isSidebarOpen" (click)="toggleSidebar()"></div>
+</div>

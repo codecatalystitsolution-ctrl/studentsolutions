@@ -1,0 +1,158 @@
+<div class="profile-layout" *ngIf="!isLoading">
+  <div class="profile-banner glass-card">
+    <div class="banner-cover"></div>
+    <div class="banner-content">
+      <div class="avatar-container">
+        <div class="big-avatar">{{ userData?.fullName?.charAt(0) || 'S' }}</div>
+      </div>
+      <div class="user-titles">
+        <h2>{{ userData?.fullName || 'Student' }}</h2>
+        <p>{{ userData?.email }} • {{ userData?.role || 'Student Account' }}</p>
+      </div>
+      <div class="action-btns">
+        <button class="btn-edit" *ngIf="!isEditMode" (click)="toggleEditMode()">
+          ✏️ Edit Profile
+        </button>
+        <button class="btn-cancel" *ngIf="isEditMode" (click)="toggleEditMode()">✕ Cancel</button>
+        <button
+          class="btn-save"
+          *ngIf="isEditMode"
+          (click)="saveProfile()"
+          [disabled]="profileForm.invalid"
+        >
+          💾 Save Changes
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="profile-grid" [class.edit-mode]="isEditMode">
+    <ng-container *ngIf="!isEditMode">
+      <div class="info-card glass-card">
+        <h3>🎓 Academic Identity</h3>
+        <div class="info-list">
+          <div class="info-item">
+            <span>College</span> <strong>{{ userData?.collegeName }}</strong>
+          </div>
+          <div class="info-item">
+            <span>Course</span> <strong>{{ userData?.courseName }} ({{ userData?.branch }})</strong>
+          </div>
+          <div class="info-item">
+            <span>Year & Semester</span> <strong>{{ userData?.year || 'N/A' }} • {{ userData?.semester || 'N/A' }}</strong>
+          </div>
+          <div class="info-item">
+            <span>Roll Number</span> <strong>{{ userData?.rollNumber }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-card glass-card">
+        <h3>📞 Contact Information</h3>
+        <div class="info-list">
+          <div class="info-item">
+            <span>Phone</span> <strong>+91 {{ userData?.phone }}</strong>
+          </div>
+          <div class="info-item">
+            <span>WhatsApp</span> <strong>+91 {{ userData?.whatsapp || 'Not provided' }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-card glass-card span-full">
+        <h3>📍 Delivery Address</h3>
+        <div class="info-list">
+          <div class="info-item">
+            <span>Address</span> <strong>{{ userData?.address }}</strong>
+          </div>
+          <div class="info-item">
+            <span>Pincode</span> <strong>{{ userData?.pincode }}</strong>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="isEditMode">
+      <form [formGroup]="profileForm" class="edit-form-grid glass-card span-full">
+        <h3 class="edit-title">Update Your Details</h3>
+
+        <div class="input-row">
+          <div class="input-group">
+            <label>Full Name</label>
+            <input type="text" formControlName="fullName" />
+          </div>
+          <div class="input-group">
+            <label>Phone Number</label>
+            <input type="text" formControlName="phone" />
+          </div>
+          <div class="input-group">
+            <label>WhatsApp Number</label>
+            <input type="text" formControlName="whatsapp" />
+          </div>
+        </div>
+
+        <div class="input-row">
+          <div class="input-group">
+            <label>College Name</label>
+            <input type="text" formControlName="collegeName" />
+          </div>
+          <div class="input-group">
+            <label>Course</label>
+            <input type="text" formControlName="courseName" />
+          </div>
+          <div class="input-group">
+            <label>Branch</label>
+            <input type="text" formControlName="branch" />
+          </div>
+        </div>
+
+        <div class="input-row">
+          <div class="input-group">
+            <label>Current Year</label>
+            <select formControlName="year">
+              <option value="" disabled selected>Select Year</option>
+              <option value="1st Year">1st Year</option>
+              <option value="2nd Year">2nd Year</option>
+              <option value="3rd Year">3rd Year</option>
+              <option value="4th Year">4th Year</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label>Semester</label>
+            <select formControlName="semester">
+              <option value="" disabled selected>Select Semester</option>
+              <option value="1st Sem">1st Sem</option>
+              <option value="2nd Sem">2nd Sem</option>
+              <option value="3rd Sem">3rd Sem</option>
+              <option value="4th Sem">4th Sem</option>
+              <option value="5th Sem">5th Sem</option>
+              <option value="6th Sem">6th Sem</option>
+              <option value="7th Sem">7th Sem</option>
+              <option value="8th Sem">8th Sem</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label>Roll Number</label>
+            <input type="text" formControlName="rollNumber">
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label>Delivery Address</label>
+          <textarea formControlName="address" rows="2"></textarea>
+        </div>
+
+        <div class="input-group" style="max-width: 300px">
+          <label>Pincode</label>
+          <input type="text" formControlName="pincode" />
+        </div>
+      </form>
+    </ng-container>
+  </div>
+</div>
+
+<div class="loading-state" *ngIf="isLoading">
+  <div class="spinner"></div>
+  <p>Loading your profile...</p>
+</div>

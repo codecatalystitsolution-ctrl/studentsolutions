@@ -1,0 +1,355 @@
+// --- High-End Pro Palette ---
+$bg-main: #0b0f19;
+$sidebar-bg: linear-gradient(180deg, #171136 0%, #0f1222 100%);
+$glass-bg: rgba(15, 23, 42, 0.7);
+$glass-border: rgba(255, 255, 255, 0.08);
+$text-main: #f8fafc;
+$text-muted: #8b95a5;
+
+// Local Glass Class
+.glass-card {
+  background: $glass-bg;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid $glass-border;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+/* --- Ultra-Premium Welcome Banner --- */
+.welcome-banner {
+  // Matching Admin Sidebar & Card Gradients
+  background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%) !important;
+  border: 1px solid $glass-border !important;
+  border-top: 1px solid rgba(34, 211, 238, 0.3) !important; // Neon Cyan top reflection
+  border-radius: 24px !important;
+  padding: 3rem !important;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 2.5rem;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5) !important;
+
+  .banner-text {
+    position: relative;
+    z-index: 2;
+    h2 {
+      font-size: 2.5rem !important;
+      margin-bottom: 0.8rem;
+      background: linear-gradient(to right, #ffffff, #22d3ee) !important; // Cyan gradient text
+      -webkit-background-clip: text !important;
+      -webkit-text-fill-color: transparent !important;
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+    p {
+      color: #94a3b8 !important;
+      margin-bottom: 2rem;
+      max-width: 550px;
+      line-height: 1.7;
+      font-size: 1.1rem !important;
+    }
+  }
+
+  .btn-action {
+    background: linear-gradient(135deg, #0ea5e9, #6366f1) !important; // Ocean to Purple
+    color: white;
+    border: none;
+    padding: 1rem 2.5rem !important;
+    border-radius: 14px !important;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4) !important;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+    &:hover {
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 15px 35px rgba(99, 102, 241, 0.6) !important;
+    }
+  }
+
+  /* Decorative Orbs - Aurora Effect */
+  .banner-visual {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    right: 0;
+    pointer-events: none;
+    .shape {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.4;
+      &.shape-1 {
+        top: -100px;
+        right: -50px;
+        width: 350px;
+        height: 350px;
+        background: #06b6d4;
+      }
+      &.shape-2 {
+        bottom: -80px;
+        right: 200px;
+        width: 250px;
+        height: 250px;
+        background: #8b5cf6;
+      }
+    }
+  }
+}
+
+/* --- Stats Cards: Multi-Layered Gradients --- */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+
+  .stat-card {
+    padding: 1.8rem;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+    &:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    // Individual Gradient Patterns
+    &:nth-child(1) {
+      // Active Orders (Blue/Indigo)
+      background:
+        radial-gradient(circle at top right, rgba(56, 189, 248, 0.3), transparent),
+        linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+    }
+    &:nth-child(2) {
+      // Completed Files (Emerald/Teal)
+      background:
+        radial-gradient(circle at top right, rgba(16, 185, 129, 0.3), transparent),
+        linear-gradient(135deg, #064e3b 0%, #022c22 100%);
+    }
+    &:nth-child(3) {
+      // Total Spent (Deep Ocean/Cyan)
+      background:
+        radial-gradient(circle at top right, rgba(6, 182, 212, 0.3), transparent),
+        linear-gradient(135deg, #164e63 0%, #083344 100%);
+    }
+
+    .stat-icon {
+      width: 50px;
+      height: 50px;
+      background: rgba(255, 255, 255, 0.1) !important;
+      border: 1px solid rgba(255, 255, 255, 0.2) !important;
+      backdrop-filter: blur(10px);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+    }
+
+    .stat-details {
+      h3 {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: white;
+        margin: 0;
+        text-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      }
+      p {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+    }
+  }
+}
+
+/* --- Recent Orders: Floating Row Style --- */
+.modern-table {
+  width: 100%;
+  border-collapse: separate !important;
+  border-spacing: 0 12px !important; // Magic for separate rows
+
+  th {
+    padding: 1rem 2rem;
+    color: #64748b;
+    font-weight: 800;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+  }
+
+  tbody tr {
+    background: linear-gradient(
+      145deg,
+      rgba(30, 41, 59, 0.4) 0%,
+      rgba(15, 23, 42, 0.6) 100%
+    ) !important;
+    backdrop-filter: blur(12px);
+    transition: all 0.3s ease;
+
+    td {
+      padding: 1rem 3rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+
+      &:first-child {
+        border-left: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 16px 0 0 16px;
+      }
+      &:last-child {
+        border-right: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 0 16px 16px 0;
+      }
+    }
+
+    &:hover {
+      background: rgba(30, 41, 59, 0.7) !important;
+      transform: scale(0.98) translateY(-1.5px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+  }
+}
+
+/* --- Table Action Cell Styles --- */
+.action-cell {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+
+  button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    &.btn-edit {
+      background: rgba(59, 130, 246, 0.15); // Light Blue
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+
+      &:hover {
+        background: #3b82f6;
+        color: white;
+        transform: translateY(-2px);
+      }
+    }
+
+    &.btn-cancel {
+      background: rgba(239, 68, 68, 0.15); // Light Red
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+
+      &:hover {
+        background: #ef4444;
+        color: white;
+        transform: translateY(-2px);
+      }
+    }
+  }
+}
+
+.locked-status {
+  color: #64748b;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  opacity: 0.7;
+}
+
+/* --- Delivered Badge Gradient --- */
+.status-badge.delivered {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.2)) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(16, 185, 129, 0.4) !important;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.1);
+  font-weight: 800;
+}
+
+/* --- Glowing Status Badges --- */
+.status-pill-student {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.8rem !important;
+  font-weight: 800 !important;
+  text-transform: uppercase;
+
+  &.pending {
+    background: linear-gradient(
+      135deg,
+      rgba(245, 158, 11, 0.15),
+      rgba(217, 119, 6, 0.2)
+    ) !important;
+    color: #fbbf24 !important;
+    border: 1px solid rgba(245, 158, 11, 0.4) !important;
+    .status-dot {
+      background: #fbbf24 !important;
+      box-shadow: 0 0 10px #fbbf24;
+    }
+  }
+
+  &.processing,
+  &.printing {
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(8, 145, 178, 0.2)) !important;
+    color: #22d3ee !important;
+    border: 1px solid rgba(6, 182, 212, 0.4) !important;
+    .status-dot {
+      background: #22d3ee !important;
+      box-shadow: 0 0 10px #22d3ee;
+      animation: pulse 2s infinite;
+    }
+  }
+
+  &.delivered {
+    background: linear-gradient(
+      135deg,
+      rgba(16, 185, 129, 0.15),
+      rgba(5, 150, 105, 0.2)
+    ) !important;
+    color: #34d399 !important;
+    border: 1px solid rgba(16, 185, 129, 0.4) !important;
+    .status-dot {
+      background: #34d399 !important;
+      box-shadow: 0 0 10px #34d399;
+    }
+  }
+
+  &.cancelled {
+    background: linear-gradient(135deg, rgba(244, 63, 94, 0.15), rgba(190, 18, 60, 0.2)) !important;
+    color: #fb7185 !important;
+    border: 1px solid rgba(244, 63, 94, 0.4) !important;
+    .status-dot {
+      background: #fb7185 !important;
+    }
+  }
+}

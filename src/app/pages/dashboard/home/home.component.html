@@ -1,0 +1,92 @@
+<div class="welcome-banner">
+  <div class="banner-text">
+    <h2>Welcome back, {{ userName }}! 👋</h2>
+    <p>Ready to submit your next assignment? Let us handle the formatting and printing for your CareFinder project and other subjects.</p>
+    <button class="btn-action" routerLink="/new-order">Create New File Order</button>
+  </div>
+  <div class="banner-visual">
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+  </div>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card glass-card">
+    <div class="stat-icon blue">📦</div>
+    <div class="stat-details">
+      <h3>{{ activeOrdersCount < 10 ? '0'+activeOrdersCount : activeOrdersCount }}</h3>
+      <p>Active Orders</p>
+    </div>
+  </div>
+  <div class="stat-card glass-card">
+    <div class="stat-icon green">✅</div>
+    <div class="stat-details">
+      <h3>{{ completedOrdersCount < 10 ? '0'+completedOrdersCount : completedOrdersCount }}</h3>
+      <p>Completed Files</p>
+    </div>
+  </div>
+  <div class="stat-card glass-card">
+    <div class="stat-icon purple">💳</div>
+    <div class="stat-details">
+      <h3>₹{{ totalSpent }}</h3>
+      <p>Total Spent</p>
+    </div>
+  </div>
+</div>
+
+<div class="orders-section">
+  <div class="section-header">
+    <h3>Recent Orders</h3>
+    
+  </div>
+
+  <div class="table-container glass-card">
+    <table class="modern-table">
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Subject/Topic</th>
+          <th>Est. Pages</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>ACTIONS</th>
+        </tr>
+      </thead>
+      <tbody>
+  <tr *ngFor="let order of recentOrders">
+    <td class="font-bold">{{ order.id | slice:0:8 }}...</td>
+    <td>{{ order.projectDetails?.subject || order.subject }}</td>
+    <td>{{ order.printSettings?.pagesLabel || order.pagesLabel }}</td>
+    <td class="text-muted">{{ order.createdAt | date:'mediumDate' }}</td>
+    <td>
+      <div class="status-pill-student" [ngClass]="(order.status || 'pending').toLowerCase()">
+        <span class="status-dot"></span>
+        {{ order.status || 'Pending' }}
+      </div>
+    </td>
+    
+    <td class="action-cell">
+      <div class="action-buttons" *ngIf="(order.status || 'Pending').toLowerCase() === 'pending'">
+        <!-- <button class="btn-edit" (click)="editOrder(order.id)" title="Update Order">
+          ✏️ Edit
+        </button> -->
+        <button class="btn-cancel" (click)="cancelOrder(order.id)" title="Cancel Order">
+          ✖ Cancel
+        </button>
+      </div>
+      
+      <div class="locked-status" *ngIf="(order.status || 'Pending').toLowerCase() !== 'pending'">
+        <span title="Order cannot be changed now">🔒 Locked</span>
+      </div>
+    </td>
+  </tr>
+
+  <tr *ngIf="recentOrders.length === 0">
+    <td colspan="6" style="text-align: center; padding: 3rem; color: #94a3b8; font-size: 0.95rem;">
+      No recent orders found. Click on 'New Order' to get started!
+    </td>
+  </tr>
+</tbody>
+    </table>
+  </div>
+</div>

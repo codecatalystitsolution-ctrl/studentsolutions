@@ -1,0 +1,54 @@
+<div class="login-container">
+  
+  <!-- Left Side: Branding & 3D Visual -->
+  <div class="brand-panel">
+    <div class="brand-content">
+      <h1 class="logo-text">FileCrafters</h1>
+      <p class="tagline">Crafting your academic success. <br> <span class="sub-brand">A CareFinder Initiative</span></p>
+      
+      <!-- Placeholder for a 3D Illustration -->
+      <div class="visual-3d-placeholder">
+        <div class="floating-element"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Side: Login Form -->
+  <div class="form-panel">
+    <div class="glass-card">
+      <h2>Welcome Back</h2>
+      <p class="subtitle">Enter your details to access your dashboard.</p>
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        
+        <div class="input-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" formControlName="email" placeholder="student@college.edu" autocomplete="off">
+        </div>
+
+        <div class="input-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" formControlName="password" placeholder="••••••••">
+          <a href="#" class="forgot-link">Forgot Password?</a>
+        </div>
+
+        <button type="submit" class="btn-primary" [disabled]="loginForm.invalid">Sign In</button>
+        
+        <!-- <div class="divider">
+          <span>OR</span>
+        </div>
+
+        <button type="button" class="btn-google" (click)="loginWithGoogle()">
+          <img src="assets/icons/google-icon.svg" alt="Google" class="google-icon">
+          Continue with Google
+        </button> -->
+
+      </form>
+
+      <p class="signup-prompt">
+        Don't have an account? <a href="/register">Create one</a>
+      </p>
+    </div>
+  </div>
+
+</div>

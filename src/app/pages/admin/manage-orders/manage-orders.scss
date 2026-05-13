@@ -1,0 +1,228 @@
+$text-main: #f8fafc;
+$text-muted: #94a3b8;
+$glass-border: rgba(255, 255, 255, 0.06);
+$primary-gradient: linear-gradient(135deg, #0ea5e9, #6366f1); // Ocean to Purple
+
+.manage-orders-container {
+  padding-bottom: 2rem;
+}
+
+.fade-in { animation: fadeIn 0.4s ease-out forwards; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Header & Glowing Badge */
+.page-header {
+  display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem;
+  .header-text {
+    h2 { font-size: 1.8rem; margin: 0 0 0.5rem 0; color: white; font-weight: 700; }
+    p { color: $text-muted; margin: 0; font-size: 0.95rem; }
+  }
+  .total-badge {
+    background: $primary-gradient; 
+    border: none; 
+    color: white; 
+    padding: 0.6rem 1.4rem; 
+    border-radius: 12px; 
+    font-weight: 600; 
+    font-size: 0.95rem;
+    box-shadow: 0 8px 20px rgba(14, 165, 233, 0.3);
+  }
+}
+
+/* Container Adjustments */
+.table-card {
+  background: transparent; /* Inner cards ko glow karne dene ke liye container transparent kiya */
+  border: none;
+  box-shadow: none;
+}
+
+.table-responsive { overflow-x: auto; padding-bottom: 1rem; }
+
+/* --- Ultra Premium Card-Style Table --- */
+.premium-table {
+  width: 100%; 
+  border-collapse: separate; /* MAGIC: Ye property rows ko alag karti hai */
+  border-spacing: 0 16px; /* Rows ke beech mein gap */
+  text-align: left;
+  
+  th { 
+    padding: 0 1.5rem 0.5rem 1.5rem; 
+    color: #64748b; 
+    font-weight: 600; 
+    font-size: 0.8rem; 
+    text-transform: uppercase; 
+    letter-spacing: 1.5px; 
+    border: none; 
+    background: transparent;
+  }
+  
+  /* Har Row ek Gradient Card banegi */
+  tbody tr {
+    background: linear-gradient(145deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.8) 100%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+    
+    &:hover { 
+      transform: translateY(-4px) scale(1.005); // 3D Pop effect
+      box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+      background: linear-gradient(145deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.95) 100%);
+    }
+
+    td { 
+      padding: 1.6rem 1.5rem; // Padding badhai gayi hai for chunky cards
+      vertical-align: middle; 
+      border-top: 1px solid $glass-border;
+      border-bottom: 1px solid $glass-border;
+
+      /* First aur Last cell ko curve kiya taaki card poora gol lage */
+      &:first-child {
+        border-left: 1px solid $glass-border;
+        border-top-left-radius: 20px;
+        border-bottom-left-radius: 20px;
+      }
+      &:last-child {
+        border-right: 1px solid $glass-border;
+        border-top-right-radius: 20px;
+        border-bottom-right-radius: 20px;
+      }
+    }
+  }
+
+  /* Cell Typography */
+  .primary-text { font-weight: 600; color: #f8fafc; margin-bottom: 6px; font-size: 1rem; }
+  .secondary-text { font-size: 0.85rem; color: $text-muted; display: flex; align-items: center; gap: 8px; margin-bottom: 4px;}
+  
+  /* Glowing Text Elements */
+  .order-id { font-family: monospace; font-weight: 800; color: #38bdf8; font-size: 1.1rem; margin-bottom: 4px; letter-spacing: 0.5px; }
+  .order-date { font-size: 0.8rem; color: #64748b; font-weight: 500; }
+  
+  .price-text { font-weight: 800; color: #34d399; font-size: 1.25rem; margin-bottom: 4px; text-shadow: 0 2px 10px rgba(52, 211, 153, 0.2); }
+  .advance-text { font-size: 0.8rem; color: #fbbf24; font-weight: 600; }
+
+  /* Gradient Badge for File Type */
+  .file-type-badge { 
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2)); 
+    color: #d8b4fe; 
+    border: 1px solid rgba(168, 85, 247, 0.3); 
+    padding: 4px 10px; 
+    border-radius: 6px; 
+    font-size: 0.7rem; 
+    font-weight: 700; 
+    text-transform: uppercase; 
+    letter-spacing: 0.5px; 
+  }
+}
+
+/* --- Interactive Status Dropdown --- */
+.status-dropdown {
+  appearance: none; -webkit-appearance: none;
+  background-color: rgba(255, 255, 255, 0.1); color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 20px;
+  padding: 0.6rem 2.2rem 0.6rem 1.2rem; font-size: 0.85rem; font-weight: 700;
+  cursor: pointer; outline: none; transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat; background-position: right 1rem center; background-size: 1em;
+
+  /* Dynamic Gradients based on ngClass */
+  &.pending { background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.2)); color: #fbbf24; border-color: rgba(245, 158, 11, 0.4); }
+  &.processing { background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.2)); color: #60a5fa; border-color: rgba(59, 130, 246, 0.4); }
+  &.printing { background: linear-gradient(135deg, rgba(217, 70, 239, 0.15), rgba(192, 38, 211, 0.2)); color: #e879f9; border-color: rgba(217, 70, 239, 0.4); }
+  &.delivered { background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.2)); color: #34d399; border-color: rgba(16, 185, 129, 0.4); }
+  &.cancelled { background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.2)); color: #f87171; border-color: rgba(239, 68, 68, 0.4); }
+
+  &:hover { filter: brightness(1.2); transform: scale(1.02); }
+  option { background: #0f172a; color: white; font-weight: 600; padding: 10px; }
+}
+
+/* Loading & Empty States */
+.loading-state, .empty-state { text-align: center; padding: 4rem 2rem; color: $text-muted; }
+.spinner { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #38bdf8; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem auto; }
+.empty-icon { font-size: 3rem; display: block; margin-bottom: 1rem; opacity: 0.5; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.clickable-link {
+  text-decoration: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.3s ease;
+  
+  .link-icon {
+    font-size: 0.8rem;
+    opacity: 0;
+    transform: translateX(-5px) translateY(5px);
+    transition: all 0.3s ease;
+  }
+
+  &:hover {
+    color: white;
+    text-shadow: 0 0 12px rgba(56, 189, 248, 0.6);
+    .link-icon {
+      opacity: 1;
+      transform: translateX(0) translateY(0);
+      color: #38bdf8;
+    }
+  }
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+
+  .search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 0 10px;
+    transition: 0.3s;
+
+    &:focus-within {
+      border-color: #3b82f6;
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+    }
+
+    .search-icon {
+      font-size: 1rem;
+      color: #94a3b8;
+    }
+
+    .search-input {
+      background: transparent;
+      border: none;
+      color: white;
+      padding: 10px;
+      width: 250px;
+      font-size: 0.9rem;
+      
+      &:focus { outline: none; }
+      &::placeholder { color: #64748b; }
+    }
+
+    .clear-btn {
+      background: none;
+      border: none;
+      color: #ef4444;
+      font-size: 1.1rem;
+      cursor: pointer;
+      padding: 0 5px;
+      &:hover { transform: scale(1.1); }
+    }
+  }
+
+  .total-badge {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    color: white;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.9rem;
+  }
+}

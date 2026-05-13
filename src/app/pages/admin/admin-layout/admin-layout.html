@@ -1,0 +1,56 @@
+<div class="admin-layout">
+  
+  <aside class="sidebar admin-sidebar" [class.open]="isSidebarOpen">
+    <div class="sidebar-header">
+      <div class="logo-wrapper">
+        <span class="shield-icon">🛡️</span>
+        <h2 class="logo">Admin Center</h2>
+      </div>
+      <button class="close-btn mobile-only" (click)="toggleSidebar()">✕</button>
+    </div>
+
+    <div class="admin-badge">System Administrator</div>
+
+    <nav class="nav-menu">
+      <a routerLink="./dashboard" routerLinkActive="active" class="nav-item">
+        <span class="icon">📊</span> Overview
+      </a>
+      <a routerLink="./orders" routerLinkActive="active" class="nav-item">
+        <span class="icon">📑</span> Manage Orders
+      </a>
+      <a routerLink="./order-details" routerLinkActive="active" class="nav-item">
+        <span class="icon">📄</span> Order Details
+      </a>
+      </nav>
+
+    <div class="sidebar-footer">
+      <button class="logout-btn" (click)="logout()">
+        <span class="icon">🚪</span> Secure Logout
+      </button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="top-header glass-panel">
+      <div class="header-left">
+        <button class="menu-btn mobile-only" (click)="toggleSidebar()">☰</button>
+        <div class="breadcrumb">
+          <span class="text-muted">FileCrafters</span> / <span class="highlight">Live Setup</span>
+        </div>
+      </div>
+      
+      <div class="header-right">
+        <div class="live-indicator">
+          <span class="dot pulse"></span> Live System
+        </div>
+        <div class="admin-avatar">A</div>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+
+  <div class="sidebar-overlay" *ngIf="isSidebarOpen" (click)="toggleSidebar()"></div>
+</div>

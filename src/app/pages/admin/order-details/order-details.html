@@ -1,0 +1,93 @@
+<div class="order-details-container fade-in">
+  
+  <div class="page-header">
+    <div class="header-text">
+      <h2>Full Order Details</h2>
+      <p>Comprehensive view of every order placed for CareFinder & other projects.</p>
+    </div>
+    <div class="search-box">
+       <input type="text" [(ngModel)]="searchTerm" (input)="filterOrders()" 
+              placeholder="Search Name, Roll No or Order ID..." class="search-input">
+    </div>
+  </div>
+
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Fetching complete details...</p>
+  </div>
+
+  <div class="orders-grid" *ngIf="!isLoading">
+    
+    <div class="order-card glass-card" *ngFor="let order of filteredOrders">
+       
+       <div class="card-header">
+         <div class="id-date">
+           <span class="id">Order #{{ (order.id + '') | slice:1:9 | uppercase }}</span>
+           <span class="date">{{ order.createdAt | date:'medium' }}</span>
+         </div>
+         <div class="status-badge" [ngClass]="(order.status || 'pending').toLowerCase()">
+           {{ order.status || 'Pending' }}
+         </div>
+       </div>
+
+       <div class="card-body">
+         
+         <div class="detail-section">
+           <h4>🎓 Student Details</h4>
+           <p><strong>Name</strong> {{ order.projectDetails?.submittedBy || 'N/A' }}</p>
+           <p><strong>Roll Number</strong> {{ order.projectDetails?.rollNumber || 'N/A' }}</p>
+           <p><strong>Course & Year</strong> {{ order.projectDetails?.course || 'N/A' }}</p>
+           </div>
+
+         <div class="detail-section">
+           <h4>📁 Project Details</h4>
+           <p><strong>Subject</strong> {{ order.projectDetails?.subject || 'N/A' }}</p>
+           <p><strong>Topic / Exp. Name</strong> {{ order.projectDetails?.topic || order.projectDetails?.experimentDetails || 'N/A' }}</p>
+           <p><strong>Submitted To</strong> <span class="highlight">{{ order.projectDetails?.submittedTo || 'N/A' }}</span></p>
+         </div>
+
+         <div class="detail-section">
+          <h4>🖨️ Format Setup</h4>
+          <p><strong>File Type</strong> <span class="highlight">{{ order.fileType | titlecase }}</span></p>
+          <p><strong>Pages</strong> 
+            <span class="highlight">
+              {{ order.printSettings?.pagesLabel || order.projectDetails?.estimatedPages || 'N/A' }}
+            </span>
+          </p>
+          <p><strong>Binding Req.</strong> {{ order.printSettings?.binding || 'None' | titlecase }}</p>
+        </div>
+
+         <div class="detail-section">
+           <h4>💳 Pricing Breakdown</h4>
+           <p><strong>Total Amount</strong> <span class="price">₹{{ order.pricing?.totalAmount || 0 }}</span></p>
+           <p><strong>Advance Req.</strong> ₹{{ order.pricing?.advancePaid || 0 }}</p>
+           <p><strong>UPI ID</strong> {{ order.paymentDetails?.upiId || 'N/A' }}</p>
+            <p><strong>Transaction RefID</strong> {{ order.paymentDetails?.transactionId || 'N/A' }}</p>
+         </div>
+
+         <div class="detail-section">
+           <h4>📍 Contact & Delivery</h4>
+           <p><strong>Phone / WA</strong> 
+             {{ order.userDetails?.phone || 'N/A' }} 
+             <span *ngIf="order.userDetails?.whatsapp"> / {{ order.userDetails?.whatsapp }}</span>
+           </p>
+           <p><strong>Delivery Address</strong> <span class="highlight">{{ order.userDetails?.address || 'Not Provided' }}</span></p>
+           <p><strong>Pincode</strong> {{ order.userDetails?.pincode || 'N/A' }}</p>
+         </div>
+
+       </div>
+
+       <div class="instructions-section" *ngIf="order.projectDetails?.specialInstructions && order.projectDetails?.specialInstructions !== 'None'">
+         <h4>📝 Special Instructions from Student</h4>
+         <p>"{{ order.projectDetails?.specialInstructions }}"</p>
+       </div>
+
+    </div>
+
+    <div class="empty-state glass-card" *ngIf="filteredOrders.length === 0">
+        <span class="empty-icon">🔍</span>
+        <p>No matching records found.</p>
+     </div>
+
+  </div>
+</div>

@@ -1,0 +1,105 @@
+// --- Premium Gradient Variables ---
+$bg-main: #0b0f19; // Deep dark galaxy background
+$sidebar-bg: linear-gradient(180deg, #171136 0%, #0f1222 100%); // Purple to dark blue gradient
+$glass-bg: rgba(15, 23, 42, 0.7);
+$glass-border: rgba(255, 255, 255, 0.08);
+$admin-accent: #22d3ee; // Neon Cyan accent for active states
+$text-main: #f8fafc;
+$text-muted: #8b95a5;
+
+.admin-layout {
+  display: flex; height: 100vh; width: 100%; background-color: $bg-main; color: $text-main; font-family: 'Inter', sans-serif; overflow: hidden;
+}
+
+.glass-panel { background: $glass-bg; backdrop-filter: blur(20px); border-bottom: 1px solid $glass-border; }
+
+/* --- Premium Gradient Sidebar --- */
+.admin-sidebar {
+  width: 280px; display: flex; flex-direction: column; z-index: 100; border-right: 1px solid $glass-border; 
+  background: $sidebar-bg; // Gradient applied here
+  transition: 0.3s;
+  
+  @media (max-width: 768px) { position: fixed; height: 100%; transform: translateX(-100%); &.open { transform: translateX(0); } }
+
+  .sidebar-header {
+    padding: 1.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05);
+    .logo-wrapper { display: flex; align-items: center; gap: 10px; }
+    .shield-icon { font-size: 1.5rem; filter: drop-shadow(0 0 8px rgba(6, 182, 212, 0.4)); }
+    
+    /* Logo Gradient update */
+    .logo { font-size: 1.4rem; font-weight: 800; background: linear-gradient(135deg, #06b6d4, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0;}
+    .close-btn { background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; }
+  }
+
+  /* Admin Badge Gradient */
+  .admin-badge {
+    margin: 1.5rem 1.5rem 0.5rem 1.5rem; padding: 6px 12px; 
+    background: linear-gradient(90deg, rgba(139, 92, 246, 0.15), rgba(6, 182, 212, 0.15)); 
+    border: 1px solid rgba(139, 92, 246, 0.3); 
+    color: #c084fc; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; border-radius: 8px; text-align: center;
+  }
+
+  .nav-menu {
+    flex: 1; padding: 1rem 1.5rem; display: flex; flex-direction: column; gap: 0.5rem;
+    .nav-item {
+      display: flex; align-items: center; padding: 0.9rem 1.2rem; color: $text-muted; text-decoration: none; border-radius: 12px; transition: all 0.3s ease; font-weight: 500; font-size: 0.95rem; border: 1px solid transparent;
+      .icon { margin-right: 12px; font-size: 1.1rem; filter: grayscale(100%); opacity: 0.7; transition: 0.2s;}
+      
+      &:hover { background: rgba(255, 255, 255, 0.03); color: white; }
+      
+      /* Glowing Neon Active State */
+      &.active { 
+        background: rgba(255, 255, 255, 0.05); 
+        color: white; 
+        border: 1px solid rgba(6, 182, 212, 0.5); 
+        box-shadow: 0 0 15px rgba(6, 182, 212, 0.15), inset 0 0 10px rgba(139, 92, 246, 0.1);
+        .icon { filter: grayscale(0%); opacity: 1; color: $admin-accent; }
+      }
+    }
+  }
+
+  .sidebar-footer {
+    padding: 1.5rem; border-top: 1px solid $glass-border;
+    .logout-btn { width: 100%; padding: 0.8rem; background: rgba(239, 68, 68, 0.05); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 10px; cursor: pointer; font-weight: 600; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px;
+      &:hover { background: rgba(239, 68, 68, 0.15); box-shadow: 0 0 15px rgba(239, 68, 68, 0.2); }
+    }
+  }
+}
+
+/* --- Main Content --- */
+.main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+.top-header {
+  height: 70px; display: flex; justify-content: space-between; align-items: center; padding: 0 2rem;
+  .header-left { display: flex; align-items: center; gap: 1rem;
+    .breadcrumb { font-size: 0.9rem; font-weight: 500; letter-spacing: 0.5px;
+      .highlight { color: #c084fc; } // Purple highlight
+    }
+    .menu-btn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
+  }
+  .header-right { display: flex; align-items: center; gap: 1.5rem;
+    .live-indicator { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: #10b981; font-weight: 600; text-transform: uppercase; background: rgba(16, 185, 129, 0.1); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(16, 185, 129, 0.2);
+      .dot { width: 8px; height: 8px; background-color: #10b981; border-radius: 50%; }
+      .pulse { animation: pulse 2s infinite; }
+    }
+    
+    /* Avatar Gradient Update */
+    .admin-avatar { width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #0ea5e9, #6366f1); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); border: 1px solid rgba(255,255,255,0.1); }
+  }
+}
+
+.content-area { flex: 1; padding: 2rem; overflow-y: auto; &::-webkit-scrollbar { width: 6px; } &::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; } }
+.sidebar-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); z-index: 90; backdrop-filter: blur(4px); }
+.mobile-only { display: none; }
+
+@media (max-width: 768px) {
+  .mobile-only { display: block; }
+  .top-header { padding: 0 1rem; .breadcrumb { display: none; } }
+  .content-area { padding: 1rem; }
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}

@@ -1,0 +1,124 @@
+<div class="register-container">
+  <div class="brand-panel">
+    <div class="brand-content">
+      <h1 class="logo-text">FileCrafters</h1>
+      <p class="tagline">Join us and never worry about project submissions again.</p>
+    </div>
+  </div>
+
+  <div class="form-panel">
+    <div class="glass-card wide-card">
+      <h2>Create an Account</h2>
+      <p class="subtitle">Fill in your academic details to get started.</p>
+
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+        <div class="form-grid">
+          <div class="input-group">
+            <label>Full Name</label>
+            <input type="text" formControlName="fullName" placeholder="John Doe" />
+          </div>
+
+          <div class="input-group">
+            <label>Email Address</label>
+            <input type="email" formControlName="email" placeholder="student@college.edu" />
+          </div>
+
+          <div class="input-group">
+            <label>Phone Number</label>
+            <input type="tel" formControlName="phone" placeholder="10-digit number" />
+          </div>
+
+          <div class="input-group">
+            <label>WhatsApp Number (Optional)</label>
+            <input type="tel" formControlName="whatsapp" placeholder="For quick updates" />
+          </div>
+
+          <div class="input-group">
+            <label>College Name</label>
+            <input type="text" formControlName="collegeName" placeholder="E.g. XYZ Institute" />
+          </div>
+
+          <div class="input-group grid-span-half">
+            <label>Course</label>
+            <input type="text" formControlName="courseName" placeholder="B.Tech, BCA, etc." />
+          </div>
+
+          <div class="input-group grid-span-half">
+            <label>Branch/Specialization</label>
+            <input type="text" formControlName="branch" placeholder="CSE, Mech, etc." />
+          </div>
+
+          <div class="input-group">
+            <label>Current Year</label>
+            <select formControlName="year">
+              <option value="" disabled selected>Select Year</option>
+              <option value="1st Year">1st Year</option>
+              <option value="2nd Year">2nd Year</option>
+              <option value="3rd Year">3rd Year</option>
+              <option value="4th Year">4th Year</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label>Semester</label>
+            <select formControlName="semester">
+              <option value="" disabled selected>Select Semester</option>
+              <option value="1st Sem">1st Sem</option>
+              <option value="2nd Sem">2nd Sem</option>
+              <option value="3rd Sem">3rd Sem</option>
+              <option value="4th Sem">4th Sem</option>
+              <option value="5th Sem">5th Sem</option>
+              <option value="6th Sem">6th Sem</option>
+              <option value="7th Sem">7th Sem</option>
+              <option value="8th Sem">8th Sem</option>
+            </select>
+          </div>
+
+          <div class="input-group grid-span-half">
+            <label>Roll Number</label>
+            <input type="text" formControlName="rollNumber" placeholder="University Roll No" />
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label>Delivery Address</label>
+          <textarea
+            formControlName="address"
+            rows="2"
+            placeholder="Full address for delivery"
+          ></textarea>
+        </div>
+
+        <div class="form-grid">
+          <div class="input-group">
+            <label>Pincode</label>
+            <input type="text" formControlName="pincode" placeholder="6-digit PIN" />
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="input-group">
+            <label>Password</label>
+            <input type="password" formControlName="password" placeholder="••••••••" />
+          </div>
+
+          <div class="input-group">
+            <label>Confirm Password</label>
+            <input type="password" formControlName="confirmPassword" placeholder="••••••••" />
+            @if (
+              registerForm.hasError('mismatch') && registerForm.get('confirmPassword')?.touched
+            ) {
+              <small class="error-text"> Passwords do not match. </small>
+            }
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary" [disabled]="registerForm.invalid">
+          Register
+        </button>
+      </form>
+
+      <p class="login-prompt">Already have an account? <a routerLink="/login">Sign In</a></p>
+    </div>
+  </div>
+</div>

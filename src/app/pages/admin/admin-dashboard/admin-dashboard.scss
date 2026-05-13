@@ -1,0 +1,255 @@
+$text-main: #f8fafc;
+$text-muted: #94a3b8;
+$glass-border: rgba(255, 255, 255, 0.08);
+
+.admin-dashboard-container {
+  padding-bottom: 2rem;
+}
+
+.fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+.dashboard-header {
+  margin-bottom: 2rem;
+  h2 {
+    font-size: 1.8rem;
+    margin: 0 0 0.5rem 0;
+    color: white;
+    font-weight: 700;
+  }
+  p {
+    color: $text-muted;
+    margin: 0;
+    font-size: 0.95rem;
+  }
+}
+
+/* --- Gradient Stats Grid --- */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+/* Base Card Style */
+.stat-card {
+  position: relative;
+  border-radius: 20px;
+  padding: 1.8rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  overflow: hidden;
+  border: 1px solid $glass-border;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 0.5);
+  cursor: default;
+
+  &:hover {
+    transform: translateY(-5px);
+    .stat-icon-wrapper {
+      transform: scale(1.1) rotate(5deg);
+    }
+  }
+
+  /* The actual content */
+  .stat-content {
+    position: relative;
+    z-index: 2;
+    .stat-title {
+      display: block;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+      margin-bottom: 0.8rem;
+      color: rgba(255, 255, 255, 0.8);
+    }
+    .stat-value {
+      margin: 0;
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: white;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+  }
+
+  /* Icon styling */
+  .stat-icon-wrapper {
+    position: relative;
+    z-index: 2;
+    width: 50px;
+    height: 50px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease;
+  }
+
+  /* Subtle Glowing Background Shape */
+  .bg-glow {
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    filter: blur(40px);
+    z-index: 1;
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
+  }
+}
+
+/* --- The Gradient Combinations --- */
+
+/* 1. Emerald Gradient (Revenue) */
+.emerald-gradient {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.05));
+  border-top: 1px solid rgba(16, 185, 129, 0.4);
+  &:hover {
+    box-shadow: 0 15px 30px -10px rgba(16, 185, 129, 0.4);
+    .bg-glow {
+      opacity: 0.8;
+    }
+  }
+  .bg-glow {
+    background: #10b981;
+  }
+}
+
+/* 2. Ocean Gradient (Production) */
+.ocean-gradient {
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(59, 130, 246, 0.05));
+  border-top: 1px solid rgba(6, 182, 212, 0.4);
+  &:hover {
+    box-shadow: 0 15px 30px -10px rgba(6, 182, 212, 0.4);
+    .bg-glow {
+      opacity: 0.8;
+    }
+  }
+  .bg-glow {
+    background: #06b6d4;
+  }
+}
+
+/* 3. Sunset Gradient (Pending) */
+.sunset-gradient {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(225, 29, 72, 0.05));
+  border-top: 1px solid rgba(245, 158, 11, 0.4);
+  &:hover {
+    box-shadow: 0 15px 30px -10px rgba(245, 158, 11, 0.4);
+    .bg-glow {
+      opacity: 0.8;
+    }
+  }
+  .bg-glow {
+    background: #f59e0b;
+  }
+}
+
+/* 4. Amethyst Gradient (Completed) */
+.amethyst-gradient {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(217, 70, 239, 0.05));
+  border-top: 1px solid rgba(139, 92, 246, 0.4);
+  &:hover {
+    box-shadow: 0 15px 30px -10px rgba(139, 92, 246, 0.4);
+    .bg-glow {
+      opacity: 0.8;
+    }
+  }
+  .bg-glow {
+    background: #8b5cf6;
+  }
+}
+
+/* --- Quick Info Panel --- */
+.quick-info-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  .info-panel {
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(16px);
+    border: 1px solid $glass-border;
+    padding: 2rem;
+    border-radius: 20px;
+    h3 {
+      margin: 0 0 1rem 0;
+      color: white;
+    }
+    p {
+      color: $text-muted;
+      line-height: 1.6;
+      margin: 0;
+      font-size: 0.95rem;
+    }
+    strong {
+      color: #f59e0b;
+    }
+  }
+}
+
+/* --- Advanced Chart Section --- */
+.chart-section {
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 1.8rem 2rem;
+  border-radius: 20px;
+  margin-top: 1rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    
+    .title-wrap {
+      h3 { margin: 0 0 0.4rem 0; color: white; font-size: 1.3rem; font-weight: 700; }
+      p { margin: 0; color: #94a3b8; font-size: 0.9rem; }
+    }
+
+    .live-pulse {
+      display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: #10b981; font-weight: 600; text-transform: uppercase; background: rgba(16, 185, 129, 0.1); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(16, 185, 129, 0.2);
+      .dot { width: 8px; height: 8px; background-color: #10b981; border-radius: 50%; animation: pulse 2s infinite; }
+    }
+  }
+
+  .chart-container {
+    position: relative;
+    height: 380px; // Graph ki height
+    width: 100%;
+  }
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+/* 4. Rose/Red Gradient (Cancelled) */
+.rose-gradient {
+  background: linear-gradient(135deg, rgba(248, 18, 148, 0.334), rgba(197, 1, 43, 0.197));
+  border-top: 1px solid rgba(244, 63, 94, 0.5);
+
+  &:hover {
+    box-shadow: 0 15px 30px -10px rgba(255, 105, 130, 0.767);
+    .bg-glow {
+      opacity: 0.8;
+    }
+  }
+  .bg-glow {
+    background: #ff5672;
+  }
+}
