@@ -8,7 +8,6 @@ import { AuthService } from '../../services/auth.service';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  // Dhyan dein: RouterOutlet import karna zaroori hai nested routes ke liye
   imports: [CommonModule, RouterLink, RouterOutlet, RouterLinkActive], 
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
@@ -25,21 +24,29 @@ export class DashboardComponent implements OnInit {
   isSidebarOpen: boolean = false;
   isProfileMenuOpen: boolean = false;
   isLearningHubOpen: boolean = true; 
-  isAccountOpen: boolean = true; // Shuruat me open rakhna hai ya close, yahan se control karein
+  isAccountOpen: boolean = true;
   studentID: any;
 
-  toggleLearningHub() {
-    this.isLearningHubOpen = !this.isLearningHubOpen;
-  }
+  // === POPUP VARIABLES ===
+  showWelcomeModal: boolean = false;
+  currentUserId: string = '';
 
-  toggleAccount() {
-    this.isAccountOpen = !this.isAccountOpen;
-  }
+  toggleLearningHub() { this.isLearningHubOpen = !this.isLearningHubOpen; }
+  toggleAccount() { this.isAccountOpen = !this.isAccountOpen; }
 
   ngOnInit(): void {
     authState(this.auth).subscribe(user => {
       if (user) {
+        this.currentUserId = user.uid;
         this.fetchHeaderData(user.uid);
+
+        // === POPUP LOGIC ===
+        // Check karein agar is user ne pehle popup dismiss kiya hai ya nahi
+        const hasSeenWelcome = localStorage.getItem(`welcome_seen_${user.uid}`);
+        if (!hasSeenWelcome) {
+          this.showWelcomeModal = true;
+        }
+
       } else {
         this.router.navigate(['/login']);
       }
@@ -63,7 +70,20 @@ export class DashboardComponent implements OnInit {
   }
 
   toggleSidebar() { this.isSidebarOpen = !this.isSidebarOpen; }
+
+  closeSidebarOnMobile() {
+    if (window.innerWidth <= 768) {
+      this.isSidebarOpen = false;
+    }
+  }
+
   toggleProfileMenu() { this.isProfileMenuOpen = !this.isProfileMenuOpen; }
+
+  // === POPUP CLOSE FUNCTION ===
+  closeWelcomeModal() {
+    this.showWelcomeModal = false;
+    localStorage.setItem(`welcome_seen_${this.currentUserId}`, 'true');
+  }
 
   async logout() {
     await this.authService.logout();

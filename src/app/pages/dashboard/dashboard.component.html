@@ -6,77 +6,65 @@
       <button class="close-btn mobile-only" (click)="toggleSidebar()">✕</button>
     </div>
 
-  <nav class="nav-menu">
+    <nav class="nav-menu">
+      <div class="nav-section">
+        <a routerLink="/dashboard/home" class="nav-item" routerLinkActive="active" (click)="closeSidebarOnMobile()">
+          <span class="icon">🏠</span>
+          <span class="text">Dashboard</span>
+        </a>
+        <a routerLink="/dashboard/my-orders" class="nav-item" routerLinkActive="active" (click)="closeSidebarOnMobile()">
+          <span class="icon">📦</span>
+          <span class="text">MY ORDERS</span>
+        </a>
+        <a routerLink="/dashboard/help-support" class="nav-item" routerLinkActive="active" (click)="closeSidebarOnMobile()">
+          <span class="icon">❓</span>
+          <span class="text">HELP & SUPPORT</span>
+        </a>
+      </div> 
+      
+      <div class="nav-section">
+        <div class="section-heading-wrapper" (click)="toggleLearningHub()">
+          <p class="section-heading">LEARNING HUB</p>
+          <span class="dropdown-arrow" [class.rotated]="isLearningHubOpen">▶</span>
+        </div>
+        <div class="nav-items-container" [class.show]="isLearningHubOpen">
+          <a routerLink="/dashboard/quizzes" class="nav-item" routerLinkActive="active" (click)="closeSidebarOnMobile()">
+            <span class="icon">📝</span>
+            <span class="text">Quiz Exams</span>
+          </a>
+          <a class="nav-item" routerLinkActive="active" (click)="closeSidebarOnMobile()">
+            <span class="icon">🏛️</span>
+            <span class="text">Govt. Mock Tests</span>
+          </a>
+          <a class="nav-item" routerLinkActive="active" (click)="closeSidebarOnMobile()">
+            <span class="icon">📄</span>
+            <span class="text">Previous Papers</span>
+            <span class="badge premium">PRO</span>
+          </a>
+        </div>
+      </div>
 
-  <div class="nav-section">
-    <!-- <p class="section-heading">PRINT SERVICES</p> -->
-    
-    <a routerLink="/dashboard/home" class="nav-item" routerLinkActive="active">
-      <span class="icon">🏠</span>
-      <span class="text">Dashboard</span>
-    </a>
-    <a routerLink="/dashboard/my-orders" class="nav-item" routerLinkActive="active">
-      <span class="icon">📦</span>
-      <span class="text">MY ORDERS</span>
-    </a>
-    <a routerLink="/dashboard/help-support" class="nav-item" routerLinkActive="active">
-      <span class="icon">❓</span>
-      <span class="text">HELP & SUPPORT</span>
-    </a>
-  </div> 
-    
-  
-  <div class="nav-section">
-  <div class="section-heading-wrapper" (click)="toggleLearningHub()">
-    <p class="section-heading">LEARNING HUB</p>
-    <span class="dropdown-arrow" [class.rotated]="isLearningHubOpen">▶</span>
-  </div>
-  
-  <div class="nav-items-container" [class.show]="isLearningHubOpen">
-    <a routerLink="/dashboard/quizzes" class="nav-item" routerLinkActive="active">
-      <span class="icon">📝</span>
-      <span class="text">Quiz Exams</span>
-    </a>
-    
-    <a class="nav-item" routerLinkActive="active">
-      <span class="icon">🏛️</span>
-      <span class="text">Govt. Mock Tests</span>
-    </a>
-
-    <a class="nav-item" routerLinkActive="active">
-      <span class="icon">📄</span>
-      <span class="text">Previous Papers</span>
-      <span class="badge premium">PRO</span>
-    </a>
-  </div>
-</div>
-
-  <div class="nav-section">
-  <div class="section-heading-wrapper" (click)="toggleAccount()">
-    <p class="section-heading">ACCOUNT</p>
-    <span class="dropdown-arrow" [class.rotated]="isAccountOpen">▶</span>
-  </div>
-  
-  <div class="nav-items-container" [class.show]="isAccountOpen">
-    <a routerLink="/dashboard/profile" class="nav-item" routerLinkActive="active">
-      <span class="icon">👤</span>
-      <span class="text">My Profile</span>
-       </a>
-    
-       <a routerLink="/dashboard/my-tickets" class="nav-item" routerLinkActive="active">
-      <span class="icon">🎫</span>
-      <span class="text">Track Complaints</span>
-    </a>
-    
-    <a routerLink="/dashboard/settings" class="nav-item" routerLinkActive="active">
-      <span class="icon">⚙️</span>
-      <span class="text">Settings</span>
-    </a>
-  </div>
-
-</div>
-
-</nav>
+      <div class="nav-section">
+        <div class="section-heading-wrapper" (click)="toggleAccount()">
+          <p class="section-heading">ACCOUNT</p>
+          <span class="dropdown-arrow" [class.rotated]="isAccountOpen">▶</span>
+        </div>
+        <div class="nav-items-container" [class.show]="isAccountOpen">
+          <a routerLink="/dashboard/profile" class="nav-item" routerLinkActive="active" (click)="closeSidebarOnMobile()">
+            <span class="icon">👤</span>
+            <span class="text">My Profile</span>
+          </a>
+          <a routerLink="/dashboard/my-tickets" class="nav-item" routerLinkActive="active" (click)="closeSidebarOnMobile()">
+            <span class="icon">🎫</span>
+            <span class="text">Track Complaints</span>
+          </a>
+          <a routerLink="/dashboard/settings" class="nav-item" routerLinkActive="active" (click)="closeSidebarOnMobile()">
+            <span class="icon">⚙️</span>
+            <span class="text">Settings</span>
+          </a>
+        </div>
+      </div>
+    </nav>
 
     <div class="sidebar-footer">
       <div class="user-mini-profile">
@@ -99,12 +87,25 @@
       
       <div class="header-right">
         <a routerLink="/new-order" class="btn-primary-sm">New Order</a>
-        <!-- <button class="icon-btn">🔔<span class="badge">0</span></button> -->
 
         <div class="navbar-profile">
           <div class="avatar-btn" (click)="toggleProfileMenu()">
             {{ userName.charAt(0).toUpperCase() }}
-          </div>          
+          </div>
+          
+          <div class="profile-dropdown glass-card" *ngIf="isProfileMenuOpen">
+            <div class="dropdown-header">
+              <span class="d-name">{{ userName }}</span>
+              <span class="d-email">{{ userEmail }}</span>
+            </div>
+            <div class="divider"></div>
+            <a routerLink="/dashboard/profile" class="dropdown-item" (click)="toggleProfileMenu()">
+              <span class="icon">👤</span> My Profile
+            </a>
+            <button class="dropdown-item text-danger" (click)="logout()">
+              <span class="icon">🚪</span> Log Out
+            </button>
+          </div>
         </div>
       </div>
     </header>
@@ -112,8 +113,47 @@
     <div class="content-area">
       <router-outlet></router-outlet>
     </div>
-
   </main>
 
   <div class="sidebar-overlay" *ngIf="isSidebarOpen" (click)="toggleSidebar()"></div>
+</div>
+
+<div class="welcome-overlay fade-in" *ngIf="showWelcomeModal">
+  <div class="welcome-dialog glass-card pop-in">
+    <div class="dialog-header">
+      <div class="icon-pulse">🚀</div>
+      <h2>Our Services are LIVE!</h2>
+      <p>Welcome to Student Solution. Here's everything you need to know.</p>
+    </div>
+    <div class="dialog-body">
+      <div class="feature-box">
+        <h3>✨ Premium Features</h3>
+        <ul class="feature-list">
+          <li><span>📄</span> <strong>Smart Formatting:</strong> Professional project alignments.</li>
+          <li><span>🚚</span> <strong>Fast Delivery:</strong> Get your printed files on time.</li>
+          <li><span>🔔</span> <strong>Live Tracking:</strong> Real-time updates on your dashboard.</li>
+        </ul>
+      </div>
+      <div class="steps-box">
+        <h3>🛠️ How to use?</h3>
+        <div class="step-items">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-text">Click <strong>'New Order'</strong> and fill project details.</div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-text">Pay securely and confirm your request.</div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-text">Track your live status until delivery!</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="dialog-footer">
+      <button class="btn-start" (click)="closeWelcomeModal()">Let's Get Started! 🎉</button>
+    </div>
+  </div>
 </div>
