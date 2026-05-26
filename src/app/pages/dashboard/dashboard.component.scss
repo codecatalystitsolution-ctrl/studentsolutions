@@ -1,0 +1,541 @@
+// Variables
+$bg-main: #0b1120;
+$glass-bg: rgba(30, 41, 59, 0.7);
+$glass-border: rgba(255, 255, 255, 0.08);
+$primary: #3b82f6;
+$text-main: #f8fafc;
+$text-muted: #94a3b8;
+
+// Layout Basics
+.dashboard-layout {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  background: radial-gradient(circle at top left, #15293a 0%, #080c1f 50%, #350a328d 100%);
+  color: $text-main;
+  font-family: 'Inter', sans-serif;
+  overflow: hidden;
+}
+.logo {
+  display: inline-block;
+  vertical-align: middle;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+}
+
+// Reusable Glass Class
+.glass-panel,
+.glass-card {
+  background: $glass-bg;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid $glass-border;
+}
+
+/* --- Sidebar --- */
+.sidebar {
+  width: 260px;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease;
+  z-index: 100;
+  border-right: 1px solid $glass-border;
+
+  @media (max-width: 768px) {
+    position: fixed;
+    height: 100%;
+    transform: translateX(-100%);
+    &.open {
+      transform: translateX(0);
+    }
+  }
+
+  .sidebar-header {
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #60a5fa, #3b82f6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+  }
+
+  .nav-section {
+    margin-bottom: 20px;
+
+    .section-heading-wrapper {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      padding: 10px 15px;
+      user-select: none;
+
+      .section-heading {
+        margin: 0;
+        font-size: 12px;
+        font-weight: 600;
+        color: #8a99ad; // Aapke dashboard theme ke hisab se color adjust karein
+        letter-spacing: 1px;
+      }
+
+      .dropdown-arrow {
+        font-size: 10px;
+        color: #8a99ad;
+        transition: transform 0.3s ease;
+
+        &.rotated {
+          transform: rotate(90deg); // Open hone par arrow niche point karega
+        }
+      }
+    }
+
+    // Smooth opening/closing animation ke liye
+    .nav-items-container {
+      max-height: 0;
+      overflow: hidden;
+      transition:
+        max-height 0.3s ease-out,
+        opacity 0.3s ease;
+      opacity: 0;
+
+      &.show {
+        max-height: 300px; // Apne content ke hisab se isko adjust kar sakte hain
+        opacity: 1;
+      }
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      padding: 12px 20px;
+      text-decoration: none;
+      color: #fff;
+      transition: background 0.2s;
+
+      &:hover,
+      &.active {
+        background: rgba(255, 255, 255, 0.05); // Active tab highlight
+      }
+
+      .icon {
+        margin-right: 12px;
+      }
+
+      .badge {
+        margin-left: auto;
+        font-size: 10px;
+        padding: 2px 6px;
+        border-radius: 4px;
+
+        &.premium {
+          background: #ff9800;
+          color: #fff;
+        }
+      }
+    }
+  }
+  // Yeh styles sabhi nav-sections par ek sath apply honge
+  .nav-section {
+    margin-bottom: 20px;
+
+    .section-heading-wrapper {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      padding: 10px 15px;
+      user-select: none;
+
+      .section-heading {
+        margin: 0;
+        font-size: 12px;
+        font-weight: 600;
+        color: #8a99ad;
+        letter-spacing: 1px;
+      }
+
+      .dropdown-arrow {
+        font-size: 10px;
+        color: #8a99ad;
+        transition: transform 0.3s ease;
+
+        &.rotated {
+          transform: rotate(90deg);
+        }
+      }
+    }
+
+    .nav-items-container {
+      max-height: 0;
+      overflow: hidden;
+      transition:
+        max-height 0.3s ease-out,
+        opacity 0.3s ease;
+      opacity: 0;
+
+      &.show {
+        max-height: 200px; // Kam items hain toh 200px kafi hai
+        opacity: 1;
+      }
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      padding: 12px 20px;
+      text-decoration: none;
+      color: #fff;
+      transition: background 0.2s;
+
+      &:hover,
+      &.active {
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      .icon {
+        margin-right: 12px;
+      }
+    }
+  }
+  .ticket-log-card.active-link {
+    border-color: #10b981 !important;
+    background: rgba(16, 185, 129, 0.08) !important;
+  }
+
+  .nav-menu {
+    flex: 1;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    background: radial-gradient(circle at top left, #15293a 0%, #080c1f 50%, #350a328d 100%);
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      padding: 0.8rem 1rem;
+      color: $text-muted;
+      text-decoration: none;
+      border-radius: 12px;
+      transition: all 0.2s;
+      font-weight: 500;
+
+      .icon {
+        margin-right: 12px;
+        font-size: 1.1rem;
+      }
+
+      &:hover,
+      &.active {
+        background: rgba(59, 130, 246, 0.1);
+        color: $primary;
+        border-right: 3px solid $primary;
+      }
+    }
+  }
+
+  .sidebar-footer {
+    padding: 1.5rem;
+    border-top: 1px solid $glass-border;
+
+    .user-mini-profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 1rem;
+
+      .avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: radial-gradient(circle at top left, #15293a 0%, #080c1f 50%, #350a328d 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+      }
+      .info {
+        display: flex;
+        flex-direction: column;
+        .name {
+          font-weight: 600;
+          font-size: 0.9rem;
+        }
+        .role {
+          font-size: 0.75rem;
+          color: $text-muted;
+        }
+      }
+    }
+
+    .logout-btn {
+      width: 100%;
+      padding: 0.7rem;
+      background: radial-gradient(circle at top left, #15293a 0%, #080c1f 50%, #350a328d 100%);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.2s;
+      &:hover {
+        background: rgba(239, 68, 68, 0.2);
+      }
+    }
+  }
+}
+
+/* --- Main Content --- */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.top-header {
+  height: 70px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 2rem;
+  border-bottom: 1px solid $glass-border;
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    .page-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+    .menu-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    text-decoration: none;
+
+    .btn-primary-sm {
+      background: $primary;
+      color: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+
+      // Bas ye line add karni hai
+      text-decoration: none;
+
+      // (Optional) Button ko vertically center karne ke liye agar text hila hua lage
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .icon-btn {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      position: relative;
+      cursor: pointer;
+      .badge {
+        position: absolute;
+        top: -5px;
+        right: -8px;
+        background: #ef4444;
+        color: white;
+        font-size: 0.6rem;
+        padding: 2px 6px;
+        border-radius: 10px;
+        font-weight: bold;
+      }
+    }
+  }
+}
+
+.content-area {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+
+  // Custom Scrollbar
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 10px;
+  }
+}
+
+// Utility Classes
+.mobile-only {
+  display: none;
+}
+.btn-primary-sm {
+  background: $primary;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at top left, #15293a 0%, #080c1f 50%, #350a328d 100%);
+  z-index: 90;
+}
+
+@media (max-width: 768px) {
+  .mobile-only {
+    display: block;
+  }
+  .hidden-mobile {
+    display: none;
+  }
+  .top-header {
+    padding: 0 1rem;
+  }
+  .content-area {
+    padding: 1rem;
+  }
+  .welcome-banner {
+    flex-direction: column;
+    text-align: center;
+    padding: 1.5rem;
+  }
+}
+
+/* --- Navbar Profile Dropdown --- */
+.navbar-profile {
+  position: relative;
+}
+
+.avatar-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.1rem;
+  cursor: pointer;
+  border: 2px solid $glass-border;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+  }
+}
+
+.profile-dropdown {
+  position: absolute;
+  top: 55px;
+  right: 0;
+  width: 240px;
+  padding: 0.5rem;
+  border-radius: 16px;
+  z-index: 200;
+  animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
+  .dropdown-header {
+    padding: 1rem 0.8rem;
+    display: flex;
+    flex-direction: column;
+
+    .d-name {
+      font-weight: 600;
+      font-size: 1rem;
+      color: white;
+    }
+    .d-email {
+      font-size: 0.8rem;
+      color: $text-muted;
+      margin-top: 4px;
+      word-break: break-all;
+    }
+  }
+
+  .divider {
+    height: 1px;
+    background: $glass-border;
+    margin: 0.5rem 0;
+  }
+
+  .dropdown-item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 0.8rem;
+    border-radius: 10px;
+    color: $text-main;
+    text-decoration: none;
+    background: transparent;
+    border: none;
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.2s;
+
+    .icon {
+      margin-right: 10px;
+      font-size: 1.1rem;
+    }
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    &.text-danger {
+      color: #ef4444;
+      &:hover {
+        background: rgba(239, 68, 68, 0.1);
+      }
+    }
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

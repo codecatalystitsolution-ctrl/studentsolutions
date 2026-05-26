@@ -1,0 +1,119 @@
+<div class="dashboard-layout">
+  
+  <aside class="sidebar glass-panel" [class.open]="isSidebarOpen">
+    <div class="sidebar-header">
+      <img src="assets/images/Studentlogo.png" alt="Logo" class="logo">
+      <button class="close-btn mobile-only" (click)="toggleSidebar()">✕</button>
+    </div>
+
+  <nav class="nav-menu">
+
+  <div class="nav-section">
+    <!-- <p class="section-heading">PRINT SERVICES</p> -->
+    
+    <a routerLink="/dashboard/home" class="nav-item" routerLinkActive="active">
+      <span class="icon">🏠</span>
+      <span class="text">Dashboard</span>
+    </a>
+    <a routerLink="/dashboard/my-orders" class="nav-item" routerLinkActive="active">
+      <span class="icon">📦</span>
+      <span class="text">MY ORDERS</span>
+    </a>
+    <a routerLink="/dashboard/help-support" class="nav-item" routerLinkActive="active">
+      <span class="icon">❓</span>
+      <span class="text">HELP & SUPPORT</span>
+    </a>
+  </div> 
+    
+  
+  <div class="nav-section">
+  <div class="section-heading-wrapper" (click)="toggleLearningHub()">
+    <p class="section-heading">LEARNING HUB</p>
+    <span class="dropdown-arrow" [class.rotated]="isLearningHubOpen">▶</span>
+  </div>
+  
+  <div class="nav-items-container" [class.show]="isLearningHubOpen">
+    <a routerLink="/dashboard/quizzes" class="nav-item" routerLinkActive="active">
+      <span class="icon">📝</span>
+      <span class="text">Quiz Exams</span>
+    </a>
+    
+    <a class="nav-item" routerLinkActive="active">
+      <span class="icon">🏛️</span>
+      <span class="text">Govt. Mock Tests</span>
+    </a>
+
+    <a class="nav-item" routerLinkActive="active">
+      <span class="icon">📄</span>
+      <span class="text">Previous Papers</span>
+      <span class="badge premium">PRO</span>
+    </a>
+  </div>
+</div>
+
+  <div class="nav-section">
+  <div class="section-heading-wrapper" (click)="toggleAccount()">
+    <p class="section-heading">ACCOUNT</p>
+    <span class="dropdown-arrow" [class.rotated]="isAccountOpen">▶</span>
+  </div>
+  
+  <div class="nav-items-container" [class.show]="isAccountOpen">
+    <a routerLink="/dashboard/profile" class="nav-item" routerLinkActive="active">
+      <span class="icon">👤</span>
+      <span class="text">My Profile</span>
+       </a>
+    
+       <a routerLink="/dashboard/my-tickets" class="nav-item" routerLinkActive="active">
+      <span class="icon">🎫</span>
+      <span class="text">Track Complaints</span>
+    </a>
+    
+    <a routerLink="/dashboard/settings" class="nav-item" routerLinkActive="active">
+      <span class="icon">⚙️</span>
+      <span class="text">Settings</span>
+    </a>
+  </div>
+
+</div>
+
+</nav>
+
+    <div class="sidebar-footer">
+      <div class="user-mini-profile">
+        <div class="avatar">{{ userName.charAt(0).toUpperCase() }}</div>
+        <div class="info">
+          <span class="name">{{ userName }}</span>
+          <span class="role">{{ studentID }}</span>
+        </div>
+      </div>
+      <button class="logout-btn" (click)="logout()">Log Out</button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="top-header glass-panel">
+      <div class="header-left">
+        <button class="menu-btn mobile-only" (click)="toggleSidebar()">☰</button>
+        <h1 class="page-title">Dashboard</h1>
+      </div>
+      
+      <div class="header-right">
+        <a routerLink="/new-order" class="btn-primary-sm">New Order</a>
+        <!-- <button class="icon-btn">🔔<span class="badge">0</span></button> -->
+
+        <div class="navbar-profile">
+          <div class="avatar-btn" (click)="toggleProfileMenu()">
+            {{ userName.charAt(0).toUpperCase() }}
+          </div>          
+        </div>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <router-outlet></router-outlet>
+    </div>
+
+  </main>
+
+  <div class="sidebar-overlay" *ngIf="isSidebarOpen" (click)="toggleSidebar()"></div>
+</div>

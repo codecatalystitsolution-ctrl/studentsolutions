@@ -1,0 +1,127 @@
+<div class="support-wrapper">
+  
+  <div class="support-header">
+    <div class="badge-tag">Center Support</div>
+    <h1>Help & Support Hub</h1>
+    <p>Get assistance with any questions or issues you may have.</p>
+  </div>
+
+  <div class="support-grid">
+    <div class="left-pane">
+      <div class="action-cards">
+        <a href="https://wa.me/919286304340" target="_blank" class="glass-card whatsapp-card">
+          <div class="icon-box">💬</div>
+          <div class="card-info">
+            <h3>WhatsApp Support</h3>
+            <p>Go to WhatsApp And Chat with Us</p>
+          </div>
+          <span class="arrow-go">➔</span>
+        </a>
+        
+        <a href="mailto:codecatalystitsolution@gmail.com" class="glass-card email-card">
+          <div class="icon-box">📧</div>
+          <div class="card-info">
+            <h3>Email Helpdesk</h3>
+            <p>codecatalystitsolution@gmail.com</p>
+          </div>
+          <span class="arrow-go">➔</span>
+        </a>
+      </div>
+
+      
+      <div class="faq-wrapper">
+        <h2>Frequently Asked Questions</h2>
+        <div class="accordion">
+          <div *ngFor="let faq of faqs; let i = index" class="accordion-item" [class.is-open]="faq.isOpen">
+            <div class="accordion-header" (click)="toggleFaq(i)">
+              <span class="q-text">{{ faq.question }}</span>
+              <div class="toggle-icon">
+                <span class="line1"></span>
+                <span class="line2"></span>
+              </div>
+            </div>
+            <div class="accordion-body">
+              <div class="inner-content">
+                <p>{{ faq.answer }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="right-pane">
+      <div class="form-glass-card">
+        <div class="form-header">
+          <h2>Raise a Ticket</h2>
+          <p>Describe your issue in detail and our team will contact you shortly.</p>
+        </div>
+
+        <form [formGroup]="ticketForm" (ngSubmit)="onSubmitTicket()" class="premium-form">
+          <div class="input-wrapper">
+            <label>Your Name</label>
+            <div class="input-field-group">
+              <span class="field-icon">👤</span>
+              <input type="text" formControlName="name" placeholder="Sanjeev Kumar" />
+            </div>
+          </div>
+
+          <div class="input-wrapper">
+            <label>Email Address</label>
+            <div class="input-field-group">
+              <span class="field-icon">✉️</span>
+              <input type="email" formControlName="email" placeholder="example@mail.com" />
+            </div>
+          </div>
+
+          <div class="input-wrapper">
+            <label>Category</label>
+            <div class="input-field-group">
+              <span class="field-icon">📁</span>
+              <select formControlName="category">
+                <option value="">-- Select Category --</option>
+                <option value="file-upload">File/Project Upload Issue</option>
+                <option value="payment">Payment & Refund</option>
+                <option value="pro-access">Premium/PRO Account Access</option>
+                <option value="other">Other Issue</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="input-wrapper">
+            <label>Subject</label>
+            <div class="input-field-group">
+              <span class="field-icon">✏️</span>
+              <input type="text" formControlName="subject" placeholder="Enter subject of your query" />
+            </div>
+          </div>
+
+          <div class="input-wrapper">
+            <label>Message / Details</label>
+            <div class="input-field-group alignment-top">
+              <span class="field-icon">💬</span>
+              <textarea formControlName="message" rows="4" placeholder="Describe your issue in detail..."></textarea>
+            </div>
+          </div>
+
+          <button type="submit" class="gradient-btn" [disabled]="isSubmitting">
+            <span>{{ isSubmitting ? 'Submitting...' : 'Send Message' }}</span>
+            <span class="btn-glow"></span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="custom-modal-overlay" *ngIf="showCustomDialog">
+    <div class="custom-modal-card">
+      <div class="success-icon-ring">
+        <span class="checkmark">✓</span>
+      </div>
+      <h2>Ticket Raised Successfully!</h2>
+    <p>Your support ticket has been safely stored in our database. Our technical team will review your query and contact you shortly.</p>
+     <button class="modal-close-btn" (click)="closeModal()">Okay, Go to Dashboard</button>
+    </div>
+  </div>
+
+</div>

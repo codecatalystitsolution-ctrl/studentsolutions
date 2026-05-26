@@ -1,0 +1,119 @@
+<div class="manage-orders-container fade-in">
+  
+  <div class="page-header">
+    <div class="header-text">
+      <h2>Support Desk</h2>
+      <p>Resolve student queries, issues, and track active tickets.</p>
+    </div>
+    
+    <div class="header-actions">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" [(ngModel)]="searchTerm" (keyup)="filterTickets()" placeholder="Search FC-ID, Name or Ticket..." class="search-input"/>
+        <button class="clear-btn" *ngIf="searchTerm" (click)="clearSearch()">✖</button>
+      </div>
+      <div class="total-badge">Total Tickets: {{ filteredTickets.length }}</div>
+    </div>
+  </div>
+
+  <div class="table-card glass-card">
+    <div class="loading-state" *ngIf="isLoading">
+      <div class="spinner"></div><p>Loading tickets...</p>
+    </div>
+
+    <div class="table-responsive" *ngIf="!isLoading">
+      <table class="premium-table">
+        <thead>
+          <tr>
+            <th>Ticket ID</th>
+            <th>Student Info</th>
+            <th>Category / Subject</th>
+            <th>Message</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let ticket of filteredTickets">
+            
+            <td>
+              <div class="order-id">#{{ (ticket.id + '') | slice:1:9 | uppercase }}</div>
+              <div class="order-date">{{ ticket.createdAt | date: 'mediumDate' }}</div>
+            </td>
+
+            <td>
+              <div class="primary-text">👤 {{ ticket.name || 'Student' }}</div>
+              <div class="student-id-badge">{{ ticket.studentID || 'Unknown ID' }}</div>
+            </td>
+
+            <td>
+              <div class="file-type-badge" style="margin-bottom: 5px; display: inline-block;">
+                {{ ticket.category | titlecase }}
+              </div>
+              <div class="primary-text" style="font-size: 0.9rem;">{{ ticket.subject }}</div>
+            </td>
+
+            <td style="max-width: 250px;">
+              <div class="secondary-text message-text">
+                {{ ticket.message | slice:0:50 }}{{ ticket.message?.length > 50 ? '...' : '' }}
+              </div>
+            </td>
+
+            <td>
+              <select [(ngModel)]="ticket.status" (change)="updateTicketStatus(ticket.id, ticket.status)"
+                class="status-dropdown" [ngClass]="(ticket.status || 'pending').toLowerCase()">
+                <option value="pending">🟡 Pending</option>
+                <option value="In Progress">🟠 In Progress</option>
+                <option value="Resolved">🟢 Resolved</option>
+              </select>
+            </td>
+
+            <td class="action-cell">
+              <div class="action-buttons">
+                <!-- <button class="btn-edit" (click)="openReplyModal(ticket)">
+                  {{ ticket.adminReply ? '✏️ Edit Reply' : '✉️ Reply' }}
+                </button> -->
+                <button class="btn-cancel" (click)="deleteTicket(ticket.id)">
+                  🗑️ Delete
+                </button>
+              </div>
+            </td>
+
+          </tr>
+          
+          <tr *ngIf="filteredTickets.length === 0">
+            <td colspan="6" class="empty-state">
+              <span class="empty-icon">🎫</span>
+              <p>No support tickets found.</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="modal-overlay fade-in" *ngIf="showReplyModal">
+    <div class="reply-modal glass-card">
+      <div class="modal-header">
+        <h3>Reply to Ticket #{{ selectedTicket ? ((selectedTicket.id + '') | slice:1:9 | uppercase) : '' }}</h3>
+        <button class="close-modal-btn" (click)="closeReplyModal()">✖</button>
+      </div>
+      
+      <div class="student-message-box">
+        <span class="label">Student Message:</span>
+        <p>{{ selectedTicket.message }}</p>
+      </div>
+
+      <div class="reply-input-box">
+        <label>Your Official Reply:</label>
+        <textarea [(ngModel)]="adminReplyText" rows="4" placeholder="Type your resolution here..."></textarea>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeReplyModal()">Cancel</button>
+        <button class="btn-primary" (click)="sendReply()">Send Reply & Resolve</button>
+      </div>
+    </div>
+  </div>
+
+</div>

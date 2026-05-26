@@ -1,0 +1,36 @@
+<div class="admin-login-container">
+  <div class="glow-bg"></div>
+
+  <div class="login-card fade-in">
+    <div class="card-header">
+      <div class="shield-icon">🛡️</div>
+      <h2>Operations Center</h2>
+      <p>Authorized Personnel Only</p>
+    </div>
+
+    <form (ngSubmit)="onAdminLogin()">
+      <div class="input-group">
+        <label>Admin Email</label>
+        <input type="email" [(ngModel)]="email" name="email" placeholder="admin@filecrafters.in" required>
+      </div>
+
+      <div class="input-group">
+        <label>Secure Password</label>
+        <input type="password" [(ngModel)]="password" name="password" placeholder="••••••••" required>
+      </div>
+
+      <div class="error-box" *ngIf="errorMessage">
+        ⚠️ {{ errorMessage }}
+      </div>
+
+      <button type="submit" class="btn-login" [disabled]="isLoading">
+        <span *ngIf="!isLoading">Authenticate Login</span>
+        <span *ngIf="isLoading" class="spinner"></span>
+      </button>
+    </form>
+    
+    <div class="footer-text">
+      FileCrafters Secure System v1.0   
+    </div>
+  </div>
+</div>

@@ -1,0 +1,204 @@
+<div class="order-layout">
+  <header class="page-header">
+    <a routerLink="/dashboard/home" class="back-btn">← Back to Dashboard</a>
+    <h1>Create New File Order</h1>
+    <p class="subtitle">Fill in the requirements and let our experts handle the rest.</p>
+  </header>
+
+  <div class="order-grid">
+    <div class="form-section glass-card">
+      <form [formGroup]="orderForm">
+        <h3 class="section-title"><span class="step-num">1</span> Choose File Type</h3>
+        <div class="input-group">
+          <label>What do you want us to make?</label>
+          <select formControlName="fileType" class="highlight-select">
+            <option value="" disabled selected>-- Select a File Type --</option>
+            <option value="practical">Practical File</option>
+            <option value="project">Project File</option>
+            <option value="assignment">Assignment File</option>
+          </select>
+        </div>
+
+        <div class="divider"></div>
+
+        <div *ngIf="orderForm.get('fileType')?.value" class="dynamic-form-section fade-in">
+          <h3 class="section-title"><span class="step-num">2</span> Academic Details</h3>
+          <div class="input-row">
+            <div class="input-group">
+              <label>Course & Year</label>
+              <input type="text" formControlName="course" placeholder="e.g. B.Tech 3rd Year" />
+            </div>
+            <div class="input-group">
+              <label>Subject</label>
+              <input
+                type="text"
+                formControlName="subject"
+                placeholder="e.g. Software Engineering"
+              />
+            </div>
+          </div>
+
+          <div class="input-group" *ngIf="orderForm.get('fileType')?.value === 'practical'">
+            <label>List of Experiments / Syllabus</label>
+            <textarea
+              formControlName="experimentDetails"
+              rows="2"
+              placeholder="Mention experiment names or paste syllabus link"
+            ></textarea>
+          </div>
+
+          <div
+            class="input-group"
+            *ngIf="
+              orderForm.get('fileType')?.value === 'project' ||
+              orderForm.get('fileType')?.value === 'assignment'
+            "
+          >
+            <label>Exact Topic / Title</label>
+            <input type="text" formControlName="topic" placeholder="Exact Title of the File" />
+          </div>
+
+          <div class="input-row">
+            <div class="input-group">
+              <label>Submitted To</label>
+              <input type="text" formControlName="submittedTo" placeholder="Teacher's Name" />
+            </div>
+            <div class="input-group">
+              <label>Submitted By</label>
+              <input type="text" formControlName="submittedBy" placeholder="Your Name" />
+            </div>
+          </div>
+
+          <div class="input-row">
+            <div class="input-group">
+              <label>Roll Number</label>
+              <input type="text" formControlName="rollNumber" placeholder="College Roll No." />
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <h3 class="section-title"><span class="step-num">3</span> Print Settings</h3>
+
+      <div class="input-row custom-radios">
+      
+      <div class="input-group">
+        <label>Pages Slab</label>
+        <select formControlName="pageSlab">
+          <option *ngFor="let slab of availableSlabs" [value]="slab.price">
+            {{ slab.label }}
+          </option>
+        </select>
+      </div>
+
+      <div class="input-group" *ngIf="orderForm.get('fileType')?.value === 'project'">
+        <label>Binding Style</label>
+        <select formControlName="bindingType">
+          <option value="stick">Stick File (₹20)</option>
+          <option value="spiral">Spiral Binding (₹50)</option>
+          <option value="hardbound" *ngIf="orderForm.get('fileType')?.value === 'project'">
+            Hardbound (₹150)
+          </option>
+        </select>
+      </div>
+      
+    </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="summary-section">
+      <div class="summary-card glass-card">
+        <h3>Order Summary</h3>
+        <p class="info-text">Your price updates automatically based on requirements.</p>
+        
+        <div class="cost-breakdown">
+          
+          <div class="cost-row">
+            <span>
+              {{ currentFileTypeLabel }}
+              <small *ngIf="currentSlabLabel" style="display:block; color:#94a3b8; font-size: 0.8rem; margin-top: 4px;">
+                {{ currentSlabLabel }}
+              </small>
+            </span>
+            <span>₹{{ currentPrintCost }}</span>
+          </div>
+
+          <div class="cost-row" *ngIf="orderForm.get('fileType')?.value === 'project'">
+            <span style="text-transform: capitalize;">Binding Charges ({{ orderForm.get('bindingType')?.value }})</span>
+            <span>₹{{ currentBindingCost }}</span>
+          </div>
+
+        </div>
+
+        <div class="total-row">
+          <span>Total Estimate</span>
+          <span class="total-price">₹{{ totalEstimatedPrice }}</span>
+        </div>
+
+        <div class="advance-notice" *ngIf="totalEstimatedPrice > 0">
+          <span class="icon">💡</span>
+          50% advance (₹{{ totalEstimatedPrice / 2 }}) required to start processing.
+        </div>
+
+        <button class="btn-checkout" (click)="openPaymentModal()" [disabled]="orderForm.invalid || totalEstimatedPrice === 0">
+          Confirm & Place Order
+        </button>
+      </div>
+    </div>
+  </div>
+  
+</div>
+
+<div class="payment-overlay" *ngIf="showPaymentModal">
+  <div class="payment-card glass-card fade-in">
+    
+    <div class="step-container" *ngIf="paymentStep === 1">
+      <div class="modal-header">
+        <span class="icon-lock">🔒</span>
+        <h3>Advance Payment</h3>
+        <p>Start processing by paying 50% advance</p>
+      </div>
+
+      <div class="summary-box">
+        <div class="row"><span>Total Estimate:</span> <span>₹{{ totalEstimatedPrice }}</span></div>
+        <div class="row highlight"><span>To Pay Now (50%):</span> <span class="neon-text">₹{{ totalEstimatedPrice / 2 }}</span></div>
+      </div>
+      <button class="btn-next" (click)="paymentStep = 2">Generate QR Code</button>
+    </div>
+
+    <div class="step-container text-center" *ngIf="paymentStep === 2">
+      <h3>Scan to Pay ₹{{ totalEstimatedPrice / 2 }}</h3>
+      <div class="qr-box">
+        <img src="../../assets/images/qr.png" alt="UPI QR" class="qr-img">
+      </div>
+      <p class="upi-id">UPI ID: 8954697879@sbi</p>
+      
+      <div class="btn-group">
+        <button class="btn-back" (click)="paymentStep = 1">Back</button>
+        <button class="btn-next" (click)="paymentStep = 3">I have Paid</button>
+      </div>
+    </div>
+
+    <div class="step-container" *ngIf="paymentStep === 3">
+      <h3>Payment Verification</h3>
+      <p>Enter Transaction ID or Name you used to pay.</p>
+      
+      <div class="input-group">
+        <label for="upiId">UPI ID / Pay Name</label>
+        <input type="text" [(ngModel)]="transactionUPIId" placeholder="e.g. UPI No. / Pay Name" class="modal-input">
+      </div>
+      <div class="input-group">
+        <label for="transactionRef">Transaction Reference</label>
+        <input type="text" [(ngModel)]="transactionRef" placeholder="e.g. UPI Ref No. / GPay Name" class="modal-input">
+      </div>
+
+      <button class="btn-confirm" (click)="submitFinalOrder()" [disabled]="isLoading">
+        <span *ngIf="!isLoading">Confirm Payment & Order</span>
+        <span *ngIf="isLoading" class="spinner"></span>
+      </button>
+    </div>
+
+    <button class="close-btn" (click)="closePaymentModal()">×</button>
+  </div>
+</div>

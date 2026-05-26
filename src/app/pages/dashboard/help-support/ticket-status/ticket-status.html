@@ -1,0 +1,56 @@
+<div class="ticket-wrapper">
+  
+  <div class="ticket-header">
+    <div class="badge-tag">Support Logs</div>
+    <h1>My Support Tickets</h1>
+    <p>Track the resolution and live updates of your support tickets here.</p>
+  </div>
+
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Loading support tickets...</p>
+  </div>
+
+  <div class="empty-state" *ngIf="!isLoading && tickets.length === 0">
+    <span class="empty-icon">🎫</span>
+    <h3>No Tickets Found</h3>
+    <p>You haven't raised any support tickets yet.</p>
+  </div>
+
+  <div class="tickets-grid" *ngIf="!isLoading && tickets.length > 0">
+    
+    <div class="ticket-card glass-card" *ngFor="let ticket of tickets">
+      
+      <div class="card-top">
+        <span class="cat-label">{{ getCategoryLabel(ticket.category) }}</span>
+        <span class="status-badge" [ngClass]="(ticket.status || 'pending').toLowerCase()">
+          {{ ticket.status || 'Pending' }}
+        </span>
+      </div>
+
+      <div class="ticket-meta">
+        <h2 class="subject-text">{{ ticket.subject }}</h2>
+        <span class="ticket-date">Raised on: {{ ticket.createdAt | date:'medium' }}</span>
+      </div>
+
+      <div class="message-box">
+        <span class="box-tag">Your Message:</span>
+        <p>{{ ticket.message }}</p>
+      </div>
+
+      <div class="admin-reply-box" *ngIf="ticket.adminReply">
+        <div class="reply-header">
+          <span class="admin-icon">🛠️</span>
+          <strong>Official Support Reply:</strong>
+        </div>
+        <p class="reply-text">{{ ticket.adminReply }}</p>
+      </div>
+
+      <div class="pending-footer" *ngIf="!ticket.adminReply">
+        <span>⏳ Our technical support team is reviewing your query.</span>
+      </div>
+
+    </div>
+
+  </div>
+</div>

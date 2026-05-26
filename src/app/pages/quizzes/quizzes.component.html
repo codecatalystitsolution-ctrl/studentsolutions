@@ -1,0 +1,49 @@
+<div class="page-container fade-in">
+  <header class="page-header">
+    <div class="header-content">
+      <h1>General Quiz Exams</h1>
+      <p class="subtitle">Practice daily with topic-wise mock tests to boost your score.</p>
+    </div>
+  </header>
+
+  <div class="filter-section">
+    <button
+      *ngFor="let cat of categories"
+      class="filter-btn"
+      [class.active]="selectedCategory === cat"
+      (click)="filterQuizzes(cat)"
+    >
+      {{ cat }}
+    </button>
+  </div>
+
+  <div class="quiz-grid">
+    <div class="quiz-card glass-card" *ngFor="let quiz of filteredQuizzes">
+      <div class="card-top">
+        <span class="subject-badge">{{ quiz.subject }}</span>
+        <span class="level-indicator" [ngClass]="quiz.level.toLowerCase()">
+          {{ quiz.level }}
+        </span>
+      </div>
+
+      <div class="card-body">
+        <h3 class="quiz-title">{{ quiz.title }}</h3>
+
+        <div class="quiz-meta">
+          <div class="meta-item"><span class="icon">❓</span> {{ quiz.questionsCount }} Qs</div>
+          <div class="meta-item"><span class="icon">⏱️</span> {{ quiz.durationMins }} Mins</div>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <button class="btn-start" (click)="startQuiz(quiz.id, quiz.durationMins)">
+          Start Quiz <span class="arrow">→</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="no-data" *ngIf="filteredQuizzes.length === 0">
+      <p>No quizzes available for this subject right now. Check back later!</p>
+    </div>
+  </div>
+</div>

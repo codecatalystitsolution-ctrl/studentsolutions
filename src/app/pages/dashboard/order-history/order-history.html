@@ -1,0 +1,101 @@
+<div class="history-wrapper">
+  <div class="history-header">
+    <div class="badge-tag">Tracking Hub</div>
+    <h1>My Order History</h1>
+    <p>Your old orders, live printing status aur delivery updates are available here.</p>
+  </div>
+
+  <div class="counter-grid">
+    <div class="counter-card total">
+      <div class="counter-info">
+        <h3>Total Orders</h3>
+        <h2>{{ orders.length }}</h2>
+      </div>
+      <span class="counter-icon">📦</span>
+    </div>
+    <div class="counter-card pending">
+      <div class="counter-info">
+        <h3>In Progress</h3>
+        <h2>{{ getCountByStatus('pending') + getCountByStatus('printing') }}</h2>
+      </div>
+      <span class="counter-icon">⏳</span>
+    </div>
+    <div class="counter-card completed">
+      <div class="counter-info">
+        <h3>Delivered</h3>
+        <h2>{{ getCountByStatus('delivered') }}</h2>
+      </div>
+      <span class="counter-icon">✓</span>
+    </div>
+  </div>
+
+  <div class="orders-container glass-card">
+    <h2>All Placed Orders</h2>
+
+    <div class="loading-state" *ngIf="isLoading">
+      <div class="spinner"></div>
+      <p>Loading orders...</p>
+    </div>
+
+    <div class="empty-state" *ngIf="!isLoading && orders.length === 0">
+      <span class="empty-icon">📂</span>
+      <h3>No orders found</h3>
+      <p>You haven't placed any orders yet.</p>
+      <a routerLink="/dashboard/new-order" class="order-now-btn">Book New Order</a>
+    </div>
+
+    <div class="orders-list" *ngIf="!isLoading && orders.length > 0">
+      <div class="table-responsive">
+        <table class="premium-table">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Subject/Topic</th>
+              <th>Est. Pages</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let order of orders">
+              <td class="font-bold">#{{ order?.id | slice: 0 : 8 | uppercase }}</td>
+
+              <td>{{ order?.projectDetails?.subject || order?.subject || 'N/A' }}</td>
+
+              <td>{{ order?.printSettings?.pagesLabel || order?.pagesLabel || 'N/A' }}</td>
+
+              <td class="text-muted">
+                {{ order?.createdAt ? (order.createdAt | date: 'mediumDate') : 'N/A' }}
+              </td>
+
+              <td>
+                <span class="status-badge" [ngClass]="(order?.status || 'pending').toLowerCase()">
+                  {{ order?.status || 'Pending' }}
+                </span>
+              </td>
+              
+              <td class="action-cell">
+                <div
+                  class="action-buttons"
+                  *ngIf="(order.status || 'Pending').toLowerCase() === 'pending'"
+                >
+                  <button class="btn-cancel" (click)="cancelOrder(order.id)" title="Cancel Order">
+                    ✖ Cancel
+                  </button>
+                </div>
+
+                <div
+                  class="locked-status"
+                  *ngIf="(order.status || 'Pending').toLowerCase() !== 'pending'"
+                >
+                  <span title="Order cannot be changed now">🔒 Locked</span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

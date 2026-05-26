@@ -1,0 +1,12 @@
+/* You can add global styles to this file, and also import other style files */
+// Angular Material Dialog ki base layout configuration layer override karne ke liye
+.cdk-overlay-container {
+  z-index: 99999 !important; // Taaki sidebar ya top headers ke piche dialog na chhupe
+  position: fixed;
+}
+
+.custom-dialog-container .mat-mdc-dialog-container {
+  --mdc-dialog-container-shape: 16px;
+  background-color: transparent !important; // Humne inline container custom style banaya hai
+  box-shadow: none !important;
+}

@@ -1,0 +1,75 @@
+<div class="admin-dashboard-container fade-in">
+  
+  <div class="dashboard-header">
+    <h2>System Overview</h2>
+    <p>Live snapshot of FileCrafters operations.</p>
+  </div>
+
+  <div class="stats-grid">
+    
+    <div class="stat-card emerald-gradient">
+      <div class="stat-content">
+        <span class="stat-title">Total Revenue</span>
+        <h3 class="stat-value">₹{{ totalRevenue | number }}</h3>
+      </div>
+      <div class="stat-icon-wrapper">
+        <span class="icon">💰</span>
+      </div>
+      <div class="bg-glow"></div>
+    </div>
+
+    <div class="stat-card rose-gradient">
+      <div class="stat-content">
+        <span class="stat-title">Cancelled Orders</span>
+        <h3 class="stat-value">{{ cancelledOrders < 10 ? '0'+cancelledOrders : cancelledOrders }}</h3>
+        <div class="stat-trend negative"></div>
+      </div>
+      <div class="stat-icon-wrapper">
+        <span class="icon">🚫</span>
+      </div>
+      <div class="bg-glow"></div>
+    </div>
+
+    <div class="stat-card sunset-gradient">
+      <div class="stat-content">
+        <span class="stat-title">Needs Attention (Pending)</span>
+        <h3 class="stat-value">{{ pendingOrders < 10 ? '0'+pendingOrders : pendingOrders }}</h3>
+      </div>
+      <div class="stat-icon-wrapper">
+        <span class="icon">⏳</span>
+      </div>
+      <div class="bg-glow"></div>
+    </div>
+
+    <div class="stat-card amethyst-gradient">
+      <div class="stat-content">
+        <span class="stat-title">Files Delivered</span>
+        <h3 class="stat-value">{{ completedOrders < 10 ? '0'+completedOrders : completedOrders }}</h3>
+      </div>
+      <div class="stat-icon-wrapper">
+        <span class="icon">✅</span>
+      </div>
+      <div class="bg-glow"></div>
+    </div>
+
+  </div>
+
+  <div class="quick-info-grid">
+    <div class="chart-section glass-card fade-in">
+    <div class="chart-header">
+      <div class="title-wrap">
+        <h3>📈 FileCraf Performance Analytics</h3>
+        <p>Live snapshot of revenue and orders over the last 7 days.</p>
+      </div>
+      <div class="live-pulse">
+        <span class="dot"></span> Live Sync
+      </div>
+    </div>
+    
+    <div class="chart-container">
+      <canvas id="performanceChart"></canvas>
+    </div>
+  </div>
+  </div>
+
+</div>

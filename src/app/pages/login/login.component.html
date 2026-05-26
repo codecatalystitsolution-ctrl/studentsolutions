@@ -1,0 +1,64 @@
+<div class="login-container">
+  
+  <div class="brand-panel">
+    <div class="brand-content">
+      <h1 class="logo-text">FileCrafters</h1>
+      <p class="tagline">Crafting your academic success. <br> </p>
+      <img src="assets/images/Studentlogo.png" alt="3D Visual Placeholder" class="visual-3d-placeholder">
+    </div>
+  </div>
+
+  <div class="form-panel">
+    <div class="glass-card fade-in">
+      
+      <ng-container *ngIf="!isForgotPasswordMode">
+        <h2>Welcome Back</h2>
+        <p class="subtitle">Enter your details to access your dashboard.</p>
+
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+          
+          <div class="input-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" formControlName="email" placeholder="student@college.edu" autocomplete="off">
+          </div>
+
+          <div class="input-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" formControlName="password" placeholder="••••••••">
+            <a class="forgot-link" (click)="toggleForgotPassword()" style="cursor: pointer;">Forgot Password?</a>
+          </div>
+
+          <button type="submit" class="btn-primary" [disabled]="loginForm.invalid">Sign In</button>
+
+        </form>
+
+        <p class="signup-prompt">
+          Don't have an account? <a routerLink="/register">Create one</a>
+        </p>
+      </ng-container>
+
+
+      <ng-container *ngIf="isForgotPasswordMode">
+        <h2>Reset Password</h2>
+        <p class="subtitle" style="margin-bottom: 1.5rem;">
+          Enter your registered email and we'll send you a secure reset link.
+        </p>
+
+        <div class="input-group">
+          <label for="resetEmail">Email Address</label>
+          <input type="email" id="resetEmail" [(ngModel)]="resetEmail" placeholder="student@college.edu" autocomplete="off">
+        </div>
+
+        <button type="button" class="btn-primary" (click)="sendResetLink()" [disabled]="isResetting">
+          {{ isResetting ? 'Sending Link...' : 'Send Reset Link' }}
+        </button>
+
+        <p class="signup-prompt" style="margin-top: 1.5rem;">
+          Remember your password? <a (click)="toggleForgotPassword()" style="cursor: pointer; color: #60a5fa; font-weight: 600;">Back to Login</a>
+        </p>
+      </ng-container>
+
+    </div>
+  </div>
+
+</div>

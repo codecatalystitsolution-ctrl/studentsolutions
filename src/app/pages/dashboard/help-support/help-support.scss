@@ -1,0 +1,381 @@
+
+:host {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.support-wrapper {
+  padding: 32px;
+  background: radial-gradient(circle at top left, #203d55 0%, #080c1f 50%, #350a328d 100%);
+  min-height: 100vh;
+  color: #fff;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+
+  @media (max-width: 768px) { padding: 16px; }
+
+  // Header Zone
+  .support-header {
+    margin-bottom: 40px;
+    
+    .badge-tag {
+      display: inline-block;
+      background: rgba(67, 24, 255, 0.15);
+      color: #7064ff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 100px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+      border: 1px solid rgba(67, 24, 255, 0.3);
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin: 0 0 10px 0;
+      background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    p { color: #a3b1cc; font-size: 15px; margin: 0; max-width: 600px; line-height: 1.6; }
+  }
+
+  // Layout Grid
+  .support-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 32px;
+    align-items: start;
+
+    @media (max-width: 1150px) { grid-template-columns: 1fr; }
+  }
+
+  // Left Section
+  .left-pane {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  // Quick Action Cards (Upgraded for 3 Column Grid with your theme configurations)
+  .action-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); // Teeno cards ko line me lane ke liye 3 columns
+    gap: 20px;
+
+    @media (max-width: 900px) { grid-template-columns: repeat(2, 1fr); }
+    @media (max-width: 600px) { grid-template-columns: 1fr; }
+
+    .glass-card {
+      display: flex;
+      align-items: center;
+      padding: 20px;
+      background: rgba(17, 28, 68, 0.6);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      text-decoration: none;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+      &:hover {
+        transform: translateY(-4px);
+        background: rgba(17, 28, 68, 0.9);
+        border-color: rgba(112, 100, 255, 0.4);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+
+        .arrow-go { transform: translateX(5px); color: #fff; }
+      }
+      
+      &.ticket-log-card:hover {
+        border-color: rgba(16, 185, 129, 0.4); // Track complaints ke liye specific hover border tone
+      }
+
+      .icon-box {
+        font-size: 24px;
+        background: rgba(255, 255, 255, 0.03);
+        padding: 12px;
+        border-radius: 12px;
+        margin-right: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      .card-info {
+        flex: 1;
+        h3 { font-size: 16px; font-weight: 700; margin: 0 0 4px 0; color: #fff; }
+        p { font-size: 12.5px; color: #a3b1cc; margin: 0; }
+      }
+
+      .arrow-go {
+        font-size: 16px;
+        color: #5a658d;
+        transition: transform 0.3s ease, color 0.3s ease;
+      }
+    }
+  }
+
+  // Premium FAQ Accordion
+  .faq-wrapper {
+    h2 { font-size: 20px; font-weight: 700; margin: 0 0 20px 0; letter-spacing: -0.3px; }
+
+    .accordion {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .accordion-item {
+      background: rgba(17, 28, 68, 0.5);
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      overflow: hidden;
+      transition: all 0.3s ease;
+
+      .accordion-header {
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        user-select: none;
+
+        .q-text { font-size: 14.5px; font-weight: 600; color: #e2e8f0; transition: color 0.3s; }
+        
+        // Plus minus toggle micro-animation
+        .toggle-icon {
+          position: relative;
+          width: 14px;
+          height: 14px;
+          
+          span {
+            position: absolute;
+            background: #a3b1cc;
+            transition: all 0.3s ease;
+          }
+          .line1 { top: 6px; left: 0; width: 14px; height: 2px; }
+          .line2 { top: 0; left: 6px; width: 2px; height: 14px; }
+        }
+      }
+
+      .accordion-body {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s cubic-bezier(0, 1, 0, 1);
+        
+        .inner-content { padding: 0 20px 20px 20px; color: #a3b1cc; font-size: 14px; line-height: 1.6; }
+      }
+
+      &:hover { border-color: rgba(255, 255, 255, 0.1); }
+
+      &.is-open {
+        background: #111c44;
+        border-color: rgba(112, 100, 255, 0.3);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+
+        .accordion-header .q-text { color: #fff; }
+        .accordion-header .toggle-icon .line2 { transform: rotate(90deg); opacity: 0; }
+        .accordion-header .toggle-icon .line1 { background: #7064ff; }
+        .accordion-body { max-height: 300px; }
+      }
+    }
+  }
+
+  // Right Section - Premium Form Card
+  .form-glass-card {
+    background: linear-gradient(145deg, rgba(19, 31, 76, 0.8) 0%, rgba(13, 22, 57, 0.9) 100%);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 32px;
+    border-radius: 24px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+
+    @media (max-width: 480px) { padding: 20px; }
+
+    .form-header {
+      margin-bottom: 28px;
+      h2 { font-size: 22px; font-weight: 700; margin: 0 0 6px 0; }
+      p { color: #a3b1cc; font-size: 13.5px; margin: 0; }
+    }
+
+    .success-toast {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 14px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      
+      .toast-icon {
+        background: #10b981;
+        color: #fff;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: bold;
+      }
+      p { font-size: 13px; color: #10b981; margin: 0; font-weight: 500; }
+    }
+
+    .premium-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+
+      .input-wrapper {
+        display: flex;
+        flex-direction: column;
+        
+        label { font-size: 13px; font-weight: 600; color: #cbd5e1; margin-bottom: 8px; }
+        .err-text { color: #ee5d50; font-size: 11px; margin-top: 5px; font-weight: 500; }
+      }
+
+      // Icon wrapped inside fields
+      .input-field-group {
+        display: flex;
+        align-items: center;
+        background: #0b1437;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 0 14px;
+        transition: all 0.2s ease;
+
+        &.alignment-top { align-items: flex-start; padding-top: 12px; }
+
+        .field-icon { font-size: 15px; color: #5a658d; margin-right: 12px; }
+
+        input, select, textarea {
+          flex: 1;
+          background: transparent;
+          border: none;
+          outline: none;
+          padding: 14px 0;
+          color: #fff;
+          font-size: 13.5px;
+          font-family: inherit;
+
+          &::placeholder { color: #5a658d; }
+        }
+
+        textarea { resize: none; padding: 0; }
+        select {
+          cursor: pointer;
+          option { background: #0b1437; color: #fff; }
+        }
+
+        // Focus Glow Effect
+        &:focus-within {
+          border-color: #7064ff;
+          box-shadow: 0 0 0 3px rgba(112, 100, 255, 0.15);
+          .field-icon { color: #7064ff; }
+        }
+      }
+
+      // Premium Gradient Button with hover glow
+      .gradient-btn {
+        position: relative;
+        background: linear-gradient(135deg, #7064ff 0%, #4318ff 100%);
+        border: none;
+        padding: 16px;
+        border-radius: 12px;
+        color: #fff;
+        font-size: 14.5px;
+        font-weight: 700;
+        cursor: pointer;
+        overflow: hidden;
+        margin-top: 10px;
+        transition: transform 0.2s;
+
+        span { position: relative; z-index: 2; }
+
+        .btn-glow {
+          position: absolute;
+          top: 0; left: 0; width: 100%; height: 100%;
+          background: linear-gradient(135deg, #8579ff 0%, #5126ff 100%);
+          opacity: 0;
+          transition: opacity 0.3s ease;
+          z-index: 1;
+        }
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(67, 24, 255, 0.4);
+          .btn-glow { opacity: 1; }
+        }
+
+        &:active { transform: translateY(0); }
+        &:disabled { background: #272f53; color: #5a658d; cursor: not-allowed; box-shadow: none; .btn-glow { display: none; } }
+      }
+    }
+  }
+
+  // ==========================================
+  // 🚀 CUSTOM ENGLISH GLASS DIALOG OVERLAY MODAL
+  // ==========================================
+  .custom-modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(11, 20, 55, 0.75); // Translucent backdrop blur layer
+    backdrop-filter: blur(12px);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 99999;
+    animation: modalFadeIn 0.25s ease-out;
+
+    .custom-modal-card {
+      background: linear-gradient(145deg, #131f4c 0%, #0d1639 100%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 40px 32px;
+      border-radius: 24px;
+      max-width: 440px; width: 90%;
+      text-align: center;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
+      animation: modalScaleUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.2) forwards;
+
+      .success-icon-ring {
+        width: 65px; height: 65px;
+        background: rgba(16, 185, 129, 0.12);
+        border: 2px solid #10b981;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 24px auto;
+        box-shadow: 0 0 20px rgba(16, 185, 129, 0.25);
+
+        .checkmark { color: #10b981; font-size: 28px; font-weight: bold; line-height: 1; }
+      }
+
+      h2 { font-size: 24px; font-weight: 700; margin: 0 0 12px 0; color: #ffffff; letter-spacing: -0.5px; }
+      p { color: #a3b1cc; font-size: 14.5px; line-height: 1.6; margin: 0 0 28px 0; }
+
+      .modal-close-btn {
+        background: linear-gradient(135deg, #7064ff 0%, #4318ff 100%);
+        color: white; border: none; padding: 14px 36px; border-radius: 12px;
+        font-size: 14.5px; font-weight: 700; cursor: pointer; width: 100%;
+        letter-spacing: 0.5px; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 15px rgba(67, 24, 255, 0.2);
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(67, 24, 255, 0.4);
+          background: linear-gradient(135deg, #7c72ff 0%, #4e26ff 100%);
+        }
+        &:active { transform: translateY(0); }
+      }
+    }
+  }
+}
+
+// 🎬 ANIMATION ENGINES
+@keyframes modalFadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes modalScaleUp { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }

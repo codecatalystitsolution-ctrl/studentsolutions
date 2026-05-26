@@ -1,0 +1,71 @@
+<div class="quiz-container fade-in">
+  
+  <ng-container *ngIf="!isSubmitted">
+    
+    <div class="quiz-header glass-card">
+      <div class="progress-info">
+        <span class="q-count">Question {{ currentQuestionIndex + 1 }} of {{ questions.length }}</span>
+      </div>
+      <div class="timer-box" [ngClass]="{'time-warning': timeLeftSeconds <= 60}">
+        <span class="icon">⏱️</span> {{ formattedTime }}
+      </div>
+    </div>
+
+    <div class="question-card glass-card">
+      <h2 class="question-text">{{ questions[currentQuestionIndex].text }}</h2>
+
+      <div class="options-container">
+        <div 
+          class="option-item" 
+          *ngFor="let option of questions[currentQuestionIndex].options"
+          [class.selected]="userAnswers[currentQuestionIndex] === option"
+          (click)="selectOption(option)">
+          <div class="custom-radio">
+            <div class="dot" *ngIf="userAnswers[currentQuestionIndex] === option"></div>
+          </div>
+          <span class="option-text">{{ option }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="quiz-footer">
+      <button class="btn-secondary" (click)="prevQuestion()" [disabled]="currentQuestionIndex === 0">
+        ← Previous
+      </button>
+      
+      <button class="btn-primary" (click)="nextQuestion()" *ngIf="currentQuestionIndex < questions.length - 1">
+        Next →
+      </button>
+
+      <button class="btn-submit" (click)="submitQuiz()" *ngIf="currentQuestionIndex === questions.length - 1">
+        Submit Quiz ✔️
+      </button>
+    </div>
+
+  </ng-container>
+
+
+  <ng-container *ngIf="isSubmitted">
+    <div class="result-card glass-card fade-in text-center">
+      
+      <div class="score-circle">
+        <svg viewBox="0 0 36 36" class="circular-chart">
+          <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+          <path class="circle" [attr.stroke-dasharray]="(score / questions.length * 100) + ', 100'" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+        </svg>
+        <div class="score-text">
+          <span class="big-score">{{ score }}</span>
+          <span class="total-score">/ {{ questions.length }}</span>
+        </div>
+      </div>
+
+      <h2 class="result-title">Quiz Completed!</h2>
+      <p class="result-msg">
+        {{ score >= (questions.length / 2) ? 'Great job! You passed the test.' : 'Needs improvement. Keep practicing!' }}
+      </p>
+
+      <button class="btn-primary-large" (click)="goBackToQuizzes()">Return to Dashboard</button>
+    </div>
+  </ng-container>
+
+</div>
