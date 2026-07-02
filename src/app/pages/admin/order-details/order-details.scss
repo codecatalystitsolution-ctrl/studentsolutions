@@ -96,6 +96,94 @@ $primary-gradient: linear-gradient(135deg, #0ea5e9, #8b5cf6); // Ocean Blue to A
       
       .highlight { color: #38bdf8; font-weight: 600; text-shadow: 0 0 10px rgba(56, 189, 248, 0.2); }
       
+      .upload-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+        margin-top: 0.9rem;
+        max-width: 280px; /* keep upload actions compact to avoid overlapping adjacent columns */
+        overflow: hidden; /* clip any shadows/overflow so they don't cover other columns */
+      }
+
+      .file-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.45rem 0.7rem; /* smaller buttons */
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 0.83rem;
+        text-decoration: none;
+        transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: 0 6px 14px -10px rgba(59, 130, 246, 0.28);
+        background-clip: padding-box;
+      }
+
+      .view-link {
+        background: rgba(56, 189, 248, 0.12);
+        color: #7dd3fc;
+      }
+
+      .download-link {
+        background: rgba(168, 85, 247, 0.12);
+        color: #c084fc;
+      }
+
+      .file-link:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 24px -12px rgba(59, 130, 246, 0.35);
+      }
+
+      .file-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+        margin-top: 0.8rem;
+      }
+
+      .file-row {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.35rem 0.55rem;
+        background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));
+        border-radius: 10px;
+        border: 1px solid rgba(255,255,255,0.03);
+        width: 100%;
+        box-sizing: border-box;
+        position: relative;
+      }
+
+      .file-name {
+        color: #cbd5e1;
+        font-weight: 700;
+        font-size: 0.85rem;
+        flex: 1 1 auto; /* take remaining space */
+        max-width: 160px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        padding-right: 0.6rem;
+      }
+
+      .file-links { display: flex; gap: 0.45rem; align-items: center; flex: 0 0 auto; }
+
+      .pdf-preview {
+        margin-top: 1.4rem;
+        border-radius: 18px;
+        overflow: hidden;
+        background: rgba(15, 23, 42, 0.65);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 18px 40px rgba(0, 0, 0, 0.18);
+      }
+
+      .pdf-preview object {
+        min-height: 420px;
+        width: 100%;
+        display: block;
+      }
+
       /* Gradient Text for Price */
       .price { 
         font-weight: 800; font-size: 1.4rem; 

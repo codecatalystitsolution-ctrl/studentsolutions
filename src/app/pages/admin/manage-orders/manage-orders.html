@@ -33,6 +33,7 @@
             <th>Order ID & Date</th>
             <th>Student Info <span style="color: #60a5fa">(Front Page)</span></th>
             <th>Project Details</th>
+            <th>PDFs</th>
             <th>Format & Price</th>
             <th>Live Status</th>
             <th>Payments</th>
@@ -41,6 +42,29 @@
         </thead>
         <tbody>
           <tr *ngFor="let order of filteredOrders">
+            <td class="pdf-column">
+              <div class="pdf-list">
+                <ng-container *ngIf="order.uploadDetails?.selfUploaded && (order.uploadDetails?.files?.length || order.uploadDetails?.uploadedFileDataUrl)">
+                  <ng-container *ngIf="order.uploadDetails?.files?.length">
+                    <a *ngFor="let f of order.uploadDetails.files; let i = index"
+                       class="btn-download-order pdf-item"
+                       [href]="f.dataUrl"
+                       [download]="f.name || ('uploaded-'+i+'.pdf')"
+                       title="Download {{ f.name }}">
+                      ⬇️ {{ f.name }}
+                    </a>
+                  </ng-container>
+                  <ng-container *ngIf="!order.uploadDetails?.files?.length && order.uploadDetails?.uploadedFileDataUrl">
+                    <a class="btn-download-order pdf-item"
+                       [href]="order.uploadDetails.uploadedFileDataUrl"
+                       [download]="order.uploadDetails.fileName || 'uploaded-file.pdf'"
+                       title="Download uploaded student PDF">
+                      ⬇️ Download
+                    </a>
+                  </ng-container>
+                </ng-container>
+              </div>
+            </td>
             <td>
               <a
                 class="order-id clickable-link"
@@ -134,7 +158,7 @@
             </tr>
 
           <tr *ngIf="filteredOrders.length === 0">
-            <td colspan="5" class="empty-state">
+            <td colspan="8" class="empty-state">
               <span class="empty-icon">🔍</span>
               <p *ngIf="searchTerm">No orders found matching "{{ searchTerm }}"</p>
               <p *ngIf="!searchTerm">No orders received yet.</p>

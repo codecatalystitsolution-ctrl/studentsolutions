@@ -57,6 +57,34 @@
           <p><strong>Binding Req.</strong> {{ order.printSettings?.binding || 'None' | titlecase }}</p>
         </div>
 
+        <div class="detail-section" *ngIf="order.uploadDetails?.selfUploaded && (order.uploadDetails?.files?.length || order.uploadDetails?.uploadedFileDataUrl)">
+          <h4>📎 Uploaded PDF</h4>
+          <div class="upload-file-summary">
+            <p><strong>Files:</strong> {{ order.uploadDetails?.files?.length ? order.uploadDetails.files.length + ' file(s)' : 1 }}</p>
+            <p><strong>Names:</strong> {{ order.uploadDetails?.files?.map(file => file.name).join(', ') || order.uploadDetails?.fileName || 'Uploaded Document' }}</p>
+            <p><strong>Size:</strong> {{ order.uploadDetails?.files?.map(file => file.sizeLabel).join(', ') || order.uploadDetails?.fileSize || 'Unknown' }}</p>
+          </div>
+          <div class="upload-actions">
+            <ng-container *ngIf="order.uploadDetails?.files?.length">
+              <div class="file-list">
+                <div *ngFor="let f of order.uploadDetails.files; let i = index" class="file-row">
+                  <span class="file-name">{{ f.name }}</span>
+                  <div class="file-links">
+                    <a class="file-link download-link" [href]="f.dataUrl" [download]="f.name">⬇️ Download</a>
+                  </div>
+                </div>
+              </div>
+            </ng-container>
+            <ng-container *ngIf="!order.uploadDetails?.files?.length && order.uploadDetails?.uploadedFileDataUrl">
+              <a class="file-link download-link"
+                 [href]="order.uploadDetails.uploadedFileDataUrl"
+                 [download]="order.uploadDetails.fileName || 'uploaded-file.pdf'">
+                ⬇️ Download PDF
+              </a>
+            </ng-container>
+          </div>
+        </div>
+
          <div class="detail-section">
            <h4>💳 Pricing Breakdown</h4>
            <p><strong>Total Amount</strong> <span class="price">₹{{ order.pricing?.totalAmount || 0 }}</span></p>
@@ -67,12 +95,20 @@
 
          <div class="detail-section">
            <h4>📍 Contact & Delivery</h4>
-           <p><strong>Phone / WA</strong> 
-             {{ order.userDetails?.phone || 'N/A' }} 
-             <span *ngIf="order.userDetails?.whatsapp"> / {{ order.userDetails?.whatsapp }}</span>
+           <p><strong>Phone / WA</strong>
+             {{ order.userDetails?.phone || order.phone || order.userPhone || order.contact?.phone || 'N/A' }}
+             <span *ngIf="order.userDetails?.whatsapp || order.whatsapp || order.contact?.whatsapp">
+               / {{ order.userDetails?.whatsapp || order.whatsapp || order.contact?.whatsapp }}
+             </span>
            </p>
-           <p><strong>Delivery Address</strong> <span class="highlight">{{ order.userDetails?.address || 'Not Provided' }}</span></p>
-           <p><strong>Pincode</strong> {{ order.userDetails?.pincode || 'N/A' }}</p>
+           <p><strong>Delivery Address</strong>
+             <span class="highlight">
+               {{ order.userDetails?.address || order.address || order.deliveryAddress || order.contact?.address || 'Not Provided' }}
+             </span>
+           </p>
+           <p><strong>Pincode</strong>
+             {{ order.userDetails?.pincode || order.pincode || order.deliveryPincode || order.contact?.pincode || 'N/A' }}
+           </p>
          </div>
 
        </div>

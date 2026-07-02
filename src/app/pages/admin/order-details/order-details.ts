@@ -49,13 +49,26 @@ export class OrderDetailsComponent implements OnInit {
         // Har order ke liye user data fetch karna
         const detailedOrders = await Promise.all(
           rawOrders.map(async (order) => {
-            if (order.userId) {
-              const userSnap = await get(ref(this.db, `users/${order.userId}`));
+            const userKey = order.userId || order.uid || order.userUID || order.customerUID;
+            let userDetails = null;
+
+            if (userKey) {
+              const userSnap = await get(ref(this.db, `users/${userKey}`));
               if (userSnap.exists()) {
-                return { ...order, userDetails: userSnap.val() };
+                userDetails = userSnap.val();
               }
             }
-            return order;
+
+            if (!userDetails) {
+              userDetails = order.userDetails || {
+                phone: order.phone || order.userPhone || order.contact?.phone,
+                whatsapp: order.whatsapp || order.contact?.whatsapp,
+                address: order.address || order.deliveryAddress || order.contact?.address,
+                pincode: order.pincode || order.deliveryPincode || order.contact?.pincode
+              };
+            }
+
+            return { ...order, userDetails };
           })
         );
 

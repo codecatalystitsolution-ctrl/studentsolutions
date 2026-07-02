@@ -80,29 +80,63 @@
 
           <h3 class="section-title"><span class="step-num">3</span> Print Settings</h3>
 
-      <div class="input-row custom-radios">
-      
-      <div class="input-group">
-        <label>Pages Slab</label>
-        <select formControlName="pageSlab">
-          <option *ngFor="let slab of availableSlabs" [value]="slab.price">
-            {{ slab.label }}
-          </option>
-        </select>
-      </div>
+          <div class="input-row custom-radios">
+            <div class="input-group">
+              <label>Pages Slab</label>
+              <select formControlName="pageSlab">
+                <option *ngFor="let slab of availableSlabs" [value]="slab.price">
+                  {{ slab.label }}
+                </option>
+              </select>
+            </div>
 
-      <div class="input-group" *ngIf="orderForm.get('fileType')?.value === 'project'">
-        <label>Binding Style</label>
-        <select formControlName="bindingType">
-          <option value="stick">Stick File (₹20)</option>
-          <option value="spiral">Spiral Binding (₹50)</option>
-          <option value="hardbound" *ngIf="orderForm.get('fileType')?.value === 'project'">
-            Hardbound (₹150)
-          </option>
-        </select>
-      </div>
-      
-    </div>
+            <div class="input-group" *ngIf="orderForm.get('fileType')?.value === 'project'">
+              <label>Binding Style</label>
+              <select formControlName="bindingType">
+                <option value="stick">Stick File (₹20)</option>
+                <option value="spiral">Spiral Binding (₹50)</option>
+                <option value="hardbound" *ngIf="orderForm.get('fileType')?.value === 'project'">
+                  Hardbound (₹150)
+                </option>
+              </select>
+            </div>
+
+            <div class="input-group" *ngIf="orderForm.get('fileType')?.value === 'assignment' || orderForm.get('fileType')?.value === 'practical'">
+              <label>Number of Files</label>
+              <select formControlName="fileQuantity">
+                <option [value]="1">1 File</option>
+                <option [value]="2">2 Files</option>
+                <option [value]="3">3 Files</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <h3 class="section-title"><span class="step-num">4</span> Upload Preference</h3>
+          <div class="upload-card">
+            <label class="toggle-row">
+              <input type="checkbox" formControlName="uploadOwnFile" (change)="onUploadOptionChange($event)" />
+              <span>I will upload my own PDF file</span>
+            </label>
+            <p class="hint-text">
+              If you upload your own PDF, we will deduct ₹50 from the total estimate. If you skip this,
+              our admin will prepare the file and no deduction will be applied.
+            </p>
+
+            <div class="upload-box" *ngIf="orderForm.get('uploadOwnFile')?.value">
+              <label class="upload-label" for="studentFile">Upload up to 3 PDFs (max 1MB each)</label>
+              <input id="studentFile" type="file" accept="application/pdf" multiple (change)="onFileSelected($event)" />
+              <div class="upload-meta" *ngIf="uploadedFileNames && !isFileUploading">
+                <span>Selected: {{ uploadedFileNames }}</span>
+                <span *ngIf="uploadedFilesSizeLabel">({{ uploadedFilesSizeLabel }})</span>
+              </div>
+              <div class="upload-meta" *ngIf="!uploadedFileNames && !isFileUploading">
+                Please choose up to 3 PDF files to apply the discount.
+              </div>
+              <div class="upload-meta" *ngIf="isFileUploading">Reading your PDF file(s)…</div>
+            </div>
+          </div>
         </div>
       </form>
     </div>
@@ -129,6 +163,16 @@
             <span>₹{{ currentBindingCost }}</span>
           </div>
 
+          <div class="cost-row discount-row" *ngIf="selfUploadFeeDeduction > 0">
+            <span>Self-upload discount</span>
+            <span>-₹{{ selfUploadFeeDeduction }}</span>
+          </div>
+
+          <div class="cost-row muted-row" *ngIf="selfUploadFeeDeduction === 0 && orderForm.get('fileType')?.value">
+            <span>Preparation mode</span>
+            <span>Admin will prepare</span>
+          </div>
+
         </div>
 
         <div class="total-row">
@@ -139,6 +183,10 @@
         <div class="advance-notice" *ngIf="totalEstimatedPrice > 0">
           <span class="icon">💡</span>
           50% advance (₹{{ totalEstimatedPrice / 2 }}) required to start processing.
+        </div>
+
+        <div class="status-note" *ngIf="uploadStatusMessage">
+          {{ uploadStatusMessage }}
         </div>
 
         <button class="btn-checkout" (click)="openPaymentModal()" [disabled]="orderForm.invalid || totalEstimatedPrice === 0">
@@ -162,6 +210,7 @@
 
       <div class="summary-box">
         <div class="row"><span>Total Estimate:</span> <span>₹{{ totalEstimatedPrice }}</span></div>
+        <div class="row" *ngIf="selfUploadFeeDeduction > 0"><span>Upload Discount:</span> <span>-₹{{ selfUploadFeeDeduction }}</span></div>
         <div class="row highlight"><span>To Pay Now (50%):</span> <span class="neon-text">₹{{ totalEstimatedPrice / 2 }}</span></div>
       </div>
       <button class="btn-next" (click)="paymentStep = 2">Generate QR Code</button>

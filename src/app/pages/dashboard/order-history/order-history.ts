@@ -6,6 +6,7 @@ import { Auth, authState } from '@angular/fire/auth';
 import { Database, ref, onValue, off, update } from '@angular/fire/database';
 
 interface Order {
+  fileType?: string;
   projectDetails?: any;
   subject?: any;
   printSettings?: any;
