@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } 
 import { Router, RouterLink } from '@angular/router';
 import { Auth, authState } from '@angular/fire/auth';
 import { Database, ref, push, set, onValue } from '@angular/fire/database'; // 'onValue' add kiya hai
+import { NotificationService } from '../../shared/notification/notification.service';
 
 @Component({
   selector: 'app-new-order',
@@ -19,6 +20,7 @@ export class NewOrderComponent implements OnInit {
   private auth = inject(Auth);
   private db = inject(Database);
   private router = inject(Router);
+  private notificationService = inject(NotificationService);
 
   userId: string = ''; // Firebase ka original UID
   studentID: string = ''; // Aapka custom FC-XXXXXX ID
@@ -173,7 +175,7 @@ export class NewOrderComponent implements OnInit {
     }
 
     if (files.length > this.maxUploadFiles) {
-      alert(`Please upload at most ${this.maxUploadFiles} PDF files.`);
+      this.notificationService.show('warning', `Please upload at most ${this.maxUploadFiles} PDF files.`, 'Upload Limit');
       input.value = '';
       return;
     }
@@ -181,12 +183,12 @@ export class NewOrderComponent implements OnInit {
     for (const file of files) {
       const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
       if (!isPdf) {
-        alert('Please upload PDF files only.');
+        this.notificationService.show('warning', 'Please upload PDF files only.', 'Invalid File');
         input.value = '';
         return;
       }
       if (file.size > this.maxUploadSizeBytes) {
-        alert('Each PDF must be 1MB or smaller. Please choose a smaller file.');
+        this.notificationService.show('warning', 'Each PDF must be 1MB or smaller. Please choose a smaller file.', 'File Too Large');
         input.value = '';
         return;
       }
@@ -203,7 +205,7 @@ export class NewOrderComponent implements OnInit {
       this.updatePricingPreview();
     } catch (error) {
       console.error('Error reading uploaded PDF files:', error);
-      alert('We could not read the selected PDF files. Please try again.');
+      this.notificationService.show('error', 'We could not read the selected PDF files. Please try again.', 'Upload Error');
       input.value = '';
       this.uploadedFiles = [];
       this.uploadedFileNames = '';
@@ -246,7 +248,7 @@ export class NewOrderComponent implements OnInit {
   openPaymentModal() {
     if (this.orderForm.invalid || !this.userId) {
       this.orderForm.markAllAsTouched();
-      alert("Please fill all required details correctly before proceeding.");
+      this.notificationService.show('warning', 'Please fill all required details correctly before proceeding.', 'Incomplete Form');
       return;
     }
     this.showPaymentModal = true;
@@ -262,7 +264,7 @@ export class NewOrderComponent implements OnInit {
 
   async submitFinalOrder() {
     if (!this.transactionRef || this.transactionRef.trim() === '') {
-      alert('Please enter your Transaction Reference or UPI ID used for payment.');
+      this.notificationService.show('warning', 'Please enter your Transaction Reference or UPI ID used for payment.', 'Missing Transaction');
       return;
     }
 
@@ -322,12 +324,12 @@ export class NewOrderComponent implements OnInit {
       await set(newOrderRef, orderData);
 
       this.closePaymentModal();
-      alert('Order Placed Successfully! 🎉 We will verify your payment and start processing.');
+      this.notificationService.show('success', 'Order Placed Successfully! 🎉 We will verify your payment and start processing.', 'Order Placed');
       this.router.navigate(['/dashboard/home']);
 
     } catch (error) {
       console.error('Error placing order:', error);
-      alert('Failed to place order. Please try again.');
+      this.notificationService.show('error', 'Failed to place order. Please try again.', 'Order Failed');
     } finally {
       this.isLoading = false;
     }

@@ -2,6 +2,8 @@ import { Component, OnInit, inject, ChangeDetectorRef, NgZone } from '@angular/c
 import { CommonModule, DatePipe, UpperCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Database, ref, onValue, update, remove } from '@angular/fire/database';
+import { ConfirmService } from '../../../shared/confirmation/confirm.service';
+import { NotificationService } from '../../../shared/notification/notification.service';
 
 @Component({
   selector: 'app-complaints',
@@ -14,6 +16,8 @@ export class ComplaintsComponent implements OnInit {
   private db = inject(Database);
   private cdr = inject(ChangeDetectorRef);
   private ngZone = inject(NgZone);
+  private confirmService = inject(ConfirmService);
+  private notificationService = inject(NotificationService);
 
   tickets: any[] = [];
   filteredTickets: any[] = [];
@@ -77,9 +81,10 @@ export class ComplaintsComponent implements OnInit {
   async updateTicketStatus(ticketId: string, newStatus: string) {
     try {
       await update(ref(this.db, `complaints/${ticketId}`), { status: newStatus });
+      this.notificationService.show('success', 'Ticket status updated.', 'Updated');
     } catch (error) {
       console.error("Status update error:", error);
-      alert("Failed to update status.");
+      this.notificationService.show('error', 'Failed to update status.', 'Update Failed');
     }
   }
 
@@ -99,7 +104,7 @@ export class ComplaintsComponent implements OnInit {
 
   async sendReply() {
     if (!this.adminReplyText.trim()) {
-      alert("Please write a reply before sending.");
+      this.notificationService.show('warning', 'Please write a reply before sending.', 'Empty Reply');
       return;
     }
 
@@ -114,18 +119,25 @@ export class ComplaintsComponent implements OnInit {
       // Optional toast/alert here
     } catch (error) {
       console.error("Reply error:", error);
-      alert("Failed to send reply.");
+      this.notificationService.show('error', 'Failed to send reply.', 'Send Failed');
     }
   }
 
   async deleteTicket(ticketId: string) {
-    const isConfirm = confirm("⚠️ Permanently delete this ticket?");
-    if (isConfirm) {
-      try {
-        await remove(ref(this.db, `complaints/${ticketId}`));
-      } catch (error) {
-        console.error("Delete error:", error);
-      }
+    const confirmed = await this.confirmService.confirm({
+      title: 'Delete Ticket',
+      message: '⚠️ Permanently delete this ticket?',
+      confirmText: 'Delete',
+      cancelText: 'Cancel'
+    });
+
+    if (!confirmed) return;
+    try {
+      await remove(ref(this.db, `complaints/${ticketId}`));
+      this.notificationService.show('success', 'Ticket deleted.', 'Deleted');
+    } catch (error) {
+      console.error("Delete error:", error);
+      this.notificationService.show('error', 'Failed to delete ticket.', 'Delete Failed');
     }
   }
 }

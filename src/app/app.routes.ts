@@ -118,6 +118,10 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/admin/manage-orders/manage-orders').then(m => m.ManageOrdersComponent)
       },
       {
+        path: 'students',
+        loadComponent: () => import('./pages/admin/student-management/student-management').then(m => m.StudentManagementComponent)
+      },
+      {
         path: 'order-details',
         loadComponent: () => import('./pages/admin/order-details/order-details').then(m => m.OrderDetailsComponent)
       },

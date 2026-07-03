@@ -2,8 +2,9 @@ import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 import { Router, RouterLink } from '@angular/router';
-import { Auth,sendPasswordResetEmail } from '@angular/fire/auth';
+import { Auth, sendPasswordResetEmail } from '@angular/fire/auth';
 import { CommonModule } from '@angular/common';
+import { NotificationService } from '../../shared/notification/notification.service';
 
 @Component({
   selector: 'app-login',
@@ -20,6 +21,7 @@ export class LoginComponent implements OnInit {
   private authService = inject(AuthService);
   private router = inject(Router);
   private auth = inject(Auth);
+  private notificationService = inject(NotificationService);
 
   // Naye variables Forgot Password ke liye
   isForgotPasswordMode: boolean = false; 
@@ -37,9 +39,16 @@ export class LoginComponent implements OnInit {
 if (this.loginForm.valid) {
     const { email, password } = this.loginForm.value;
     try {
-      await this.authService.login(email, password);
+      const user = await this.authService.login(email, password);
       console.log('Login Successful!');
-      
+
+      const userProfile = await this.authService.getUserProfile(user.uid);
+      if (userProfile?.status === 'suspended') {
+        await this.authService.logout();
+        this.notificationService.show('error', 'Your account has been suspended. Please contact support to reopen your account.', 'Account Suspended');
+        return;
+      }
+
       // Admin emails ki list (Yahan apne actual admin emails zarur rakhein)
       const adminEmails = ['admin@filecrafters.in', 'wmohd2514@outlook.com'];
 
@@ -54,10 +63,10 @@ if (this.loginForm.valid) {
       
     } catch (error: any) {
       console.error('Login Failed:', error.message);
-      alert('Login Failed: ' + error.message);
+      this.notificationService.show('error', error.message || 'Login Failed. Please try again.', 'Login Error');
     }
   } else {
-    alert('Please fill in all required fields with valid information.');
+    this.notificationService.show('warning', 'Please fill in all required fields with valid information.', 'Invalid Input');
   }
 }
 
@@ -69,7 +78,7 @@ if (this.loginForm.valid) {
 
   async sendResetLink() {
     if (!this.resetEmail) {
-      alert("Please enter your registered email address.");
+      this.notificationService.show('warning', 'Please enter your registered email address.', 'Missing Email');
       return;
     }
 
@@ -79,7 +88,7 @@ if (this.loginForm.valid) {
       // Firebase ka inbuilt function email bhejne ke liye
       await sendPasswordResetEmail(this.auth, this.resetEmail);
       
-      alert("Password reset link sent! 📧 Please check your email inbox (and spam folder).");
+      this.notificationService.show('success', 'Password reset link sent! Please check your email inbox (and spam folder).', 'Email Sent');
       this.isForgotPasswordMode = false; // Wapas login screen dikha do
       this.resetEmail = '';
       
@@ -87,11 +96,11 @@ if (this.loginForm.valid) {
       console.error("Forgot password error:", error);
       // Firebase alag-alag error deta hai, unko handle karein
       if (error.code === 'auth/user-not-found') {
-        alert("No account found with this email.");
+        this.notificationService.show('error', 'No account found with this email.', 'Email Not Registered');
       } else if (error.code === 'auth/invalid-email') {
-        alert("Please enter a valid email address.");
+        this.notificationService.show('warning', 'Please enter a valid email address.', 'Invalid Email');
       } else {
-        alert("Failed to send reset email. Please try again later.");
+        this.notificationService.show('error', 'Failed to send reset email. Please try again later.', 'Send Error');
       }
     } finally {
       this.isResetting = false;

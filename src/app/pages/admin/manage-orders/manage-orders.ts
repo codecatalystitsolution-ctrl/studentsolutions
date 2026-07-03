@@ -2,6 +2,8 @@ import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; 
 import { Database, ref, onValue, update, remove } from '@angular/fire/database';
+import { ConfirmService } from '../../../shared/confirmation/confirm.service';
+import { NotificationService } from '../../../shared/notification/notification.service';
 import { RouterLink } from '@angular/router';
 
 @Component({
@@ -14,6 +16,8 @@ import { RouterLink } from '@angular/router';
 export class ManageOrdersComponent implements OnInit {
   private db = inject(Database);
   private cdr = inject(ChangeDetectorRef);
+  private confirmService = inject(ConfirmService);
+  private notificationService = inject(NotificationService);
 
   orders: any[] = [];
   filteredOrders: any[] = []; 
@@ -75,7 +79,7 @@ export class ManageOrdersComponent implements OnInit {
       await update(orderRef, { status: newStatus });
     } catch (error) {
       console.error("Error updating status:", error);
-      alert("Failed to update status. Please check your connection.");
+      this.notificationService.show('error', 'Failed to update status. Please check your connection.', 'Update Failed');
     }
   }
 
@@ -88,7 +92,7 @@ export class ManageOrdersComponent implements OnInit {
       
     } catch (error) {
       console.error("Error updating payment status:", error);
-      alert("Failed to update payment status. Please check your connection.");
+      this.notificationService.show('error', 'Failed to update payment status. Please check your connection.', 'Update Failed');
     }
   }
 
@@ -97,16 +101,22 @@ export class ManageOrdersComponent implements OnInit {
   async deleteOrder(orderId: string, event: Event) {
     event.stopPropagation();
 
-    const isConfirm = confirm("⚠️ Are you sure you want to permanently delete this order?");
+    const confirmed = await this.confirmService.confirm({
+      title: 'Delete Order',
+      message: '⚠️ Are you sure you want to permanently delete this order?',
+      confirmText: 'Delete',
+      cancelText: 'Cancel'
+    });
 
-    if (isConfirm) {
-      try {
-        const orderRef = ref(this.db, `orders/${orderId}`);
-        await remove(orderRef); 
-      } catch (error) {
-        console.error("Error deleting order:", error);
-        alert("Failed to delete order.");
-      }
+    if (!confirmed) return;
+
+    try {
+      const orderRef = ref(this.db, `orders/${orderId}`);
+      await remove(orderRef);
+      this.notificationService.show('success', 'Order deleted successfully.', 'Deleted');
+    } catch (error) {
+      console.error("Error deleting order:", error);
+      this.notificationService.show('error', 'Failed to delete order.', 'Delete Failed');
     }
   }
 }

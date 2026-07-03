@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Auth, authState } from '@angular/fire/auth';
 import { Database, ref, get, update } from '@angular/fire/database';
+import { NotificationService } from '../../../shared/notification/notification.service';
 
 @Component({
   selector: 'app-profile',
@@ -16,6 +17,7 @@ export class ProfileComponent implements OnInit {
   private db = inject(Database);
   private fb = inject(FormBuilder);
   private cdr = inject(ChangeDetectorRef);
+  private notificationService = inject(NotificationService);
 
   profileForm!: FormGroup;
   userData: any = null;
@@ -97,10 +99,10 @@ async loadUserProfile() {
       // Update local view data
       this.userData = { ...this.userData, ...this.profileForm.value };
       this.isEditMode = false;
-      alert('Profile updated successfully! ✨');
+      this.notificationService.show('success', 'Profile updated successfully! ✨', 'Profile Saved');
     } catch (error) {
       console.error("Error updating profile", error);
-      alert('Failed to update profile.');
+      this.notificationService.show('error', 'Failed to update profile.', 'Update Failed');
     }
   }
 }

@@ -1,0 +1,11 @@
+<div class="notification-wrapper" *ngIf="messages().length > 0">
+  <div class="notification-card" *ngFor="let note of messages()" [ngClass]="note.type">
+    <div class="notification-header">
+      <div>
+        <span class="notification-title">{{ note.title || (note.type | titlecase) }}</span>
+        <p class="notification-message">{{ note.message }}</p>
+      </div>
+      <button class="dismiss-btn" type="button" (click)="dismiss(note.id)">✕</button>
+    </div>
+  </div>
+</div>

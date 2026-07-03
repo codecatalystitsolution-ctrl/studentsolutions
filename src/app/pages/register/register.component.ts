@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common'; 
 import { AuthService } from '../../services/auth.service';
+import { NotificationService } from '../../shared/notification/notification.service';
 import { Router, RouterLink } from '@angular/router';
 
 @Component({
@@ -17,6 +18,7 @@ export class RegisterComponent implements OnInit {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private notificationService = inject(NotificationService);
 
   ngOnInit(): void {
     this.registerForm = this.fb.group({
@@ -52,8 +54,8 @@ export class RegisterComponent implements OnInit {
         console.log('Registration Successful!');
         this.router.navigate(['/dashboard/home']);
       } catch (error: any) {
-        console.error('Registration Failed:', error.message);
-        alert('Registration Failed: ' + error.message);
+          console.error('Registration Failed:', error.message);
+          this.notificationService.show('error', 'Registration Failed: ' + error.message, 'Registration Failed');
       }
     } else {
       this.registerForm.markAllAsTouched();

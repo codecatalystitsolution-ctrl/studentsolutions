@@ -1,0 +1,81 @@
+<div class="student-management-page fade-in">
+  <div class="page-header premium-header">
+    <div class="heading-group">
+      <h1>Student Management</h1>
+      <p>Monitor every registered student, manage account status, and keep the system secure.</p>
+    </div>
+    <div class="summary-pill">
+      <div>
+        <span>Total Students</span>
+        <strong>{{ totalStudents }}</strong>
+      </div>
+      <div>
+        <span>Active</span>
+        <strong>{{ activeStudents }}</strong>
+      </div>
+      <div>
+        <span>Suspended</span>
+        <strong>{{ suspendedStudents }}</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="search-card glass-card">
+    <div class="search-bar">
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        (input)="filterStudents()"
+        placeholder="Search students by name, email, college, ID or status"
+      />
+      <button type="button" *ngIf="searchTerm" (click)="searchTerm=''; filterStudents();">Clear</button>
+    </div>
+  </div>
+
+  <div class="table-section glass-card">
+    <div class="table-title-bar">
+      <div>
+        <h2>Registered Students</h2>
+        <p>Premium view for account management, suspension control, and rapid review.</p>
+      </div>
+      <span class="status-pill">{{ filteredStudents.length }} students shown</span>
+    </div>
+
+    <div *ngIf="isLoading" class="loading-panel">
+      <div class="spinner"></div>
+      <span>Loading student roster...</span>
+    </div>
+
+    <table *ngIf="!isLoading" class="student-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>College</th>
+          <th>Student ID</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let student of filteredStudents">
+          <td>{{ student.fullName || 'N/A' }}</td>
+          <td>{{ student.email || 'N/A' }}</td>
+          <td>{{ student.collegeName || 'N/A' }}</td>
+          <td>{{ student.studentID || 'N/A' }}</td>
+          <td>
+            <span [ngClass]="statusBadgeClass(student.status)">{{ student.status || 'active' | titlecase }}</span>
+          </td>
+          <td>
+            <button class="action-button" (click)="toggleStudentStatus(student)">
+              {{ student.status === 'suspended' ? 'Activate' : 'Suspend' }}
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="!isLoading && filteredStudents.length === 0">
+          <td colspan="6" class="empty-state">No students match your search.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -2,10 +2,12 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { Auth, authState } from '@angular/fire/auth';
 import { map } from 'rxjs/operators';
+import { NotificationService } from '../shared/notification/notification.service';
 
 export const adminGuard: CanActivateFn = (route, state) => {
   const auth = inject(Auth);
   const router = inject(Router);
+  const notification = inject(NotificationService);
 
   // Yahan apna Admin Email likhein (Multiple admins bhi add kar sakte hain)
   const allowedAdminEmails = [
@@ -21,7 +23,7 @@ export const adminGuard: CanActivateFn = (route, state) => {
         return true; // Access Granted! ✅
       } else {
         // Access Denied! ❌ Wapas login page par bhejo
-        alert('Access Denied: Restricted Admin Area.');
+        notification.show('error', 'Access Denied: Restricted Admin Area.', 'Access Denied');
         router.navigate(['/login']);
         return false;
       }

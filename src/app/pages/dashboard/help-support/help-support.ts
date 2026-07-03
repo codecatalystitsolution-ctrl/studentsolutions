@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Database, ref, push, set, onValue } from '@angular/fire/database';
 import { Auth, authState } from '@angular/fire/auth'; // Auth imports
 import { Router } from '@angular/router'; // Router for unauthenticated users
+import { NotificationService } from '../../../shared/notification/notification.service';
 
 @Component({
   selector: 'app-help-support',
@@ -124,7 +125,8 @@ export class HelpSupportComponent implements OnInit {
       } catch (error) {
         this.isSubmitting = false;
         console.error(error);
-        alert('Database sync fail! Please try again.');
+          const notification = inject(NotificationService);
+          notification.show('error', 'Database sync failed. Please try again.', 'Sync Failed');
       }
     } else {
       this.ticketForm.markAllAsTouched();

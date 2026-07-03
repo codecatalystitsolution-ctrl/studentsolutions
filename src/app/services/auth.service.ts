@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Auth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword } from '@angular/fire/auth';
-import { Database, ref, set } from '@angular/fire/database';
+import { Database, ref, set, update, get } from '@angular/fire/database';
 
 @Injectable({
     providedIn: 'root'
@@ -39,6 +39,7 @@ export class AuthService {
                 ...cleanUserData,
                 studentID: customUserID,
                 role: 'Student',
+                status: 'active',
                 createdAt: new Date().toISOString()
             };
 
@@ -48,6 +49,30 @@ export class AuthService {
 
             return userCredential;
         } catch (error) {
+            throw error;
+        }
+    }
+
+    async getUserProfile(uid: string) {
+        try {
+            const userRef = ref(this.db, `users/${uid}`);
+            const snapshot = await get(userRef);
+            return snapshot.exists() ? snapshot.val() : null;
+        } catch (error) {
+            console.error('Error fetching user profile:', error);
+            return null;
+        }
+    }
+
+    async setUserStatus(uid: string, status: 'active' | 'suspended') {
+        try {
+            const userRef = ref(this.db, `users/${uid}`);
+            await update(userRef, {
+                status,
+                updatedAt: new Date().toISOString()
+            });
+        } catch (error) {
+            console.error('Error updating user status:', error);
             throw error;
         }
     }

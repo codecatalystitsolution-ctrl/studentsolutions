@@ -3,6 +3,8 @@ import { CommonModule, DatePipe, UpperCasePipe } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 // Firebase Tools
 import { Auth, authState } from '@angular/fire/auth';
+import { ConfirmService } from '../../../shared/confirmation/confirm.service';
+import { NotificationService } from '../../../shared/notification/notification.service';
 import { Database, ref, onValue, off, update } from '@angular/fire/database';
 
 interface Order {
@@ -43,6 +45,8 @@ export class OrderHistoryComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef); // UI force update tool
   private ngZone = inject(NgZone); // Angular zone for UI updates
+  private confirmService = inject(ConfirmService);
+  private notificationService = inject(NotificationService);
 
   ngOnInit(): void {
     authState(this.auth).subscribe(user => {
@@ -121,20 +125,22 @@ export class OrderHistoryComponent implements OnInit, OnDestroy {
   // ==========================================
 
   async cancelOrder(orderId: string) {
-    const isConfirm = confirm("Are you sure you want to cancel this order? This cannot be undone.");
-    
-    if (isConfirm) {
-      try {
-        const orderRef = ref(this.db, `orders/${orderId}`);
-        // Database mein status ko 'Cancelled' set kar dega
-        await update(orderRef, { status: 'Cancelled' });
-        
-        alert("Order has been cancelled successfully.");
-        // Note: fetchRealtimeOrders mein onValue laga hai, toh table apne aap refresh ho jayegi
-      } catch (error) {
-        console.error("Error cancelling order:", error);
-        alert("Failed to cancel order. Please check your connection.");
-      }
+    const confirmed = await this.confirmService.confirm({
+      title: 'Cancel Order',
+      message: 'Are you sure you want to cancel this order? This cannot be undone.',
+      confirmText: 'Yes, Cancel',
+      cancelText: 'Keep Order'
+    });
+
+    if (!confirmed) return;
+
+    try {
+      const orderRef = ref(this.db, `orders/${orderId}`);
+      await update(orderRef, { status: 'Cancelled' });
+      this.notificationService.show('success', 'Order has been cancelled successfully.', 'Cancelled');
+    } catch (error) {
+      console.error('Error cancelling order:', error);
+      this.notificationService.show('error', 'Failed to cancel order. Please check your connection.', 'Cancel Failed');
     }
   }
 

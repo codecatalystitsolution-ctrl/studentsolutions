@@ -1,0 +1,226 @@
+.student-management-page {
+  display: grid;
+  gap: 1.5rem;
+  padding: 2rem;
+}
+
+.premium-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 2rem;
+  border-radius: 32px;
+  background: linear-gradient(135deg, rgba(59, 130, 246, .95), rgba(168, 85, 247, .9));
+  color: #f8fafc;
+  box-shadow: 0 32px 80px rgba(15, 23, 42, .24);
+}
+
+.heading-group {
+  max-width: 740px;
+}
+
+.heading-group h1 {
+  margin: 0 0 .75rem;
+  font-size: clamp(2rem, 3vw, 3rem);
+  letter-spacing: -.03em;
+}
+
+.heading-group p {
+  margin: 0;
+  color: rgba(248, 250, 252, .78);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.summary-pill {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(12rem, 1fr));
+  gap: 1rem;
+}
+
+.summary-pill div {
+  padding: 1rem 1.2rem;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, .08);
+  border: 1px solid rgba(255, 255, 255, .16);
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;
+}
+
+.summary-pill span {
+  color: rgba(248, 250, 252, .82);
+  font-size: .95rem;
+}
+
+.summary-pill strong {
+  font-size: 1.65rem;
+}
+
+.search-card,
+.table-section {
+  background: rgba(15, 23, 42, .86);
+  border: 1px solid rgba(148, 163, 184, .12);
+  border-radius: 28px;
+  padding: 1.5rem;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, .18);
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  background: rgba(15, 23, 42, .95);
+  border: 1px solid rgba(148, 163, 184, .14);
+  border-radius: 18px;
+  padding: .75rem 1rem;
+}
+
+.search-bar input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #e2e8f0;
+  font-size: 1rem;
+}
+
+.search-bar button {
+  border: none;
+  border-radius: 999px;
+  padding: .6rem 1rem;
+  background: rgba(59, 130, 246, .95);
+  color: #f8fafc;
+  cursor: pointer;
+  transition: transform .2s ease;
+}
+
+.search-bar button:hover {
+  transform: translateY(-1px);
+}
+
+.table-title-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.table-title-bar h2 {
+  margin: 0;
+  color: #f8fafc;
+}
+
+.table-title-bar p {
+  margin: 0;
+  color: rgba(148, 163, 184, .95);
+}
+
+.status-pill {
+  padding: .55rem 1rem;
+  border-radius: 999px;
+  background: rgba(16, 185, 129, .14);
+  color: #a7f3d0;
+  font-weight: 600;
+}
+
+.loading-panel {
+  display: grid;
+  place-items: center;
+  gap: .75rem;
+  min-height: 16rem;
+  color: rgba(148, 163, 184, .95);
+}
+
+.spinner {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  border: .45rem solid rgba(148, 163, 184, .18);
+  border-top-color: #60a5fa;
+  animation: spinner-rotate .85s linear infinite;
+}
+
+@keyframes spinner-rotate {
+  to { transform: rotate(360deg); }
+}
+
+.student-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 100%;
+}
+
+.student-table thead th {
+  padding: 1rem 1rem .75rem;
+  text-align: left;
+  color: rgba(148, 163, 184, .95);
+  font-size: .95rem;
+  letter-spacing: .01em;
+}
+
+.student-table tbody tr {
+  border-top: 1px solid rgba(148, 163, 184, .08);
+}
+
+.student-table tbody td {
+  padding: 1rem 1rem;
+  color: #e2e8f0;
+  vertical-align: middle;
+}
+
+.badge-active,
+.badge-suspended {
+  display: inline-flex;
+  padding: .45rem .8rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: .9rem;
+}
+
+.badge-active {
+  background: rgba(16, 185, 129, .16);
+  color: #a7f3d0;
+}
+
+.badge-suspended {
+  background: rgba(244, 63, 94, .14);
+  color: #fecdd3;
+}
+
+.action-button {
+  border: none;
+  border-radius: 999px;
+  padding: .7rem 1rem;
+  color: #f8fafc;
+  cursor: pointer;
+  transition: transform .2s ease, background .2s ease;
+}
+
+.action-button:hover {
+  transform: translateY(-1px);
+}
+
+.action-button {
+  background: linear-gradient(135deg, #818cf8, #7c3aed);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 0;
+  color: rgba(148, 163, 184, .95);
+}
+
+@media (max-width: 900px) {
+  .premium-header,
+  .search-card,
+  .table-section {
+    padding: 1.25rem;
+  }
+
+  .summary-pill {
+    grid-template-columns: 1fr;
+  }
+}

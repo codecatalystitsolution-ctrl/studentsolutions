@@ -1,7 +1,8 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
-import { Database, ref, onValue } from '@angular/fire/database';
+import { Database, ref, onValue, update } from '@angular/fire/database';
 import { Chart } from 'chart.js/auto'; // Graph ke liye import
+import { NotificationService } from '../../../shared/notification/notification.service';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -15,6 +16,7 @@ export class AdminDashboardComponent implements OnInit {
   private db = inject(Database);
   private cdr = inject(ChangeDetectorRef);
   private datePipe = inject(DatePipe);
+  private notificationService = inject(NotificationService);
 
   // System Stats
   totalRevenue: number = 0;
@@ -23,12 +25,64 @@ export class AdminDashboardComponent implements OnInit {
   completedOrders: number = 0;
   cancelledOrders: number = 0;
 
+  // Student Stats
+  totalStudents: number = 0;
+  activeStudents: number = 0;
+  suspendedStudents: number = 0;
+  students: Array<any> = [];
+  isStudentLoading: boolean = true;
 
   // Chart Variable
   public liveChart: any;
 
   ngOnInit(): void {
     this.fetchSystemStats();
+    this.fetchStudentStats();
+  }
+
+  async fetchStudentStats() {
+    const usersRef = ref(this.db, 'users');
+    onValue(usersRef, (snapshot) => {
+      const usersData = snapshot.val();
+      this.students = [];
+      this.totalStudents = 0;
+      this.activeStudents = 0;
+      this.suspendedStudents = 0;
+
+      if (usersData) {
+        Object.keys(usersData).forEach(uid => {
+          const user = usersData[uid];
+          if (user.role?.toLowerCase() === 'student') {
+            this.totalStudents += 1;
+            if (user.status === 'suspended') {
+              this.suspendedStudents += 1;
+            } else {
+              this.activeStudents += 1;
+            }
+            this.students.push({ uid, ...user });
+          }
+        });
+      }
+
+      this.students.sort((a, b) => (a.fullName || '').localeCompare(b.fullName || ''));
+      this.isStudentLoading = false;
+      this.cdr.detectChanges();
+    });
+  }
+
+  async changeStudentStatus(uid: string, newStatus: 'active' | 'suspended') {
+    try {
+      const userRef = ref(this.db, `users/${uid}`);
+      await update(userRef, {
+        status: newStatus,
+        updatedAt: new Date().toISOString()
+      });
+      this.notificationService.show('success', 'Student status updated.', 'Updated');
+    } catch (error) {
+      console.error('Failed to update student status', error);
+      // show notification instead
+      this.notificationService.show('error', 'Failed to update student status. Please try again.', 'Update Failed');
+    }
   }
 
 fetchSystemStats() {
