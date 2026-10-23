@@ -1,14 +1,16 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+﻿import { Component, OnInit, HostListener, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, Router, RouterOutlet, RouterLinkActive } from '@angular/router';
+import { RouterLink, Router, RouterOutlet, RouterLinkActive, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs';
 import { Auth, authState } from '@angular/fire/auth';
 import { Database, ref, onValue } from '@angular/fire/database';
 import { AuthService } from '../../services/auth.service';
+import { ThemeService } from '../../services/theme.service';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterOutlet, RouterLinkActive], 
+  imports: [CommonModule, RouterLink, RouterOutlet, RouterLinkActive],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
@@ -18,35 +20,42 @@ export class DashboardComponent implements OnInit {
   private router = inject(Router);
   private authService = inject(AuthService);
   private cdr = inject(ChangeDetectorRef);
+  private themeService = inject(ThemeService);
 
-  userName: string = 'Loading...';
-  userEmail: string = '';
-  isSidebarOpen: boolean = false;
-  isProfileMenuOpen: boolean = false;
-  isLearningHubOpen: boolean = true; 
-  isAccountOpen: boolean = true;
-  studentID: any;
+  userName = 'Loading...';
+  userEmail = '';
+  studentID: string | null = '';
+  isSidebarOpen = false;
+  isProfileMenuOpen = false;
+  isLearningHubOpen = true;
+  isAccountOpen = true;
+  showWelcomeModal = false;
+  currentUserId = '';
+  readonly theme = this.themeService.theme;
 
-  // === POPUP VARIABLES ===
-  showWelcomeModal: boolean = false;
-  currentUserId: string = '';
+  toggleLearningHub() {
+    this.isLearningHubOpen = !this.isLearningHubOpen;
+  }
 
-  toggleLearningHub() { this.isLearningHubOpen = !this.isLearningHubOpen; }
-  toggleAccount() { this.isAccountOpen = !this.isAccountOpen; }
+  toggleAccount() {
+    this.isAccountOpen = !this.isAccountOpen;
+  }
 
   ngOnInit(): void {
-    authState(this.auth).subscribe(user => {
+    this.applyTheme(this.themeService.theme());
+
+    this.router.events.pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .subscribe(() => this.closeSidebarOnMobile());
+
+    authState(this.auth).subscribe((user) => {
       if (user) {
         this.currentUserId = user.uid;
         this.fetchHeaderData(user.uid);
 
-        // === POPUP LOGIC ===
-        // Check karein agar is user ne pehle popup dismiss kiya hai ya nahi
         const hasSeenWelcome = localStorage.getItem(`welcome_seen_${user.uid}`);
         if (!hasSeenWelcome) {
           this.showWelcomeModal = true;
         }
-
       } else {
         this.router.navigate(['/login']);
       }
@@ -55,31 +64,56 @@ export class DashboardComponent implements OnInit {
 
   fetchHeaderData(uid: string) {
     const userRef = ref(this.db, 'users/' + uid);
-    onValue(userRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        this.userName = data.fullName || 'Student';
-        this.userEmail = data.email || '';
-        this.studentID = data.studentID || '';
-      } else {
-        this.userName = 'Student';
-        this.studentID = '';  
-      }
-      this.cdr.detectChanges();
-    });
+    onValue(
+      userRef,
+      (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          this.userName = data.fullName || 'Student';
+          this.userEmail = data.email || '';
+          this.studentID = data.studentID || '';
+        } else {
+          this.userName = 'Student';
+          this.studentID = '';
+        }
+        this.cdr.detectChanges();
+      },
+      { onlyOnce: false }
+    );
   }
 
-  toggleSidebar() { this.isSidebarOpen = !this.isSidebarOpen; }
+  applyTheme(theme: 'dark' | 'light') {
+
+    this.themeService.setTheme(theme);
+  }
+
+  toggleTheme() {
+    this.applyTheme(this.theme() === 'dark' ? 'light' : 'dark');
+  }
+
+  getStoredTheme(): 'dark' | 'light' {
+    return this.themeService.theme();
+  }
+
+  toggleSidebar() {
+    this.isSidebarOpen = !this.isSidebarOpen;
+  }
 
   closeSidebarOnMobile() {
-    if (window.innerWidth <= 768) {
+    if (window.innerWidth <= 900) {
       this.isSidebarOpen = false;
     }
   }
 
-  toggleProfileMenu() { this.isProfileMenuOpen = !this.isProfileMenuOpen; }
+  @HostListener('window:resize')
+  onViewportResize() {
+    if (window.innerWidth > 900) this.isSidebarOpen = false;
+  }
 
-  // === POPUP CLOSE FUNCTION ===
+  toggleProfileMenu() {
+    this.isProfileMenuOpen = !this.isProfileMenuOpen;
+  }
+
   closeWelcomeModal() {
     this.showWelcomeModal = false;
     localStorage.setItem(`welcome_seen_${this.currentUserId}`, 'true');

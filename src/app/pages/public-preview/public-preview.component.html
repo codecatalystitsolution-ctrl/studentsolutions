@@ -1,0 +1,850 @@
+<div class="public-landing">
+  <!-- 1. Header & Navigation -->
+  <header class="public-navbar">
+    <div class="nav-container">
+      <a class="nav-brand" (click)="scrollToSection('hero')" href="javascript:void(0)">
+        <span class="brand-badge">FC</span>
+        <div class="brand-text">
+          <span class="brand-name">FileCrafters</span>
+          <span class="brand-tagline">Academic Solutions</span>
+        </div>
+      </a>
+
+      <nav class="nav-links desktop-only" aria-label="Main Navigation">
+        <a (click)="scrollToSection('about')" href="javascript:void(0)">About</a>
+        <a (click)="scrollToSection('services')" href="javascript:void(0)">Services</a>
+        <a (click)="scrollToSection('portfolio')" href="javascript:void(0)">Projects</a>
+        <a (click)="scrollToSection('workflow')" href="javascript:void(0)">How It Works</a>
+        <a (click)="scrollToSection('institutions')" href="javascript:void(0)">Institutions</a>
+        <a (click)="scrollToSection('faqs')" href="javascript:void(0)">FAQs</a>
+        <a (click)="scrollToSection('contact')" href="javascript:void(0)">Support</a>
+      </nav>
+
+      <div class="nav-actions">
+        <!-- Theme Toggle -->
+        <button
+          class="theme-toggle-btn"
+          type="button"
+          (click)="toggleTheme()"
+          [attr.aria-label]="currentTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
+          [title]="currentTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
+        >
+          <span *ngIf="currentTheme === 'dark'" aria-hidden="true">&#9728; Light</span>
+          <span *ngIf="currentTheme === 'light'" aria-hidden="true">&#9790; Dark</span>
+        </button>
+
+        <!-- Auth CTAs -->
+        <a routerLink="/login" class="btn btn-outline desktop-only">Sign In</a>
+        <a routerLink="/register" class="btn btn-primary">Get Started</a>
+
+        <!-- Mobile Menu Hamburger -->
+        <button
+          class="mobile-menu-btn mobile-only"
+          type="button"
+          (click)="toggleMobileMenu()"
+          aria-label="Toggle navigation menu"
+        >
+          <span class="bar"></span>
+          <span class="bar"></span>
+          <span class="bar"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Drawer Menu -->
+    <div class="mobile-drawer" [class.open]="isMobileMenuOpen()">
+      <div class="mobile-drawer-header">
+        <span class="drawer-title">Navigation</span>
+        <button class="drawer-close-btn" type="button" (click)="closeMobileMenu()" aria-label="Close menu">&times;</button>
+      </div>
+      <nav class="mobile-nav-links">
+        <a (click)="scrollToSection('about'); closeMobileMenu()" href="javascript:void(0)">About Platform</a>
+        <a (click)="scrollToSection('services'); closeMobileMenu()" href="javascript:void(0)">Services Offered</a>
+        <a (click)="scrollToSection('portfolio'); closeMobileMenu()" href="javascript:void(0)">Project Portfolio</a>
+        <a (click)="scrollToSection('workflow'); closeMobileMenu()" href="javascript:void(0)">How It Works</a>
+        <a (click)="scrollToSection('institutions'); closeMobileMenu()" href="javascript:void(0)">Supported Colleges</a>
+        <a (click)="scrollToSection('faqs'); closeMobileMenu()" href="javascript:void(0)">FAQs</a>
+        <a (click)="scrollToSection('contact'); closeMobileMenu()" href="javascript:void(0)">Contact & Support</a>
+        <div class="mobile-auth-row">
+          <a routerLink="/login" class="btn btn-outline" (click)="closeMobileMenu()">Sign In</a>
+          <a routerLink="/register" class="btn btn-primary" (click)="closeMobileMenu()">Get Started</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- 2. Hero Section -->
+    <section id="hero" class="hero-section">
+      <div class="hero-container">
+        <div class="hero-content">
+          <div class="hero-badge">
+            <span class="badge-dot"></span> Verified Academic & Project Excellence
+          </div>
+          <h1 class="hero-title">
+            Engineering-Grade Projects &amp; <span class="gradient-text">Complete Academic Solutions</span>
+          </h1>
+          <p class="hero-subtitle">
+            From final-year major degree projects to IEEE standard documentation and practical lab files.
+            Enjoy fully tested source code, viva guides, and optional spiral or hardcover doorstep delivery.
+          </p>
+
+          <div class="hero-actions">
+            <a routerLink="/register" class="btn btn-primary btn-large">
+              <span>Get Started Free</span>
+              <span class="arrow-icon" aria-hidden="true">&rarr;</span>
+            </a>
+            <button type="button" class="btn btn-outline btn-large" (click)="scrollToSection('portfolio')">
+              <span>Explore Projects</span>
+              <span class="arrow-icon" aria-hidden="true">&darr;</span>
+            </button>
+          </div>
+
+          <div class="hero-trust-row">
+            <div class="trust-item">
+              <span class="trust-icon" aria-hidden="true">&#10003;</span>
+              <span>100% Plagiarism-Free</span>
+            </div>
+            <div class="trust-item">
+              <span class="trust-icon" aria-hidden="true">&#10003;</span>
+              <span>Complete Source &amp; Setup</span>
+            </div>
+            <div class="trust-item">
+              <span class="trust-icon" aria-hidden="true">&#10003;</span>
+              <span>Viva Guidance Included</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-visual">
+          <div class="preview-card glass-panel">
+            <div class="preview-card-header">
+              <div class="dots-row">
+                <span class="dot red"></span>
+                <span class="dot yellow"></span>
+                <span class="dot green"></span>
+              </div>
+              <span class="card-title">Live Academic Project Pipeline</span>
+            </div>
+            <div class="preview-card-body">
+              <div class="pipeline-item success">
+                <div class="pipeline-icon">&#10004;</div>
+                <div class="pipeline-info">
+                  <strong>Full-Stack Healthcare Portal</strong>
+                  <span>Angular 21 + Node.js + IEEE SRS Documentation</span>
+                </div>
+                <span class="status-pill status-ready">Ready for Viva</span>
+              </div>
+
+              <div class="pipeline-item in-progress">
+                <div class="pipeline-icon">&#9881;</div>
+                <div class="pipeline-info">
+                  <strong>Campus Marketplace App</strong>
+                  <span>Flutter + Firebase + Razorpay Gateway</span>
+                </div>
+                <span class="status-pill status-progress">Building v1.2</span>
+              </div>
+
+              <div class="pipeline-item delivery">
+                <div class="pipeline-icon">&#128230;</div>
+                <div class="pipeline-info">
+                  <strong>Hardcover Project Report (3 Copies)</strong>
+                  <span>Golden Foil Embossed &bull; MIT Moradabad</span>
+                </div>
+                <span class="status-pill status-delivery">Out for Delivery</span>
+              </div>
+            </div>
+            <div class="preview-card-footer">
+              <div class="footer-stat">
+                <small>Average Turnaround</small>
+                <strong>48 Hours</strong>
+              </div>
+              <div class="footer-stat">
+                <small>Documentation Standard</small>
+                <strong>IEEE / UGC Format</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Performance & Statistics Bar (With Verified Visitor Counter) -->
+    <section class="stats-section">
+      <div class="stats-container">
+        <div class="stat-card">
+          <span class="stat-number">1,000+</span>
+          <span class="stat-label">Projects Completed</span>
+          <small class="stat-desc">Verified academic submissions</small>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number">99.4%</span>
+          <span class="stat-label">On-Time Delivery</span>
+          <small class="stat-desc">Strict deadline adherence</small>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number">4.9 / 5.0</span>
+          <span class="stat-label">Student Satisfaction</span>
+          <small class="stat-desc">Across top universities</small>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number">48 Hrs</span>
+          <span class="stat-label">Average Turnaround</span>
+          <small class="stat-desc">Expedited review available</small>
+        </div>
+        <div class="stat-card highlight-card">
+          <span class="stat-number">{{ visitorCount() | number }}</span>
+          <span class="stat-label">Unique Platform Visitors</span>
+          <small class="stat-desc">Verified community baseline · Administrator-maintained</small>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. About Platform Section -->
+    <section id="about" class="about-section">
+      <div class="section-container">
+        <div class="section-header">
+          <span class="section-kicker">About FileCrafters</span>
+          <h2 class="section-title">Built by Engineers, Designed for Student Success</h2>
+          <p class="section-subtitle">
+            We bridge the gap between classroom theory and industry-grade engineering, providing university students
+            with verified project source code, rigorous documentation, and doorstep delivery.
+          </p>
+        </div>
+
+        <div class="about-grid">
+          <div class="about-card glass-panel">
+            <div class="about-icon">&#128187;</div>
+            <h3>Production-Quality Source Code</h3>
+            <p>
+              Clean, modular architectures written in modern frameworks. Every project contains step-by-step
+              installation scripts, seed data, and detailed inline comments.
+            </p>
+          </div>
+
+          <div class="about-card glass-panel">
+            <div class="about-icon">&#128221;</div>
+            <h3>IEEE Standard Documentation</h3>
+            <p>
+              Comprehensive reports containing Software Requirements Specifications (SRS), ER diagrams, UML class diagrams,
+              Data Flow Diagrams (DFDs), test cases, and academic references.
+            </p>
+          </div>
+
+          <div class="about-card glass-panel">
+            <div class="about-icon">&#127891;</div>
+            <h3>Viva Voce &amp; Presentation Guidance</h3>
+            <p>
+              Master your final evaluation with custom PowerPoint presentation decks, code architecture walkthroughs,
+              and curated viva question-and-answer preparation sheets.
+            </p>
+          </div>
+
+          <div class="about-card glass-panel">
+            <div class="about-icon">&#128274;</div>
+            <h3>Confidentiality &amp; Academic Integrity</h3>
+            <p>
+              Your academic records and student identity remain 100% confidential. We adhere to strict data-protection
+              policies and never share or resell customized projects.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Services Offered -->
+    <section id="services" class="services-section">
+      <div class="section-container">
+        <div class="section-header">
+          <span class="section-kicker">Comprehensive Offerings</span>
+          <h2 class="section-title">Academic Services Tailored to Your Degree</h2>
+          <p class="section-subtitle">
+            Choose from a wide spectrum of academic services covering every stage of technical evaluation.
+          </p>
+        </div>
+
+        <div class="services-grid">
+          <div class="service-card glass-panel">
+            <div class="service-badge">B.Tech / MCA / BCA</div>
+            <h3>Major &amp; Minor Projects</h3>
+            <p>Full-stack web apps, mobile solutions, cloud microservices, and AI models engineered for semester-end submissions.</p>
+            <ul class="service-list">
+              <li>Complete source repository &amp; database schema</li>
+              <li>Setup guide &amp; environment script</li>
+              <li>SRS &amp; full design documentation</li>
+            </ul>
+          </div>
+
+          <div class="service-card glass-panel">
+            <div class="service-badge">Engineering Labs</div>
+            <h3>Practical Assignments &amp; Coding Files</h3>
+            <p>Lab-ready assignment notebooks, solved problem sheets, and structured code files with outputs for every experiment.</p>
+            <ul class="service-list">
+              <li>Python, Java, C++, DSA, and Web Tech</li>
+              <li>Formatted code, output screenshots &amp; algorithm notes</li>
+              <li>Clean printable layout</li>
+            </ul>
+          </div>
+
+          <div class="service-card glass-panel">
+            <div class="service-badge">Design &amp; Prototyping</div>
+            <h3>UI/UX &amp; Interactive Prototypes</h3>
+            <p>Pixel-perfect Figma designs, mobile app wireframes, responsive web dashboards, and comprehensive design systems.</p>
+            <ul class="service-list">
+              <li>Interactive clickable Figma prototype</li>
+              <li>Design token matrix &amp; typography guide</li>
+              <li>User journey maps &amp; wireframes</li>
+            </ul>
+          </div>
+
+          <div class="service-card glass-panel">
+            <div class="service-badge">IEEE / UGC Standard</div>
+            <h3>Project Reports &amp; Research Synopses</h3>
+            <p>Professionally formatted project reports formatted to your university's exact guidelines and font standards.</p>
+            <ul class="service-list">
+              <li>Plagiarism-checked academic reports</li>
+              <li>UML, DFD &amp; Architecture diagrams</li>
+              <li>LaTeX or Word master source</li>
+            </ul>
+          </div>
+
+          <div class="service-card glass-panel">
+            <div class="service-badge">Doorstep Service</div>
+            <h3>Spiral &amp; Hardcover Print Delivery</h3>
+            <p>High-resolution color and monochrome printing with official college-standard hardcover binding delivered to your door.</p>
+            <ul class="service-list">
+              <li>Embossed golden foil lettering</li>
+              <li>Premium 100 GSM bond paper</li>
+              <li>Doorstep courier &amp; campus delivery</li>
+            </ul>
+          </div>
+
+          <div class="service-card glass-panel">
+            <div class="service-badge">Mentorship</div>
+            <h3>1-on-1 Viva &amp; Code Walkthrough</h3>
+            <p>Interactive briefing session with our technical mentors to prepare you for faculty viva questions and live code demos.</p>
+            <ul class="service-list">
+              <li>Sample viva questions &amp; answers</li>
+              <li>Architecture explanation &amp; edge cases</li>
+              <li>Laptop deployment assistance</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. Project Portfolio & Practical Design Samples -->
+    <section id="portfolio" class="portfolio-section">
+      <div class="section-container">
+        <div class="section-header">
+          <span class="section-kicker">Sample Showcase</span>
+          <h2 class="section-title">Explore Verified Project Samples</h2>
+          <p class="section-subtitle">
+            Browse our curated catalog of academic designs, source architectures, and deliverable packages.
+          </p>
+
+          <!-- Category Filter Tabs -->
+          <div class="filter-tabs" role="tablist" aria-label="Project Categories">
+            <button
+              class="tab-btn"
+              [class.active]="selectedCategory() === 'all'"
+              (click)="filterCategory('all')"
+              role="tab"
+            >All Projects</button>
+            <button
+              class="tab-btn"
+              [class.active]="selectedCategory() === 'web'"
+              (click)="filterCategory('web')"
+              role="tab"
+            >Web &amp; Cloud</button>
+            <button
+              class="tab-btn"
+              [class.active]="selectedCategory() === 'mobile'"
+              (click)="filterCategory('mobile')"
+              role="tab"
+            >Mobile Apps</button>
+            <button
+              class="tab-btn"
+              [class.active]="selectedCategory() === 'ai'"
+              (click)="filterCategory('ai')"
+              role="tab"
+            >AI &amp; ML</button>
+            <button
+              class="tab-btn"
+              [class.active]="selectedCategory() === 'design'"
+              (click)="filterCategory('design')"
+              role="tab"
+            >UI/UX Design</button>
+            <button
+              class="tab-btn"
+              [class.active]="selectedCategory() === 'doc'"
+              (click)="filterCategory('doc')"
+              role="tab"
+            >Documentation</button>
+          </div>
+        </div>
+
+        <div class="portfolio-grid">
+          <div
+            *ngFor="let project of filteredProjects"
+            class="project-card glass-panel"
+          >
+            <div class="project-header">
+              <span class="category-tag">{{ project.categoryLabel }}</span>
+              <span class="level-tag">{{ project.level }}</span>
+            </div>
+
+            <h3 class="project-title">{{ project.title }}</h3>
+            <p class="project-desc">{{ project.description }}</p>
+
+            <div class="tech-stack-row">
+              <span *ngFor="let tech of project.technologies" class="tech-pill">{{ tech }}</span>
+            </div>
+
+            <div class="deliverables-preview">
+              <small class="deliverables-label">Included Deliverables:</small>
+              <div class="deliverable-item" *ngFor="let deliv of project.deliverables.slice(0, 3)">
+                <span class="bullet-dot">&#10003;</span> {{ deliv }}
+              </div>
+              <small class="more-label" *ngIf="project.deliverables.length > 3">
+                +{{ project.deliverables.length - 3 }} additional files
+              </small>
+            </div>
+
+            <div class="card-footer-actions">
+              <button
+                type="button"
+                class="btn btn-outline btn-block"
+                (click)="openProjectDetails(project)"
+              >
+                <span>View Project Details</span>
+                <span aria-hidden="true">&rarr;</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. Supported Institutions -->
+    <section id="institutions" class="institutions-section">
+      <div class="section-container">
+        <div class="section-header">
+          <span class="section-kicker">Curriculum Alignment</span>
+          <h2 class="section-title">Aligned with University Guidelines</h2>
+          <p class="section-subtitle">
+            Our documentation templates and code structures are pre-configured to adhere to the syllabus requirements
+            of leading regional universities and technical institutions.
+          </p>
+        </div>
+
+        <div class="institutions-grid">
+          <div class="institution-card glass-panel">
+            <div class="inst-icon">&#127979;</div>
+            <h4>IFTM University</h4>
+            <p>Moradabad &bull; B.Tech / MCA / BCA</p>
+          </div>
+          <div class="institution-card glass-panel">
+            <div class="inst-icon">&#127979;</div>
+            <h4>Teerthanker Mahaveer University (TMU)</h4>
+            <p>Moradabad &bull; CCSIT Engineering</p>
+          </div>
+          <div class="institution-card glass-panel">
+            <div class="inst-icon">&#127979;</div>
+            <h4>MIT Moradabad</h4>
+            <p>AKTU Affiliated Engineering Programs</p>
+          </div>
+          <div class="institution-card glass-panel">
+            <div class="inst-icon">&#127979;</div>
+            <h4>Radha Govind Institute</h4>
+            <p>Technical &amp; Computer Science Faculty</p>
+          </div>
+          <div class="institution-card glass-panel">
+            <div class="inst-icon">&#127979;</div>
+            <h4>Shree Venkateshwara University (SVU)</h4>
+            <p>Gajraula &bull; Polytechnic &amp; Degree</p>
+          </div>
+          <div class="institution-card glass-panel">
+            <div class="inst-icon">&#127979;</div>
+            <h4>AKTU &amp; Regional Institutions</h4>
+            <p>IEEE Standard Project Guidelines</p>
+          </div>
+        </div>
+
+        <!-- Academic alignment disclaimer required by PRD Section 4.5 -->
+        <p class="institution-disclaimer">
+          <em>* Disclaimer: Institution names denote verified curriculum and formatting alignment for academic submissions and do not imply official endorsement, sponsorship, or affiliation with any mentioned university.</em>
+        </p>
+      </div>
+    </section>
+
+    <!-- 8. Order Workflow ("How It Works") -->
+    <section id="workflow" class="workflow-section">
+      <div class="section-container">
+        <div class="section-header">
+          <span class="section-kicker">Simple 6-Step Process</span>
+          <h2 class="section-title">How FileCrafters Works</h2>
+          <p class="section-subtitle">
+            From initial idea to final submission, experience a frictionless, transparent workflow.
+          </p>
+        </div>
+
+        <div class="timeline-grid">
+          <div class="timeline-step glass-panel">
+            <div class="step-badge">01</div>
+            <h4>Submit Requirements</h4>
+            <p>Create an account, select your service or project category, and provide your problem statement or deadline.</p>
+          </div>
+
+          <div class="timeline-step glass-panel">
+            <div class="step-badge">02</div>
+            <h4>Review Quotation</h4>
+            <p>Our academic coordinators review your scope and provide a transparent, itemized quotation with milestones.</p>
+          </div>
+
+          <div class="timeline-step glass-panel">
+            <div class="step-badge">03</div>
+            <h4>Secure Confirmation</h4>
+            <p>Approve your quotation and submit the initial token advance via UPI or Net Banking to begin development.</p>
+          </div>
+
+          <div class="timeline-step glass-panel">
+            <div class="step-badge">04</div>
+            <h4>Development &amp; QA</h4>
+            <p>Our engineers build and test your project, generate IEEE reports, and run automated code plagiarism scans.</p>
+          </div>
+
+          <div class="timeline-step glass-panel">
+            <div class="step-badge">05</div>
+            <h4>Review &amp; Feedback</h4>
+            <p>Inspect demo walkthroughs, suggest minor refinements, and verify that all requirements match faculty criteria.</p>
+          </div>
+
+          <div class="timeline-step glass-panel">
+            <div class="step-badge">06</div>
+            <h4>Delivery &amp; Viva Prep</h4>
+            <p>Download full source files and presentation notes. Enjoy optional printed spiral or hardcover delivery to your doorstep.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9. Benefits & Reasons to Choose Us -->
+    <section class="benefits-section">
+      <div class="section-container">
+        <div class="section-header">
+          <span class="section-kicker">The FileCrafters Advantage</span>
+          <h2 class="section-title">Why Thousands of Students Trust Us</h2>
+        </div>
+
+        <div class="benefits-grid">
+          <div class="benefit-item">
+            <div class="benefit-icon">&#128737;</div>
+            <div class="benefit-info">
+              <h4>100% Plagiarism-Free Guarantee</h4>
+              <p>Every code repository and project report is developed from scratch with automated similarity checks.</p>
+            </div>
+          </div>
+
+          <div class="benefit-item">
+            <div class="benefit-icon">&#9200;</div>
+            <div class="benefit-info">
+              <h4>Strict Deadline Adherence</h4>
+              <p>We respect your submission windows. On-time delivery is guaranteed so you never miss a college deadline.</p>
+            </div>
+          </div>
+
+          <div class="benefit-item">
+            <div class="benefit-icon">&#128181;</div>
+            <div class="benefit-info">
+              <h4>Transparent Milestone Pricing</h4>
+              <p>No hidden fees. You receive an itemized quote upfront and verify milestones before final settlement.</p>
+            </div>
+          </div>
+
+          <div class="benefit-item">
+            <div class="benefit-icon">&#128101;</div>
+            <div class="benefit-info">
+              <h4>Personal Viva Voce Mentorship</h4>
+              <p>Receive sample questions, architecture diagrams, and mock viva preparation to present with confidence.</p>
+            </div>
+          </div>
+
+          <div class="benefit-item">
+            <div class="benefit-icon">&#128222;</div>
+            <div class="benefit-info">
+              <h4>Direct In-App Support</h4>
+              <p>Chat directly with your project team, request adjustments, and track status live on your student dashboard.</p>
+            </div>
+          </div>
+
+          <div class="benefit-item">
+            <div class="benefit-icon">&#128666;</div>
+            <div class="benefit-info">
+              <h4>Seamless Print &amp; Courier Delivery</h4>
+              <p>Save time running to print shops. We print, bind, and courier hardcover copies directly to your doorstep.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10. Frequently Asked Questions -->
+    <section id="faqs" class="faqs-section">
+      <div class="section-container">
+        <div class="section-header">
+          <span class="section-kicker">Got Questions?</span>
+          <h2 class="section-title">Frequently Asked Questions</h2>
+          <p class="section-subtitle">
+            Everything you need to know about placing an order, deliverables, revisions, and delivery.
+          </p>
+        </div>
+
+        <div class="faq-accordion">
+          <div
+            *ngFor="let faq of faqs; let i = index"
+            class="faq-card glass-panel"
+            [class.active]="activeFaq() === i"
+          >
+            <button
+              type="button"
+              class="faq-question-btn"
+              (click)="toggleFaq(i)"
+              [attr.aria-expanded]="activeFaq() === i"
+            >
+              <span class="faq-question-text">{{ faq.question }}</span>
+              <span class="faq-icon" aria-hidden="true">{{ activeFaq() === i ? '&minus;' : '&#43;' }}</span>
+            </button>
+            <div class="faq-answer-panel" *ngIf="activeFaq() === i">
+              <p>{{ faq.answer }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 11. Help & Support Contact Section -->
+    <section id="contact" class="contact-section">
+      <div class="section-container">
+        <div class="contact-card glass-panel">
+          <div class="contact-info-col">
+            <span class="section-kicker">Get In Touch</span>
+            <h2>Need a Custom Project or Quick Consultation?</h2>
+            <p>
+              Have a specific IEEE research paper topic, custom hardware requirement, or tight deadline?
+              Reach out directly and our technical leads will assist you immediately.
+            </p>
+
+            <div class="contact-meta-list">
+              <div class="meta-item">
+                <span class="meta-icon">&#128231;</span>
+                <div>
+                  <small>Email Inquiries</small>
+                  <strong>support&#64;filecrafters.in</strong>
+                </div>
+              </div>
+              <div class="meta-item">
+                <span class="meta-icon">&#128172;</span>
+                <div>
+                  <small>WhatsApp Fast-Track Help</small>
+                  <strong>+91 (Support Team)</strong>
+                </div>
+              </div>
+              <div class="meta-item">
+                <span class="meta-icon">&#9201;</span>
+                <div>
+                  <small>Support Hours</small>
+                  <strong>Monday &ndash; Saturday, 9:00 AM &ndash; 9:00 PM IST</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="contact-form-col">
+            <form (ngSubmit)="submitContactForm()" #cForm="ngForm" class="contact-form">
+              <h3>Send an Inquiry</h3>
+
+              <div *ngIf="contactSuccess()" class="form-alert success">
+                &#10004; Thank you! Your inquiry has been received. Our team will contact you within 15 minutes.
+              </div>
+
+              <div class="form-group">
+                <label for="cName">Your Full Name *</label>
+                <input
+                  id="cName"
+                  type="text"
+                  name="name"
+                  [(ngModel)]="contactForm.name"
+                  required
+                  placeholder="e.g. Alex Sharma"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="cEmail">Email Address *</label>
+                <input
+                  id="cEmail"
+                  type="email"
+                  name="email"
+                  [(ngModel)]="contactForm.email"
+                  required
+                  placeholder="name@college.edu"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="cService">Service Required</label>
+                <select id="cService" name="service" [(ngModel)]="contactForm.service">
+                  <option value="University Project">Major / Minor University Project</option>
+                  <option value="Practical File">Practical Lab File &amp; Experiments</option>
+                  <option value="Documentation">IEEE Project Report &amp; Documentation</option>
+                  <option value="Hardcover Printing">Hardcover Print &amp; Courier Delivery</option>
+                  <option value="Other">Other Custom Inquiry</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="cMessage">Project Details / Topic / Queries *</label>
+                <textarea
+                  id="cMessage"
+                  name="message"
+                  [(ngModel)]="contactForm.message"
+                  required
+                  rows="3"
+                  placeholder="Briefly describe your project requirements, technology preferences, and college submission deadline..."
+                ></textarea>
+              </div>
+
+              <button
+                type="submit"
+                class="btn btn-primary btn-block"
+                [disabled]="!cForm.form.valid"
+              >
+                Send Academic Inquiry &rarr;
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 12. Footer with Discreet Admin Link -->
+  <footer class="public-footer">
+    <div class="footer-container">
+      <div class="footer-col brand-col">
+        <div class="footer-brand">
+          <span class="brand-badge">FC</span>
+          <span class="brand-name">FileCrafters</span>
+        </div>
+        <p class="footer-desc">
+          Professional academic project engineering, IEEE documentation, practical files, and doorstep delivery for university students.
+        </p>
+        <small class="copyright">&copy; 2026 FileCrafters. All rights reserved.</small>
+      </div>
+
+      <div class="footer-col">
+        <h5>Academic Services</h5>
+        <ul>
+          <li><a (click)="scrollToSection('services')" href="javascript:void(0)">Major Projects</a></li>
+          <li><a (click)="scrollToSection('services')" href="javascript:void(0)">Practical Lab Files</a></li>
+          <li><a (click)="scrollToSection('services')" href="javascript:void(0)">IEEE Documentation</a></li>
+          <li><a (click)="scrollToSection('services')" href="javascript:void(0)">Spiral &amp; Hardcover Print</a></li>
+          <li><a (click)="scrollToSection('services')" href="javascript:void(0)">Viva Voce Guidance</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h5>Quick Links</h5>
+        <ul>
+          <li><a (click)="scrollToSection('about')" href="javascript:void(0)">About Platform</a></li>
+          <li><a (click)="scrollToSection('portfolio')" href="javascript:void(0)">Project Showcase</a></li>
+          <li><a (click)="scrollToSection('institutions')" href="javascript:void(0)">Supported Colleges</a></li>
+          <li><a (click)="scrollToSection('faqs')" href="javascript:void(0)">FAQs</a></li>
+          <li><a (click)="scrollToSection('contact')" href="javascript:void(0)">Contact Support</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col auth-col">
+        <h5>Student &amp; Staff Access</h5>
+        <div class="footer-auth-links">
+          <a routerLink="/login" class="btn btn-outline btn-block">Student Portal Login</a>
+          <a routerLink="/register" class="btn btn-primary btn-block">New Student Registration</a>
+        </div>
+        <!-- Discreet Admin access link required by PRD Section 4.1 & 12 -->
+        <div class="discreet-admin-row">
+          <a routerLink="/admin-login" class="discreet-admin-link">
+            <span class="lock-icon" aria-hidden="true">&#128274;</span> Staff &amp; Administrator Access
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 13. Project Details Modal Dialog -->
+  <div
+    class="modal-backdrop"
+    *ngIf="selectedProject()"
+    (click)="closeProjectDetails()"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="selectedProject()?.title"
+  >
+    <div class="modal-dialog glass-panel" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title-row">
+          <span class="category-tag">{{ selectedProject()?.categoryLabel }}</span>
+          <span class="level-tag">{{ selectedProject()?.level }}</span>
+        </div>
+        <button
+          class="modal-close-btn"
+          type="button"
+          (click)="closeProjectDetails()"
+          aria-label="Close project details"
+        >&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <h2 class="modal-project-title">{{ selectedProject()?.title }}</h2>
+        <p class="modal-project-desc">{{ selectedProject()?.description }}</p>
+
+        <div class="modal-section">
+          <h4>System Architecture &amp; Implementation</h4>
+          <p>{{ selectedProject()?.architectureOverview }}</p>
+        </div>
+
+        <div class="modal-section">
+          <h4>Technologies Used</h4>
+          <div class="tech-stack-row">
+            <span *ngFor="let tech of selectedProject()?.technologies" class="tech-pill">{{ tech }}</span>
+          </div>
+        </div>
+
+        <div class="modal-section">
+          <h4>Standard Included Deliverables</h4>
+          <ul class="modal-deliverables-list">
+            <li *ngFor="let item of selectedProject()?.deliverables">
+              <span class="check-icon">&#10003;</span> {{ item }}
+            </li>
+          </ul>
+        </div>
+
+        <div class="modal-section">
+          <h4>Key Viva Voce Discussion Points</h4>
+          <div class="viva-topics-row">
+            <span *ngFor="let topic of selectedProject()?.vivaTopics" class="viva-pill">
+              &#128173; {{ topic }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" (click)="closeProjectDetails()">Close</button>
+        <a routerLink="/register" class="btn btn-primary" (click)="closeProjectDetails()">
+          Order Similar Project &rarr;
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

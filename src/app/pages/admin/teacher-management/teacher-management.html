@@ -1,0 +1,144 @@
+<div class="teacher-management-page fade-in">
+  <div class="page-header premium-header">
+    <div class="heading-group">
+      <h1>Teacher Management</h1>
+      <p>Monitor faculty referrals, verify academic roles, and maintain system integrity.</p>
+    </div>
+
+    <div class="header-actions-row">
+      <div class="summary-pill">
+        <div>
+          <span>Total Teachers</span>
+          <strong>{{ totalTeachers }}</strong>
+        </div>
+        <div>
+          <span>Active</span>
+          <strong>{{ activeTeachers }}</strong>
+        </div>
+        <div>
+          <span>Suspended</span>
+          <strong>{{ suspendedTeachers }}</strong>
+        </div>
+      </div>
+
+      <div class="action-buttons-group">
+        <button
+          type="button"
+          class="btn-admin-action"
+          (click)="refresh()"
+          [disabled]="isRefreshing"
+          title="Refresh teachers"
+        >
+          <span *ngIf="!isRefreshing">&#8635; Refresh</span>
+          <span *ngIf="isRefreshing">Refreshing...</span>
+        </button>
+
+        <button
+          type="button"
+          class="btn-admin-action export-btn"
+          (click)="exportCsv()"
+          [disabled]="filteredTeachers.length === 0"
+          title="Download CSV"
+        >
+          &#8681; Download CSV
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="search-card glass-card">
+    <div class="search-bar">
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        (input)="filterTeachers()"
+        placeholder="Search teachers by name, email, department, or college..."
+      />
+      <button type="button" *ngIf="searchTerm" (click)="searchTerm=''; filterTeachers();">Clear</button>
+    </div>
+  </div>
+
+  <div class="table-section glass-card">
+    <div class="table-title-bar">
+      <div>
+        <h2>Registered Faculty</h2>
+        <p>Faculty accounts authorized for academic oversight and referral codes.</p>
+      </div>
+      <span class="status-pill">{{ filteredTeachers.length }} teachers found</span>
+    </div>
+
+    <div *ngIf="isLoading" class="loading-panel">
+      <div class="spinner"></div>
+      <span>Loading teacher roster...</span>
+    </div>
+
+    <table *ngIf="!isLoading" class="teacher-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>College</th>
+          <th>Department</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let teacher of paginatedTeachers">
+          <td>
+            <a [routerLink]="['/admin/teachers', teacher.uid]" class="teacher-link">
+              {{ teacher.fullName || 'N/A' }} &rarr;
+            </a>
+          </td>
+          <td>{{ teacher.email || 'N/A' }}</td>
+          <td>{{ teacher.collegeName || 'N/A' }}</td>
+          <td>{{ teacher.department || 'N/A' }}</td>
+          <td>
+            <span [ngClass]="statusBadgeClass(teacher.status)">{{ teacher.status || 'active' | titlecase }}</span>
+          </td>
+          <td>
+            <button class="action-button" (click)="toggleTeacherStatus(teacher)">
+              {{ teacher.status === 'suspended' ? 'Activate' : 'Suspend' }}
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="!isLoading && filteredTeachers.length === 0">
+          <td colspan="6" class="empty-state">No teachers match your search criteria.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Pagination Controls (PRD 7.6) -->
+    <div class="pagination-footer" *ngIf="filteredTeachers.length > 0">
+      <div class="pagination-info">
+        Showing
+        <strong>{{ (currentPage - 1) * pageSize + 1 }}</strong>
+        to
+        <strong>{{ (currentPage * pageSize > filteredTeachers.length) ? filteredTeachers.length : (currentPage * pageSize) }}</strong>
+        of
+        <strong>{{ filteredTeachers.length }}</strong>
+        teachers
+      </div>
+
+      <div class="pagination-controls">
+        <button
+          type="button"
+          class="page-btn"
+          (click)="prevPage()"
+          [disabled]="currentPage === 1"
+        >
+          &larr; Previous
+        </button>
+        <span class="page-indicator">Page {{ currentPage }} of {{ totalPages }}</span>
+        <button
+          type="button"
+          class="page-btn"
+          (click)="nextPage()"
+          [disabled]="currentPage === totalPages"
+        >
+          Next &rarr;
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

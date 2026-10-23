@@ -70,7 +70,7 @@
                 <div *ngFor="let f of order.uploadDetails.files; let i = index" class="file-row">
                   <span class="file-name">{{ f.name }}</span>
                   <div class="file-links">
-                    <a class="file-link download-link" [href]="f.dataUrl" [download]="f.name">⬇️ Download</a>
+                    <button class="file-link download-link" type="button" (click)="downloadOrderFile(f)">Download</button>
                   </div>
                 </div>
               </div>
@@ -92,6 +92,130 @@
            <p><strong>UPI ID</strong> {{ order.paymentDetails?.upiId || 'N/A' }}</p>
             <p><strong>Transaction RefID</strong> {{ order.paymentDetails?.transactionId || 'N/A' }}</p>
          </div>
+
+         <section class="detail-section quotation-panel" aria-label="Quotation history">
+           <h4>Quotation history</h4>
+           <div *ngFor="let version of (quotations[order.id]?.versions | keyvalue)" class="quotation-history-row">
+             <p><strong>Version {{ version.value.version }}</strong> · ₹{{ version.value.amount }} {{ version.value.currency }}</p>
+             <p>{{ version.value.terms || 'No additional terms.' }}</p>
+             <small>{{ version.value.createdAt | date:'medium' }} · {{ version.value.actorEmail }}</small>
+             <span *ngIf="quotations[order.id]?.currentVersionId === version.key" class="highlight">Current offer</span>
+           </div>
+           <p *ngIf="!(quotations[order.id]?.versions | keyvalue)?.length">No quotation has been issued.</p>
+           <label [for]="'quote-amount-' + order.id">New amount (INR)</label>
+           <input [id]="'quote-amount-' + order.id" type="number" min="1" max="1000000" step="0.01"
+             [(ngModel)]="quoteAmounts[order.id]" placeholder="Enter quoted amount">
+           <label [for]="'quote-terms-' + order.id">Terms / notes for the student</label>
+           <textarea [id]="'quote-terms-' + order.id" maxlength="2000" [(ngModel)]="quoteTerms[order.id]"
+             placeholder="Explain what this quotation includes"></textarea>
+           <button type="button" (click)="createQuotation(order)" [disabled]="!quoteAmounts[order.id]">Issue new quotation</button>
+         </section>
+
+         <section class="detail-section quotation-panel" aria-label="Payment and refund ledger">
+           <h4>Payment and refund ledger</h4>
+           <p *ngIf="!payments[order.id]?.length">No payment ledger entries yet.</p>
+           <article *ngFor="let payment of payments[order.id]" class="quotation-history-row">
+             <strong>₹{{ payment.amount }} {{ payment.currency }}</strong>
+             <p>Transaction: {{ payment.transactionRef }} <span *ngIf="payment.upiId">· UPI: {{ payment.upiId }}</span></p>
+             <p>Status: <strong>{{ payment.status | titlecase }}</strong> · Submitted {{ payment.createdAt | date:'medium' }}</p>
+             <div class="quote-actions" *ngIf="payment.status === 'pending'">
+                <label [for]="'payment-decision-note-' + payment.id">Verification evidence reference or decision reason</label>
+                <textarea [id]="'payment-decision-note-' + payment.id" maxlength="500" [(ngModel)]="paymentDecisionNotes[payment.id]" placeholder="Record what external evidence was reviewed"></textarea>
+                <button type="button" (click)="setPaymentStatus(payment.id, 'verified', paymentDecisionNotes[payment.id] || '')" [disabled]="!paymentDecisionNotes[payment.id]?.trim()">Record manual verification</button>
+                <button type="button" (click)="setPaymentStatus(payment.id, 'rejected', paymentDecisionNotes[payment.id] || '')" [disabled]="!paymentDecisionNotes[payment.id]?.trim()">Reject payment</button>
+             </div>
+             <p class="quote-decision" *ngIf="payment.status === 'pending'">Verify against the external payment provider before marking verified. This screen does not prove payment.</p>
+             <div *ngFor="let event of (paymentHistory[payment.id] | keyvalue)" class="quote-version">
+               {{ event.value.type | titlecase }} · {{ event.value.actorEmail }} · {{ event.value.createdAt | date:'medium' }} · {{ event.value.message }}
+             </div>
+             <ng-container *ngIf="refunds[payment.id] as refund">
+               <p>Refund request: {{ refund.status | titlecase }} · {{ refund.reason }}</p>
+               <p *ngIf="refund.reviewedBy">Reviewed by {{ refund.reviewedBy }} · {{ refund.reviewedAt | date:'medium' }} · {{ refund.decisionNote }}</p>
+               <div class="quote-actions" *ngIf="refund.status === 'pending'">
+                <label [for]="'refund-decision-note-' + payment.id">Refund approval/rejection reason</label>
+                <textarea [id]="'refund-decision-note-' + payment.id" maxlength="500" [(ngModel)]="refundDecisionNotes[payment.id]" placeholder="Record the refund review decision"></textarea>
+                <button type="button" (click)="setRefundStatus(payment.id, 'approved')" [disabled]="!refundDecisionNotes[payment.id]?.trim()">Approve refund request</button>
+                <button type="button" (click)="setRefundStatus(payment.id, 'rejected')" [disabled]="!refundDecisionNotes[payment.id]?.trim()">Reject refund request</button>
+               </div>
+               <div *ngFor="let event of (refundHistory[payment.id] | keyvalue)" class="quote-version">
+                 Refund {{ event.value.type }} · {{ event.value.actorEmail }} · {{ event.value.createdAt | date:'medium' }} · {{ event.value.message }}
+               </div>
+                <section *ngIf="refund.status === 'approved'" class="refund-processing-panel" aria-label="External refund processing outcome">
+                  <p>External processing outcome: <strong>{{ (refundProcessing[payment.id]?.status || 'Not recorded') | titlecase }}</strong></p>
+                  <p *ngIf="refundProcessing[payment.id] as processing">Reference {{ processing.reference || 'Not provided' }} · {{ processing.createdAt | date:'medium' }} · {{ processing.actorEmail }}</p>
+                  <div *ngFor="let event of (refundProcessingHistory[payment.id] | keyvalue)" class="quote-version">
+                    External refund {{ event.value.type }} · {{ event.value.actorEmail }} · {{ event.value.message }} · {{ event.value.createdAt | date:'medium' }}
+                  </div>
+                  <div class="commission-entry-form" *ngIf="payment.status === 'verified' && refundProcessing[payment.id]?.status !== 'processed'">
+                    <label [for]="'refund-processing-reference-' + payment.id">External refund reference</label>
+                    <input [id]="'refund-processing-reference-' + payment.id" maxlength="200" [(ngModel)]="refundProcessingReferences[payment.id]" placeholder="Provider or bank reference">
+                    <label [for]="'refund-processing-note-' + payment.id">Processing outcome note</label>
+                    <textarea [id]="'refund-processing-note-' + payment.id" maxlength="500" [(ngModel)]="refundProcessingNotes[payment.id]" placeholder="Record the actual external refund result"></textarea>
+                    <button type="button" (click)="recordRefundProcessing(payment.id, 'processed')" [disabled]="!refundProcessingReferences[payment.id]?.trim() || !refundProcessingNotes[payment.id]?.trim()">Record refund processed</button>
+                    <button type="button" (click)="recordRefundProcessing(payment.id, 'failed')" [disabled]="!refundProcessingNotes[payment.id]?.trim()">Record refund failed</button>
+                  </div>
+                  <button type="button" *ngIf="payment.status === 'verified' && refundProcessing[payment.id]?.status === 'processed'" (click)="finalizeRefundLedger(payment.id)">Finalize refunded payment status</button>
+                </section>
+             </ng-container>
+           </article>
+         </section>
+
+         <section class="detail-section quotation-panel" aria-label="Delivery assignment">
+           <h4>Delivery assignment</h4>
+           <p *ngIf="deliveryAssignments[order.id] as assignment">
+             Assigned to {{ deliveryAgents.find(agent => agent.uid === assignment.agentUid)?.fullName || assignment.agentUid }} · {{ assignment.status | titlecase }}
+           </p>
+           <label [for]="'delivery-agent-' + order.id">Active delivery agent</label>
+           <select [id]="'delivery-agent-' + order.id" [(ngModel)]="selectedDeliveryAgent[order.id]">
+             <option value="">Select an agent</option>
+             <option *ngFor="let agent of deliveryAgents" [value]="agent.uid">{{ agent.fullName }} · {{ agent.email }}</option>
+           </select>
+           <button type="button" (click)="assignDelivery(order)" [disabled]="!selectedDeliveryAgent[order.id] || ['Delivered','Cancelled'].includes(order.status)">
+             {{ deliveryAssignments[order.id] ? 'Reassign delivery' : 'Assign delivery' }}
+           </button>
+           <small *ngIf="!deliveryAgents.length">No active delivery agent accounts are available.</small>
+         </section>
+
+         <section class="detail-section quotation-panel" aria-label="Referral attribution and commission" *ngIf="order.uid">
+           <h4>Teacher referral & commission ledger</h4>
+           <ng-container *ngIf="referralAttributions[order.uid] as attribution; else noReferralAttribution">
+             <p>Referral code <strong>{{ attribution.referralCode }}</strong> · Teacher account <strong>{{ attribution.teacherUid | slice:0:10 }}</strong></p>
+             <p *ngIf="!orderCommissions[order.id]?.length">No commission record exists for this order.</p>
+             <article *ngFor="let commission of orderCommissions[order.id]" class="quotation-history-row">
+               <strong>₹{{ commission.amount }} {{ commission.currency }} · {{ commission.status | titlecase }}</strong>
+               <p>Calculation snapshot: ₹{{ commission.calculationBaseAmount }} × {{ commission.calculationRatePercent }}% = ₹{{ commission.proposedAmount }} · {{ commission.roundingPolicy }}</p>
+               <p>Payment {{ commission.paymentId | slice:0:10 }} · recorded {{ commission.createdAt | date:'medium' }}</p>
+               <p>{{ commission.memo || 'No additional note.' }}</p>
+               <button type="button" *ngIf="!hasCommissionHistory(commission.id)" (click)="repairCommissionHistory(commission)">Repair missing creation history</button>
+               <div *ngFor="let event of (commissionHistory[commission.id] | keyvalue)" class="quote-version">
+                 {{ event.value.status | titlecase }} · {{ event.value.actorEmail }} · {{ event.value.message }} · {{ event.value.createdAt | date:'medium' }}
+               </div>
+               <div class="quote-actions" *ngIf="commission.status === 'pending'">
+                 <label [for]="'commission-decision-' + commission.id">Review decision reason</label>
+                 <textarea [id]="'commission-decision-' + commission.id" maxlength="1000" [(ngModel)]="commissionDecisionNotes[commission.id]" placeholder="Record eligibility and review notes"></textarea>
+                 <button type="button" (click)="updateCommissionStatus(commission, 'approved')" [disabled]="!commissionDecisionNotes[commission.id]?.trim()">Approve commission</button>
+                 <button type="button" (click)="updateCommissionStatus(commission, 'rejected')" [disabled]="!commissionDecisionNotes[commission.id]?.trim()">Reject commission</button>
+               </div>
+               <div class="quote-actions" *ngIf="commission.status === 'approved'">
+                 <label [for]="'commission-payout-note-' + commission.id">External payout reference and note</label>
+                 <textarea [id]="'commission-payout-note-' + commission.id" maxlength="1000" [(ngModel)]="commissionDecisionNotes[commission.id]" placeholder="Record payout reference after manual transfer"></textarea>
+                 <button type="button" (click)="updateCommissionStatus(commission, 'paid')" [disabled]="!commissionDecisionNotes[commission.id]?.trim()">Record external payout complete</button>
+               </div>
+             </article>
+             <div *ngIf="hasVerifiedPayment(order.id) && !(orderCommissions[order.id]?.length)" class="commission-entry-form">
+               <p>Eligibility: one manually verified payment and an immutable teacher attribution. Formula: verified payment × the administrator-entered rate, rounded half-up to INR 0.01.</p>
+               <p>Verified payment base: ₹{{ commissionBaseAmount(order.id) ?? 'Ambiguous' }}</p>
+               <label [for]="'commission-rate-' + order.id">Commission rate (%)</label>
+               <input [id]="'commission-rate-' + order.id" type="number" min="0.01" max="100" step="0.01" [(ngModel)]="commissionRates[order.id]" placeholder="Enter reviewed rate">
+               <p *ngIf="commissionPreview(order.id) as preview">Preview only: ₹{{ preview }} INR. The administrator must review and approve this snapshot.</p>
+               <label [for]="'commission-memo-' + order.id">Calculation and eligibility note</label>
+               <textarea [id]="'commission-memo-' + order.id" maxlength="1000" [(ngModel)]="commissionMemos[order.id]" placeholder="Record the approved commission basis"></textarea>
+               <button type="button" (click)="createCommission(order)" [disabled]="!commissionPreview(order.id) || !commissionMemos[order.id]?.trim()">Record pending commission</button>
+             </div>
+             <p class="quote-decision">Commission amounts are entered and reviewed manually. No payout is initiated from this application.</p>
+           </ng-container>
+           <ng-template #noReferralAttribution><p>No immutable teacher referral attribution is recorded for this student.</p></ng-template>
+         </section>
 
          <div class="detail-section">
            <h4>📍 Contact & Delivery</h4>

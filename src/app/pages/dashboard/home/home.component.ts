@@ -1,23 +1,23 @@
-import { Component, OnInit, inject, ChangeDetectorRef, NgZone } from '@angular/core';
+﻿import { Component, OnInit, inject, ChangeDetectorRef, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, Router } from '@angular/router'; 
+import { RouterLink, Router } from '@angular/router';
 import { Auth, authState } from '@angular/fire/auth';
 import { ConfirmService } from '../../../shared/confirmation/confirm.service';
 import { NotificationService } from '../../../shared/notification/notification.service';
-import { Database, ref, onValue, update } from '@angular/fire/database';
+import { Database, ref, query, orderByChild, equalTo, limitToFirst, onValue, set } from '@angular/fire/database';
 
 @Component({
   selector: 'app-home',
   standalone: true,
   imports: [CommonModule, RouterLink],
   templateUrl: './home.component.html',
-  styleUrls: ['./home.component.scss'] 
+  styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit {
   private auth = inject(Auth);
   private db = inject(Database);
   private cdr = inject(ChangeDetectorRef);
-  private router = inject(Router); 
+  private router = inject(Router);
   private ngZone = inject(NgZone); // UI ko instantly update karne ke liye
   private confirmService = inject(ConfirmService);
   private notificationService = inject(NotificationService);
@@ -40,11 +40,11 @@ export class HomeComponent implements OnInit {
             const data = snapshot.val();
             this.userName = data.fullName || 'Student';
             const studentID = data.studentID || ''; // FC-ID nikala
-            
+
             // 2. Fetch orders ko dono IDs bhej di
-            this.fetchRealtimeOrders(uid, studentID);
+            this.fetchRealtimeOrders(uid);
           } else {
-            this.fetchRealtimeOrders(uid, '');
+            this.fetchRealtimeOrders(uid);
           }
         }, { onlyOnce: true });
 
@@ -54,11 +54,11 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  fetchRealtimeOrders(uid: string, studentID: string) {
+  fetchRealtimeOrders(uid: string) {
     // Ab hum specific query ki jagah poore 'orders' ref par onValue lagayenge
     // taaki client-side par 100% accurate double-filtering kar sakein.
-    const ordersRef = ref(this.db, 'orders');
-    
+    const ordersRef = query(ref(this.db, 'orders'), orderByChild('uid'), equalTo(uid), limitToFirst(100));
+
     onValue(ordersRef, (snapshot) => {
       this.ngZone.run(() => {
         const ordersData = snapshot.val();
@@ -72,7 +72,7 @@ export class HomeComponent implements OnInit {
             const order = { id: key, ...ordersData[key] };
 
             // === FILTER 1: SIRF LOGIN STUDENT KE ORDERS ===
-            const isMyOrder = (order.uid === uid) || (studentID !== '' && order.studentID === studentID);
+            const isMyOrder = order.uid === uid;
 
             if (isMyOrder) {
               const statusLabel = (order.status || 'Pending').toLowerCase();
@@ -99,7 +99,7 @@ export class HomeComponent implements OnInit {
           this.recentOrders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         }
       });
-      
+
       this.cdr.detectChanges();
     });
   }
@@ -119,9 +119,9 @@ export class HomeComponent implements OnInit {
     if (!confirmed) return;
 
     try {
-      const orderRef = ref(this.db, `orders/${orderId}`);
-      await update(orderRef, { status: 'Cancelled' });
-      this.notificationService.show('success', 'Order has been cancelled successfully.', 'Cancelled');
+      const requestRef = ref(this.db, 'cancellationRequests/' + orderId);
+      await set(requestRef, { orderId, uid: this.auth.currentUser?.uid || '', reason: 'Cancellation requested by student', status: 'pending', createdAt: new Date().toISOString() });
+      this.notificationService.show('success', 'Cancellation request sent to the support team.', 'Request sent');
     } catch (error) {
       console.error('Error cancelling order:', error);
       this.notificationService.show('error', 'Failed to cancel order. Please check your connection.', 'Cancel Failed');

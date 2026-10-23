@@ -1,0 +1,78 @@
+<div class="teacher-detail-page fade-in">
+  <div class="page-header">
+    <div class="header-nav-row">
+      <button (click)="goBack()" class="back-button">
+        &larr; Back to Teacher List
+      </button>
+      <button class="pdf-button action-btn" type="button" (click)="downloadPdf()">
+        &#8681; Download PDF
+      </button>
+    </div>
+    <h1>Teacher Profile</h1>
+    <p>Detailed information for the selected teacher.</p>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-panel glass-card">
+    <div class="spinner"></div>
+    <span>Loading teacher details...</span>
+  </div>
+
+  <div *ngIf="!isLoading && errorMessage" class="error-panel glass-card">
+    <h2>Error</h2>
+    <p>{{ errorMessage }}</p>
+  </div>
+
+  <div *ngIf="!isLoading && teacher" class="profile-card glass-card">
+    <div class="profile-header">
+      <div class="profile-info">
+        <h2>{{ teacher.fullName }}</h2>
+        <p class="email">{{ teacher.email }}</p>
+      </div>
+      <span class="badge" [class.badge-suspended]="teacher.status === 'suspended'" [class.badge-active]="teacher.status !== 'suspended'">
+        {{ teacher.status || 'active' }}
+      </span>
+    </div>
+
+    <div class="profile-body">
+      <div class="detail-grid">
+        <div class="detail-item">
+          <label>Employee ID</label>
+          <span>{{ teacher.employeeID }}</span>
+        </div>
+        <div class="detail-item">
+          <label>College</label>
+          <span>{{ teacher.collegeName }}</span>
+        </div>
+        <div class="detail-item">
+          <label>Department</label>
+          <span>{{ teacher.department }}</span>
+        </div>
+        <div class="detail-item">
+          <label>Qualification</label>
+          <span>{{ teacher.qualification }}</span>
+        </div>
+        <div class="detail-item">
+          <label>Member Since</label>
+          <span>{{ teacher.createdAt | date:'longDate' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section *ngIf="!isLoading && teacher" class="referral-code-card glass-card">
+    <div>
+      <h2>Teacher referral code</h2>
+      <p>Codes can be used once during student registration. Existing attribution cannot be moved later.</p>
+    </div>
+    <div class="referral-code-list" *ngIf="referralCodes.length">
+      <div *ngFor="let code of referralCodes" class="referral-code-row">
+        <strong>{{ code.code }}</strong>
+        <span [class.inactive]="!code.active">{{ code.active ? 'Active' : 'Inactive' }}</span>
+      </div>
+    </div>
+    <p *ngIf="!referralCodes.length">No referral code has been created.</p>
+    <button type="button" class="create-code-button" (click)="createReferralCode()" [disabled]="isCreatingCode || teacher.status !== 'active' || referralCodes.length > 0">
+      {{ isCreatingCode ? 'Creating…' : referralCodes.length ? 'Code already created' : 'Create referral code' }}
+    </button>
+  </section>
+</div>

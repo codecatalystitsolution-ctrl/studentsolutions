@@ -1,0 +1,31 @@
+<main class="notification-inbox-page">
+  <header class="inbox-header">
+    <div>
+      <p class="eyebrow">YOUR WORKSPACE</p>
+      <h1>Notifications</h1>
+      <p>Updates sent by administrators about your orders, support, and account.</p>
+    </div>
+    <button type="button" (click)="markAllRead()" [disabled]="!unreadCount">Mark all as read <span>{{ unreadCount }}</span></button>
+  </header>
+
+  <section class="inbox-card" aria-live="polite">
+    <p class="inbox-state" *ngIf="loading" role="status">Loading your notifications…</p>
+    <div class="inbox-state empty" *ngIf="!loading && !items.length">
+      <span class="empty-icon" aria-hidden="true">✦</span>
+      <h2>You’re all caught up</h2>
+      <p>Administrator updates will appear here.</p>
+    </div>
+    <article *ngFor="let item of items" class="notification-item" [class.unread]="!item.isRead">
+      <span class="notification-dot" [class.read]="item.isRead" aria-hidden="true"></span>
+      <div class="notification-copy">
+        <div class="notification-title"><span class="type-pill">{{ item.type | titlecase }}</span><h2>{{ item.title }}</h2></div>
+        <p>{{ item.message }}</p>
+        <small>{{ item.createdAt | date:'medium' }} · {{ item.actorEmail }}</small>
+      </div>
+      <div class="notification-actions">
+        <button type="button" class="open-button" (click)="open(item)">Open</button>
+        <button type="button" *ngIf="!item.isRead" class="read-button" (click)="markRead(item)">Mark read</button>
+      </div>
+    </article>
+  </section>
+</main>

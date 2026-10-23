@@ -1,4 +1,7 @@
 <div class="login-container">
+  <button class="auth-theme-toggle" type="button" (click)="toggleTheme()" [attr.aria-label]="theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'">
+    {{ theme === 'dark' ? '☀' : '☾' }}
+  </button>
   
   <div class="brand-panel">
     <div class="brand-content">
@@ -29,8 +32,17 @@
           </div>
 
           <button type="submit" class="btn-primary" [disabled]="loginForm.invalid">Sign In</button>
-
         </form>
+
+        <div class="support-shortcut">
+          <button type="button" class="support-link" (click)="goSupport()" title="Contact support if your account is suspended">
+            <span class="support-icon">🛟</span>
+            <div>
+              <strong>Need help logging in?</strong>
+              <span>Report a suspension or request reactivation</span>
+            </div>
+          </button>
+        </div>
 
         <p class="signup-prompt">
           Don't have an account? <a routerLink="/register">Create one</a>

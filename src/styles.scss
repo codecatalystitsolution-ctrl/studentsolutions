@@ -1,12 +1,1119 @@
-/* You can add global styles to this file, and also import other style files */
-// Angular Material Dialog ki base layout configuration layer override karne ke liye
+:root {
+  --bg-page: #070d1f;
+  --bg-surface: #0d1326;
+  --bg-panel: rgba(14, 20, 37, 0.9);
+  --bg-panel-soft: rgba(17, 25, 41, 0.86);
+  --bg-elevated: rgba(20, 28, 47, 0.9);
+  --bg-input: #111a2f;
+  --glass-border: rgba(148, 163, 184, 0.15);
+  --glass-highlight: rgba(96, 165, 250, 0.2);
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --primary: #7c6df5;
+  --primary-strong: #4f46e5;
+  --primary-soft: rgba(124, 109, 245, 0.16);
+  --accent: #48c7ff;
+  --accent-soft: rgba(72, 199, 255, 0.16);
+  --success: #34d399;
+  --warning: #fbbf24;
+  --danger: #f87171;
+  --shadow-soft: 0 18px 48px rgba(5, 10, 20, 0.42);
+}
+
+body.app-theme-light {
+  --bg-page: #edf3ff;
+  --bg-surface: #f5f8ff;
+  --bg-panel: rgba(255, 255, 255, 0.8);
+  --bg-panel-soft: rgba(255, 255, 255, 0.7);
+  --bg-elevated: rgba(255, 255, 255, 0.9);
+  --bg-input: #f0f6ff;
+  --glass-border: rgba(99, 102, 241, 0.12);
+  --glass-highlight: rgba(79, 70, 229, 0.08);
+  --text-primary: #111827;
+  --text-secondary: #374151;
+  --text-muted: #64748b;
+  --primary: #5647d4;
+  --primary-strong: #3f36b5;
+  --primary-soft: rgba(86, 71, 212, 0.12);
+  --accent: #0ea5e9;
+  --accent-soft: rgba(14, 165, 233, 0.12);
+  --success: #16a34a;
+  --warning: #d97706;
+  --danger: #dc2626;
+  --shadow-soft: 0 18px 48px rgba(15, 23, 42, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background:
+    radial-gradient(circle at top left, rgba(124, 109, 245, 0.18), transparent 16%),
+    radial-gradient(circle at bottom right, rgba(72, 199, 255, 0.15), transparent 18%),
+    linear-gradient(180deg, var(--bg-page) 0%, #040918 100%);
+  color: var(--text-primary);
+  font-family:
+    'Inter',
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+body.app-theme-light {
+  background:
+    radial-gradient(circle at top left, rgba(124, 109, 245, 0.1), transparent 18%),
+    radial-gradient(circle at bottom right, rgba(14, 165, 233, 0.08), transparent 16%),
+    linear-gradient(180deg, var(--bg-page) 0%, #dfeafc 100%);
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+::selection {
+  background: rgba(124, 109, 245, 0.25);
+  color: var(--text-primary);
+}
+
 .cdk-overlay-container {
-  z-index: 99999 !important; // Taaki sidebar ya top headers ke piche dialog na chhupe
+  z-index: 99999 !important;
   position: fixed;
 }
 
 .custom-dialog-container .mat-mdc-dialog-container {
   --mdc-dialog-container-shape: 16px;
-  background-color: transparent !important; // Humne inline container custom style banaya hai
+  background-color: transparent !important;
   box-shadow: none !important;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+h1,
+h2,
+h3,
+h4,
+p {
+  margin-top: 0;
+}
+
+.auth-theme-toggle,
+.theme-toggle {
+  width: 2.6rem;
+  height: 2.6rem;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid var(--glass-border);
+  border-radius: 0.75rem;
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  font-size: 1.1rem;
+}
+
+.auth-theme-toggle {
+  position: fixed;
+  top: 1.25rem;
+  right: 1.25rem;
+  z-index: 100;
+  box-shadow: var(--shadow-soft);
+}
+
+body.app-theme-light :is(.login-container, .register-container, .admin-login-container) {
+  background: var(--bg-page);
+  color: var(--text-primary);
+}
+
+body.app-theme-light :is(.login-container, .register-container) .brand-panel {
+  background: linear-gradient(155deg, #ffffff 0%, #eef1ff 100%);
+}
+
+body.app-theme-light :is(.login-container, .register-container) :is(.glass-card, .wide-card) {
+  background: rgba(255, 255, 255, 0.92);
+  border-color: var(--glass-border);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-soft);
+}
+
+body.app-theme-light
+  :is(.login-container, .register-container)
+  :is(.tagline, .subtitle, .login-prompt, .input-group label) {
+  color: var(--text-secondary) !important;
+}
+
+body.app-theme-light
+  :is(.login-container, .register-container)
+  :is(input, textarea, select, .custom-select) {
+  background: #ffffff !important;
+  border-color: var(--glass-border) !important;
+  color: var(--text-primary) !important;
+}
+
+body.app-theme-light
+  :is(.login-container, .register-container)
+  :is(input, textarea, select)::placeholder {
+  color: var(--text-muted) !important;
+}
+
+body.app-theme-light .support-link {
+  background: var(--primary-soft);
+  border-color: var(--glass-border);
+  color: var(--text-primary);
+}
+
+body.app-theme-light .support-link strong {
+  color: var(--text-primary) !important;
+}
+
+body.app-theme-light .admin-login-container .login-card {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border-color: var(--glass-border) !important;
+  color: var(--text-primary) !important;
+}
+
+body.app-theme-light .admin-login-container .login-card :is(h2, label, .footer-text) {
+  color: var(--text-secondary) !important;
+}
+
+body.app-theme-light .admin-login-container .login-card input {
+  background: #ffffff !important;
+  border-color: var(--glass-border) !important;
+  color: var(--text-primary) !important;
+}
+
+body.app-theme-light .admin-layout {
+  background: var(--bg-page);
+  color: var(--text-primary);
+}
+
+body.app-theme-light .admin-sidebar {
+  background: linear-gradient(180deg, #ffffff 0%, #f1f3ff 100%);
+}
+
+body.app-theme-light
+  .admin-sidebar
+  :is(.logo, .close-btn, .nav-item, .nav-item:hover, .nav-item.active) {
+  color: var(--text-primary) !important;
+}
+
+body.app-theme-light .admin-sidebar .nav-item.active {
+  background: var(--primary-soft);
+  border-color: var(--glass-border);
+  box-shadow: none;
+}
+
+body.app-theme-light .admin-layout :is(.top-header, .content-area) {
+  color: var(--text-primary);
+}
+
+body.app-theme-light
+  :is(
+    .support-wrapper,
+    .ticket-wrapper,
+    .history-wrapper,
+    .profile-layout,
+    .settings-page,
+    .page-container,
+    .quiz-container,
+    .order-layout,
+    .admin-dashboard-container,
+    .manage-orders-container,
+    .order-details-container,
+    .delivery-management-page,
+    .delivery-detail-page,
+    .student-management-page,
+    .student-detail-page,
+    .teacher-management-page,
+    .teacher-detail-page
+  ) {
+  background: transparent;
+  color: var(--text-primary);
+}
+
+body.app-theme-light
+  :is(
+    .hero-panel,
+    .mini-card,
+    .panel,
+    .glass-card,
+    .settings-card,
+    .counter-card,
+    .table-card,
+    .table-section,
+    .search-card,
+    .stat-card,
+    .detail-card,
+    .profile-grid,
+    .form-glass-card,
+    .form-card,
+    .ticket-card,
+    .orders-container,
+    .order-card,
+    .info-card,
+    .edit-form-grid,
+    .faq-wrapper,
+    .accordion-item,
+    .table-container
+  ) {
+  background: #ffffff !important;
+  border-color: var(--glass-border) !important;
+  color: var(--text-primary) !important;
+  box-shadow: 0 12px 32px rgba(35, 50, 90, 0.08) !important;
+}
+
+body.app-theme-light
+  :is(
+    .support-wrapper,
+    .ticket-wrapper,
+    .history-wrapper,
+    .profile-layout,
+    .settings-page,
+    .page-container,
+    .quiz-container,
+    .order-layout,
+    .admin-dashboard-container,
+    .manage-orders-container,
+    .order-details-container,
+    .delivery-management-page,
+    .delivery-detail-page,
+    .student-management-page,
+    .student-detail-page,
+    .teacher-management-page,
+    .teacher-detail-page
+  )
+  :is(h1, h2, h3, h4, p, label, th, td, .subtitle, .text-muted, .stat-title, .description) {
+  color: var(--text-secondary) !important;
+}
+
+body.app-theme-light
+  :is(
+    .support-wrapper,
+    .ticket-wrapper,
+    .history-wrapper,
+    .profile-layout,
+    .settings-page,
+    .page-container,
+    .quiz-container,
+    .order-layout,
+    .admin-dashboard-container,
+    .manage-orders-container,
+    .order-details-container,
+    .delivery-management-page,
+    .delivery-detail-page,
+    .student-management-page,
+    .student-detail-page,
+    .teacher-management-page,
+    .teacher-detail-page
+  )
+  :is(input, textarea, select) {
+  background: #ffffff !important;
+  border-color: var(--glass-border) !important;
+  color: var(--text-primary) !important;
+}
+
+body.app-theme-light .history-wrapper .history-header h1,
+body.app-theme-light .support-wrapper .support-header h1 {
+  background: none !important;
+  background-image: none !important;
+  color: var(--text-primary) !important;
+  -webkit-background-clip: border-box;
+  -webkit-text-fill-color: var(--text-primary) !important;
+}
+
+body.app-theme-light .profile-layout {
+  background: transparent;
+  color: var(--text-primary);
+}
+
+body.app-theme-light .profile-layout .glass-card {
+  background: #ffffff !important;
+  border-color: var(--glass-border) !important;
+  color: var(--text-primary);
+}
+
+body.app-theme-light .profile-layout :is(.user-titles h2, .info-card h3, .info-item strong, label) {
+  color: var(--text-primary) !important;
+}
+
+body.app-theme-light .support-wrapper .action-cards {
+  grid-template-columns: 1fr !important;
+}
+
+body.app-theme-light .support-wrapper .action-cards .glass-card {
+  min-width: 0;
+  background: #ffffff !important;
+  border-color: var(--glass-border) !important;
+  color: var(--text-primary);
+}
+
+body.app-theme-light .support-wrapper .action-cards .card-info {
+  min-width: 0;
+}
+
+body.app-theme-light .support-wrapper .action-cards .card-info :is(h3, p) {
+  color: var(--text-secondary) !important;
+  overflow-wrap: anywhere;
+}
+
+body.app-theme-light .support-wrapper .accordion-item :is(.q-text, .inner-content) {
+  color: var(--text-secondary) !important;
+}
+
+body.app-theme-light .support-wrapper .form-glass-card {
+  background: #ffffff !important;
+  border-color: var(--glass-border) !important;
+  color: var(--text-primary);
+}
+
+body.app-theme-light .order-layout :is(.section-title, .toggle-row, .upload-label, .cost-row, .muted-row) {
+  color: var(--text-primary) !important;
+}
+
+body.app-theme-light .order-layout .status-note {
+  background: rgba(14, 165, 233, 0.1);
+  color: #075985 !important;
+}
+
+body.app-theme-light .manage-orders-container .premium-table tbody tr {
+  background: #ffffff !important;
+  box-shadow: 0 8px 24px rgba(35, 50, 90, 0.1) !important;
+}
+
+body.app-theme-light .manage-orders-container .premium-table tbody tr td {
+  border-color: var(--glass-border) !important;
+  color: var(--text-primary) !important;
+}
+
+body.app-theme-light .manage-orders-container .premium-table :is(.primary-text, .font-bold, .order-id) {
+  color: var(--text-primary) !important;
+}
+
+body.app-theme-light .manage-orders-container .premium-table :is(.secondary-text, .order-date, .text-muted) {
+  color: var(--text-muted) !important;
+}
+
+body.app-theme-light .manage-orders-container .status-dropdown {
+  background-color: #ffffff !important;
+  color: var(--text-primary) !important;
+  border-color: var(--glass-border) !important;
+}
+
+body.app-theme-light .student-detail-page :is(.detail-header, .profile-grid, .activity-card) {
+  background: #ffffff !important;
+  border-color: var(--glass-border) !important;
+  color: var(--text-primary);
+}
+
+body.app-theme-light .student-detail-page .profile-summary {
+  background: linear-gradient(135deg, #eef3ff, #f8f9ff) !important;
+}
+
+body.app-theme-light .student-detail-page :is(.profile-summary h2, .profile-summary p, .activity-header h3, .item-head strong, .item-line, .detail-card strong) {
+  color: var(--text-primary) !important;
+}
+
+body.app-theme-light .student-detail-page :is(.detail-card, .activity-item) {
+  background: #f8faff !important;
+  border-color: var(--glass-border) !important;
+}
+
+body.app-theme-light .student-detail-page .chip {
+  background: var(--primary-soft);
+  color: var(--primary-strong);
+}
+
+body.app-theme-light .student-detail-page :is(.label, .status-label, .detail-header p) {
+  color: var(--text-muted) !important;
+}
+
+body.app-theme-light .teacher-detail-page .page-header {
+  background: #ffffff;
+  border-color: var(--glass-border);
+}
+
+body.app-theme-light .teacher-detail-page .page-header h1 {
+  background: none;
+  color: var(--text-primary) !important;
+  -webkit-background-clip: border-box;
+  -webkit-text-fill-color: var(--text-primary) !important;
+}
+
+body.app-theme-light .teacher-detail-page .profile-card {
+  background: #ffffff !important;
+  border-color: var(--glass-border) !important;
+}
+
+body.app-theme-light .teacher-detail-page .profile-header {
+  background: linear-gradient(135deg, #eef3ff, #f8f9ff);
+}
+
+body.app-theme-light .teacher-detail-page .profile-body {
+  background: #ffffff !important;
+}
+
+body.app-theme-light .teacher-detail-page .detail-item {
+  background: #f8faff !important;
+  border-color: var(--glass-border) !important;
+}
+
+body.app-theme-light .teacher-detail-page :is(.profile-header h2, .profile-body .detail-item span) {
+  color: var(--text-primary) !important;
+}
+
+body.app-theme-light .teacher-detail-page .profile-header .email,
+body.app-theme-light .teacher-detail-page .detail-item label {
+  color: var(--text-muted) !important;
+}
+
+body.app-theme-light .teacher-detail-page .detail-item {
+  background: #f8faff;
+  border-color: var(--glass-border);
+}
+
+body.app-theme-light .delivery-detail-page :is(.detail-header, .profile-grid) {
+  background: #ffffff !important;
+  border-color: var(--glass-border) !important;
+}
+
+body.app-theme-light .delivery-detail-page :is(.detail-header h1, .profile-grid h2, .detail-card strong) {
+  color: var(--text-primary) !important;
+}
+
+body.app-theme-light .delivery-detail-page :is(.detail-header p, .detail-card .label) {
+  color: var(--text-muted) !important;
+}
+
+@media (max-width: 600px) {
+  body.app-theme-light .support-wrapper .action-cards {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .auth-theme-toggle {
+    top: 0.75rem;
+    right: 0.75rem;
+  }
+}
+
+/* Student account pages: consistent surfaces, typography, and mobile order cards. */
+.profile-layout, .support-wrapper, .ticket-wrapper, .history-wrapper {
+  max-width: 1180px;
+  margin-inline: auto;
+  min-height: 0 !important;
+  width: 100%;
+  box-sizing: border-box;
+}
+.profile-layout :is(h1,h2,h3,p,strong,span,label),
+.support-wrapper :is(h1,h2,h3,p,strong,span,label),
+.ticket-wrapper :is(h1,h2,h3,p,strong,span,label),
+.history-wrapper :is(h1,h2,h3,p,strong,span,label) { overflow-wrap: anywhere; }
+.profile-layout .profile-grid, .support-wrapper .support-grid, .ticket-wrapper .tickets-grid,
+.history-wrapper .orders-container { min-width: 0; }
+.support-wrapper .accordion-header { cursor: pointer; }
+.support-wrapper .input-field-group :is(input,textarea,select) { min-width: 0; max-width: 100%; }
+.support-wrapper .input-field-group textarea { resize: vertical; }
+.ticket-wrapper .ticket-create-btn {
+  border: 0; border-radius: 10px; padding: 11px 16px; color: #fff; font-weight: 700;
+  background: linear-gradient(120deg,#8248f5,#4c5de8); cursor: pointer;
+}
+.history-wrapper .table-responsive { width: 100%; max-width: 100%; overflow-x: auto; }
+
+body.app-theme-light .profile-layout,
+body.app-theme-light .support-wrapper,
+body.app-theme-light .ticket-wrapper,
+body.app-theme-light .history-wrapper { color: #19233d !important; }
+body.app-theme-light .profile-layout .profile-banner,
+body.app-theme-light .support-wrapper .support-header,
+body.app-theme-light .history-wrapper .history-header,
+body.app-theme-light .ticket-wrapper .ticket-header {
+  background: linear-gradient(120deg,#ffffff,#f2f4ff) !important;
+  border: 1px solid #dce2f1 !important;
+  color: #19233d !important;
+  box-shadow: 0 12px 32px rgba(39,52,101,.08) !important;
+}
+body.app-theme-light .profile-layout .profile-banner:after { opacity: .55; }
+body.app-theme-light .profile-layout .profile-banner .banner-cover { opacity: .4; }
+body.app-theme-light .profile-layout .profile-banner :is(.user-titles h2,.user-titles p) { color: #19233d !important; }
+body.app-theme-light .profile-layout .avatar-container { background: #eef0ff !important; }
+body.app-theme-light .profile-layout .btn-edit { background: #edeaff !important; color: #5036b4 !important; border-color: #d9d2ff !important; }
+body.app-theme-light .profile-layout .profile-grid :is(.info-card,.edit-form-grid),
+body.app-theme-light .support-wrapper :is(.action-cards .glass-card,.faq-wrapper,.form-glass-card),
+body.app-theme-light .ticket-wrapper .ticket-card,
+body.app-theme-light .history-wrapper :is(.counter-card,.orders-container) {
+  background: #fff !important; border: 1px solid #dce2f1 !important; color: #19233d !important;
+  box-shadow: 0 10px 28px rgba(39,52,101,.07) !important; backdrop-filter: none !important;
+}
+body.app-theme-light .profile-layout .profile-grid :is(h3,.info-item strong,.info-item span,.input-group label),
+body.app-theme-light .support-wrapper :is(.card-info h3,.faq-wrapper h2,.form-glass-card h2,.q-text,.premium-form label),
+body.app-theme-light .ticket-wrapper :is(.subject-text,.empty-state h3),
+body.app-theme-light .history-wrapper :is(.counter-info h2,.counter-info h3,.orders-container h2,.empty-state h3) { color: #202b49 !important; }
+body.app-theme-light .support-wrapper :is(.support-header p,.card-info p,.form-header p,.inner-content p),
+body.app-theme-light .ticket-wrapper :is(.ticket-header p,.ticket-date,.message-box p,.pending-footer,.empty-state p),
+body.app-theme-light .history-wrapper :is(.history-header p,.text-muted,.empty-state p) { color: #596680 !important; }
+body.app-theme-light .support-wrapper .support-header h1,
+body.app-theme-light .history-wrapper .history-header h1,
+body.app-theme-light .ticket-wrapper .ticket-header h1 { color: #202b49 !important; -webkit-text-fill-color: #202b49 !important; background: none !important; }
+body.app-theme-light .profile-layout .info-item,
+body.app-theme-light .support-wrapper :is(.accordion-item,.input-field-group),
+body.app-theme-light .ticket-wrapper :is(.message-box,.admin-reply-box),
+body.app-theme-light .history-wrapper .premium-table tbody tr {
+  background: #f5f7fc !important; border-color: #e0e5f0 !important;
+}
+body.app-theme-light .profile-layout .info-item :is(strong,span),
+body.app-theme-light .support-wrapper .input-field-group :is(input,textarea,select),
+body.app-theme-light .ticket-wrapper .message-box :is(.box-tag,p),
+body.app-theme-light .ticket-wrapper .reply-text,
+body.app-theme-light .history-wrapper .premium-table tbody tr td { color: #26324e !important; }
+body.app-theme-light .profile-layout .input-group :is(input,textarea,select),
+body.app-theme-light .support-wrapper .input-field-group :is(input,textarea,select) {
+  background: #f8f9fd !important; border-color: #d5dcec !important; color: #202b49 !important;
+}
+body.app-theme-light .profile-layout :is(input,textarea,select)::placeholder,
+body.app-theme-light .support-wrapper :is(input,textarea,select)::placeholder { color: #7a849a !important; opacity: 1; }
+body.app-theme-light .history-wrapper .premium-table th { color: #596680 !important; }
+
+@media (max-width: 680px) {
+  .history-wrapper .table-responsive { overflow: visible !important; }
+  .history-wrapper .premium-table { display: block; min-width: 0 !important; width: 100%; }
+  .history-wrapper .premium-table thead { display: none; }
+  .history-wrapper .premium-table tbody, .history-wrapper .premium-table tr { display: grid; width: 100%; }
+  .history-wrapper .premium-table tbody { gap: 12px; }
+  .history-wrapper .premium-table tbody tr {
+    grid-template-columns: minmax(0,1fr); padding: 8px 14px; border: 1px solid #293562;
+    border-radius: 12px; box-sizing: border-box;
+  }
+  .history-wrapper .premium-table tbody tr td {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    min-width: 0; padding: 8px 0 !important; text-align: right; white-space: normal;
+    overflow-wrap: anywhere; border-bottom: 1px solid rgba(120,140,190,.16);
+  }
+  .history-wrapper .premium-table tbody tr td::before {
+    content: attr(data-label); flex: 0 0 42%; text-align: left; color: #9da9ca;
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+  }
+  .history-wrapper .premium-table tbody tr td:last-child { border-bottom: 0; }
+  .history-wrapper .premium-table .action-buttons { justify-content: flex-end; }
+  body.app-theme-light .history-wrapper .premium-table tbody tr td::before { color: #67738d; }
+}
+
+/* Shared responsive guardrails for student and admin pages */
+:where(app-root, app-dashboard, app-admin-layout, .main-panel, .main-content, .content-shell, .content-area) { min-width: 0; }
+:where(.content-shell, .content-area) > * { min-width: 0; max-width: 100%; }
+:where(.history-wrapper, .support-wrapper, .ticket-wrapper, .profile-layout, .settings-page, .page-container, .quiz-container, .order-layout, .admin-dashboard-container, .manage-orders-container, .order-details-container, .delivery-management-page, .delivery-detail-page, .student-management-page, .student-detail-page, .teacher-management-page, .teacher-detail-page) { min-width: 0; min-height: 0; width: 100%; box-sizing: border-box; }
+:where(.history-wrapper, .support-wrapper, .ticket-wrapper, .profile-layout) { background: transparent; }
+:where(.glass-card, .panel, .settings-card, .orders-container, .table-card, .detail-card, .profile-grid, .form-glass-card, .ticket-card, .order-card, .info-card) { min-width: 0; max-width: 100%; }
+:where(.table-responsive, .table-container, .premium-table-wrapper) { max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+:where(.premium-table) { min-width: 620px; }
+:where(input, textarea, select, button) { max-width: 100%; }
+:where(textarea, input, select) { min-width: 0; }
+:where(.payment-overlay, .welcome-overlay) { padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom)); overflow-y: auto; }
+:where(.payment-card, .welcome-dialog) { max-height: calc(100dvh - 24px); overflow-y: auto; }
+
+@media (max-width: 900px) {
+  .admin-layout { min-height: 100dvh; height: 100dvh; }
+  .admin-sidebar { position: fixed !important; inset: 0 auto 0 0; height: 100dvh; width: min(82vw, 300px); transform: translateX(-105%); transition: transform .25s ease; }
+  .admin-sidebar.open { transform: translateX(0); }
+  .admin-layout .mobile-only { display: inline-grid; place-items: center; }
+  .admin-layout .sidebar-overlay { display: block; }
+  .admin-layout .content-area { padding: clamp(12px, 3vw, 22px); }
+}
+
+@media (max-width: 700px) {
+  .content-shell { padding: 12px !important; }
+  :where(.history-wrapper, .support-wrapper, .ticket-wrapper, .profile-layout, .order-layout, .page-container) { padding: 14px !important; }
+  :where(.counter-grid, .settings-grid, .support-grid, .order-grid, .content-grid) { grid-template-columns: minmax(0, 1fr) !important; }
+  :where(.profile-grid, .input-row) { grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr)) !important; }
+  :where(.counter-card, .glass-card, .settings-card, .orders-container) { padding: clamp(14px, 4vw, 22px) !important; }
+  :where(.history-header h1, .support-header h1, .page-header h1) { font-size: clamp(24px, 7vw, 32px) !important; overflow-wrap: anywhere; }
+  :where(.premium-table th, .premium-table td) { padding: 12px 10px !important; white-space: nowrap; }
+  :where(.action-buttons) { flex-wrap: wrap; }
+  :where(.summary-card) { position: static !important; }
+  :where(.support-wrapper .action-cards) { grid-template-columns: minmax(0, 1fr) !important; }
+}
+
+@media (max-width: 420px) {
+  .topbar { gap: 6px; }
+  .topbar-left, .topbar-right { gap: 6px; }
+  .search-box { min-width: 0; }
+  :where(.page-header, .history-header, .support-header, .settings-header) { margin-bottom: 16px !important; }
+  :where(.counter-grid) { gap: 10px !important; }
+  :where(.payment-card) { width: 100% !important; padding: 20px 14px !important; }
+}
+
+/* Theme-aware surfaces for account, support, orders, quizzes and checkout pages */
+body.app-theme-light .profile-layout .profile-banner{background:linear-gradient(112deg,#111b44,#111640 65%,#211653)!important;border-color:#30386d!important;color:#f5f4ff!important}
+body.app-theme-light .profile-layout .profile-banner :is(.user-titles h2,.user-titles p){color:#f5f4ff!important}
+body.app-theme-light .profile-layout .profile-grid .info-card,body.app-theme-light .profile-layout .profile-grid .edit-form-grid{background:#fff!important;border-color:#d9def0!important;color:#1d2743!important;box-shadow:0 8px 24px #303d7010!important}
+body.app-theme-light .profile-layout .profile-grid .info-card h3{color:#5543b0!important;border-color:#e4e7f2!important}
+body.app-theme-light .profile-layout .profile-grid .info-item{background:#f4f6ff!important;border-color:#dfe4f1!important}
+body.app-theme-light .profile-layout .profile-grid .info-item :is(span,strong){color:#26324f!important}
+body.app-theme-light .profile-layout .profile-grid .input-group label{color:#3f4c67!important}
+body.app-theme-light .profile-layout .profile-grid .input-group :is(input,textarea,select){background:#fff!important;border-color:#d3daeb!important;color:#1d2743!important}
+body.app-theme-light .support-wrapper .support-header{background:linear-gradient(110deg,#111b44,#171642)!important;border-color:#30386d!important}
+body.app-theme-light .support-wrapper .support-header :is(h1,p){color:#f5f4ff!important}
+body.app-theme-light .support-wrapper :is(.action-cards .glass-card,.faq-wrapper,.form-glass-card,.accordion-item){background:#fff!important;border-color:#d9def0!important;color:#1d2743!important;box-shadow:0 8px 24px #303d7010!important}
+body.app-theme-light .support-wrapper :is(.action-cards .card-info h3,.faq-wrapper h2,.form-glass-card h2,.q-text){color:#1d2743!important}
+body.app-theme-light .support-wrapper :is(.action-cards .card-info p,.form-header p,.inner-content p){color:#596680!important}
+body.app-theme-light .support-wrapper .input-field-group{background:#f7f8fc!important;border-color:#d3daeb!important}
+body.app-theme-light .support-wrapper .input-field-group :is(input,textarea,select){color:#1d2743!important}
+body.app-theme-light .history-wrapper .history-header{background:#fff!important;border-color:#d9def0!important}
+body.app-theme-light .history-wrapper .history-header :is(h1,p){color:#1d2743!important;-webkit-text-fill-color:#1d2743!important}
+body.app-theme-light .history-wrapper :is(.counter-card,.orders-container){background:#fff!important;border-color:#d9def0!important;color:#1d2743!important;box-shadow:0 8px 24px #303d7010!important}
+body.app-theme-light .history-wrapper :is(.counter-info h2,.counter-info h3,.orders-container h2,.premium-table td,.font-bold){color:#1d2743!important}
+body.app-theme-light .history-wrapper .premium-table tbody tr{background:#f5f7ff!important}
+body.app-theme-light .history-wrapper .premium-table tbody tr td{border-color:#e0e5f2!important;color:#25314e!important}
+body.app-theme-light .history-wrapper .premium-table th{color:#606d88!important}
+body.app-theme-light .history-wrapper .locked-status{color:#596680!important;background:#f5f7fc!important;border-color:#d9deeb!important}
+body.app-theme-light .order-layout{background:radial-gradient(ellipse at 80% 8%,#dedbff 0,transparent 35%),linear-gradient(145deg,#f1f4fc,#e9edf8 65%,#f4f5fc)!important;color:#1d2743!important}
+body.app-theme-light .order-layout .page-header,body.app-theme-light .order-layout .order-grid>.glass-card,body.app-theme-light .order-layout .summary-card{background:#fff!important;border-color:#d9def0!important;color:#1d2743!important;box-shadow:0 8px 24px #303d7010!important}
+body.app-theme-light .order-layout :is(.page-header h1,.section-title,.summary-card h3,.total-row,.cost-row,.toggle-row,.upload-label){color:#1d2743!important}
+body.app-theme-light .order-layout :is(.subtitle,.info-text,.hint-text,.upload-meta){color:#596680!important}
+body.app-theme-light .order-layout :is(.input-group input,.input-group textarea,.input-group select,.modal-input){background:#f7f8fc!important;border-color:#d3daeb!important;color:#1d2743!important}
+body.app-theme-light .order-layout .upload-card{background:#f7f8fc!important;border-color:#d3daeb!important}
+body.app-theme-light .order-layout .payment-card{background:#fff!important;border-color:#d9def0!important;color:#1d2743!important}
+body.app-theme-light .order-layout .payment-card :is(h3,p,.row,label){color:#1d2743!important}
+body.app-theme-light .settings-page .settings-card{background:#fff!important;border-color:#d9def0!important;color:#1d2743!important}
+body.app-theme-light .settings-page .setting-row :is(strong,p){color:#1d2743!important}
+body.app-theme-light .page-container .page-header{background:#fff!important;border-color:#d9def0!important;color:#1d2743!important}
+body.app-theme-light .page-container .page-header :is(h1,p){color:#1d2743!important}
+body.app-theme-light .quiz-card{background:#fff!important;border-color:#d9def0!important;color:#1d2743!important}
+body.app-theme-light .quiz-card :is(.quiz-title,.meta-item){color:#1d2743!important}
+body.app-theme-light .admin-sidebar{background:linear-gradient(180deg,#fff,#f1f3ff)!important;border-color:#d9def0!important}
+body.app-theme-light .admin-sidebar :is(.logo,.nav-item,.nav-item:hover,.nav-item.active,.admin-badge){color:#1d2743!important}
+body.app-theme-light .admin-sidebar .nav-item.active{background:#ebe8ff!important;border-color:#d9d3ff!important}
+body.app-theme-light .admin-layout .top-header{background:#fff!important;border-color:#d9def0!important}
+
+/* Cross-component theme rules: keep dashboard child pages synchronized with the shell. */
+body.app-theme-light .dashboard-layout .student-home{--ink:#1d2743;--muted:#5e6a83;color:#1d2743}
+body.app-theme-light .dashboard-layout .student-home .hero-panel{height:auto!important;min-height:250px!important;background:radial-gradient(ellipse at 78% 75%,#341784 0,transparent 42%),linear-gradient(112deg,#0e1638 0%,#10133f 56%,#121454 100%)!important;border-color:#35366e!important}
+body.app-theme-light .dashboard-layout .student-home .hero-panel :is(.hero-tag,.hero-copy h1,.hero-copy p){color:#f5f4ff!important}
+body.app-theme-light .dashboard-layout .student-home .hero-copy p{color:#c2c7ee!important}
+body.app-theme-light .dashboard-layout .student-home .services-strip{background:#fff!important;border-color:#d9def0!important;box-shadow:0 8px 22px #303d7010}
+body.app-theme-light .dashboard-layout .student-home .service-item{color:#202943!important;border-color:#e4e7f2!important}
+body.app-theme-light .dashboard-layout .student-home .service-item small{color:#65708a!important}
+body.app-theme-light .dashboard-layout .student-home .stat-card{background:#fff!important;border-color:#d8deef!important;color:#1d2743!important;box-shadow:0 8px 22px #303d7010}
+body.app-theme-light .dashboard-layout .student-home .stat-icon{background:#f0edff!important;border-color:#dfd9ff!important;color:#5a43c2!important}
+body.app-theme-light .dashboard-layout .student-home .stat-copy small{color:#505c76!important}
+body.app-theme-light .dashboard-layout .student-home .stat-copy em{color:#147b61!important}
+body.app-theme-light .dashboard-layout .student-home .stat-blue .stat-copy em{color:#2764b3!important}
+body.app-theme-light .dashboard-layout .student-home .stat-orange .stat-copy em{color:#995317!important}
+body.app-theme-light .dashboard-layout .student-home .panel{background:#fff!important;border-color:#d9def0!important;box-shadow:0 8px 24px #303d7010}
+body.app-theme-light .dashboard-layout .student-home .eyebrow{color:#58648a!important}
+body.app-theme-light .dashboard-layout .student-home :is(.panel-header h2,.support-box h3,.profile-box h3,.order-main strong,.order-price){color:#1c2742!important}
+body.app-theme-light .dashboard-layout .student-home :is(.support-box p,.profile-box small,.order-main small,.empty-state p){color:#626e87!important}
+body.app-theme-light .dashboard-layout .student-home .order-row{background:#f5f7ff!important;border-color:#e2e6f1!important}
+body.app-theme-light .dashboard-layout .student-home .empty-state h3{color:#202943!important}
+@media(max-width:620px){body.app-theme-light .dashboard-layout .student-home .hero-panel{min-height:240px!important}}
+
+/* Final student-page theme pass, placed last so page-level styles cannot override it. */
+body.app-theme-light .profile-layout .profile-banner,
+body.app-theme-light .support-wrapper .support-header,
+body.app-theme-light .history-wrapper .history-header,
+body.app-theme-light .ticket-wrapper .ticket-header {
+  background: linear-gradient(120deg,#fff 0%,#f7f8ff 62%,#efedff 100%) !important;
+  background-image: linear-gradient(120deg,#fff 0%,#f7f8ff 62%,#efedff 100%) !important;
+  border-color: #dce2f1 !important;
+  color: #202b49 !important;
+}
+body.app-theme-light .profile-layout .profile-banner :is(.user-titles h2,.user-titles p),
+body.app-theme-light .support-wrapper .support-header :is(h1,p),
+body.app-theme-light .history-wrapper .history-header :is(h1,p),
+body.app-theme-light .ticket-wrapper .ticket-header :is(h1,p) {
+  color: #202b49 !important; -webkit-text-fill-color: #202b49 !important;
+}
+body.app-theme-light .profile-layout .profile-banner .user-titles p,
+body.app-theme-light .support-wrapper .support-header p,
+body.app-theme-light .history-wrapper .history-header p,
+body.app-theme-light .ticket-wrapper .ticket-header p { color: #5f6b85 !important; }
+body.app-theme-light .support-wrapper .support-header h1,
+body.app-theme-light .history-wrapper .history-header h1,
+body.app-theme-light .ticket-wrapper .ticket-header h1 { background: none !important; }
+body.app-theme-light .support-wrapper :is(.action-cards .card-info h3,.faq-wrapper h2,.form-glass-card h2,.q-text),
+body.app-theme-light .profile-layout .profile-grid h3 { color: #202b49 !important; }
+body.app-theme-light .support-wrapper :is(.action-cards .card-info p,.form-header p,.inner-content p),
+body.app-theme-light .profile-layout .profile-grid :is(.info-item span,.info-item strong) { color: #596680 !important; }
+body.app-theme-light .support-wrapper .accordion-header { background: transparent !important; border: 0 !important; }
+body.app-theme-light .support-wrapper .input-field-group :is(input,textarea,select) { color: #202b49 !important; }
+.support-wrapper .arrow-go { font-size: 0; }
+.support-wrapper .arrow-go::after { content: 'Open'; font-size: 10px; }
+.profile-layout .input-group select { width: 100%; box-sizing: border-box; padding: .8rem; border-radius: 10px; }
+.profile-layout .input-group :is(input,textarea,select) { max-width: 100%; }
+.ticket-wrapper .tickets-grid { gap: 14px; }
+.ticket-wrapper .ticket-card { border-radius: 16px; }
+body.app-theme-light .dashboard-layout .content-shell .profile-layout .profile-banner .user-titles h2 {
+  color: #202b49 !important; -webkit-text-fill-color: #202b49 !important;
+}
+body.app-theme-light .dashboard-layout .content-shell .profile-layout .profile-banner .user-titles p {
+  color: #5f6b85 !important; -webkit-text-fill-color: #5f6b85 !important;
+}
+body.app-theme-light .dashboard-layout .content-shell .profile-layout .profile-grid .info-card h3 {
+  color: #4f3db0 !important; -webkit-text-fill-color: #4f3db0 !important;
+}
+body.app-theme-light .dashboard-layout.theme-light .main-panel .content-shell .history-wrapper .orders-container .premium-table tbody tr {
+  background: #f5f7fc !important; background-color: #f5f7fc !important; border-color: #dce2f1 !important;
+}
+body.app-theme-light .dashboard-layout.theme-light .main-panel .content-shell .history-wrapper .orders-container .premium-table tbody tr td,
+body.app-theme-light .dashboard-layout.theme-light .main-panel .content-shell .history-wrapper .orders-container .premium-table tbody tr td.font-bold,
+body.app-theme-light .dashboard-layout.theme-light .main-panel .content-shell .history-wrapper .orders-container .premium-table tbody tr td.text-muted {
+  background: transparent !important; color: #26324e !important; -webkit-text-fill-color: #26324e !important;
+}
+body.app-theme-light .dashboard-layout.theme-light .main-panel .content-shell .history-wrapper .orders-container .premium-table .locked-status {
+  background: #eceff7 !important; border-color: #d8deeb !important; color: #596680 !important;
+}
+body.app-theme-light .dashboard-layout.theme-light .main-panel .content-shell .profile-layout .profile-grid .info-card .info-item,
+body.app-theme-light .dashboard-layout.theme-light .main-panel .content-shell .profile-layout .profile-grid .info-card .info-item span,
+body.app-theme-light .dashboard-layout.theme-light .main-panel .content-shell .profile-layout .profile-grid .info-card .info-item strong {
+  color: #26324e !important; -webkit-text-fill-color: #26324e !important;
+}
+body.app-theme-light .dashboard-layout.theme-light .main-panel .content-shell .profile-layout .profile-grid .info-card .info-item {
+  background: #f4f6fc !important; border-color: #dfe4f1 !important;
+}
+body.app-theme-light .dashboard-layout.theme-light .main-panel .content-shell .support-wrapper .action-cards a.glass-card,
+body.app-theme-light .dashboard-layout.theme-light .main-panel .content-shell .support-wrapper .action-cards a.glass-card h3,
+body.app-theme-light .dashboard-layout.theme-light .main-panel .content-shell .support-wrapper .action-cards a.glass-card p,
+body.app-theme-light .dashboard-layout.theme-light .main-panel .content-shell .support-wrapper .action-cards a.glass-card .icon-box,
+body.app-theme-light .dashboard-layout.theme-light .main-panel .content-shell .support-wrapper .action-cards a.glass-card .arrow-go {
+  color: #26324e !important; -webkit-text-fill-color: #26324e !important;
+}
+body.app-theme-light .dashboard-layout.theme-light .main-panel .content-shell .support-wrapper .action-cards a.glass-card {
+  background: #fff !important; background-image: none !important; border-color: #dce2f1 !important;
+}
+body.app-theme-light .dashboard-layout.theme-light .main-panel .content-shell .support-wrapper .premium-form .input-field-group {
+  background: #f5f7fc !important; border-color: #d5dcec !important;
+}
+body.app-theme-light .dashboard-layout.theme-light .main-panel .content-shell .support-wrapper .premium-form .input-field-group input,
+body.app-theme-light .dashboard-layout.theme-light .main-panel .content-shell .support-wrapper .premium-form .input-field-group select,
+body.app-theme-light .dashboard-layout.theme-light .main-panel .content-shell .support-wrapper .premium-form .input-field-group textarea {
+  background: transparent !important; color: #202b49 !important; -webkit-text-fill-color: #202b49 !important;
+}
+body.app-theme-light .dashboard-layout.theme-light .main-panel .content-shell .support-wrapper .premium-form .input-wrapper label {
+  color: #46536e !important; -webkit-text-fill-color: #46536e !important;
+}
+
+/* Admin workspace page system: consistent card surfaces, readable tables, and responsive overflow. */
+body .admin-layout .content-area :is(.manage-orders-container,.student-management-page,.teacher-management-page,.delivery-management-page,.order-details-container){width:100%;max-width:1500px;margin:0 auto;padding:0!important;min-height:0!important;box-sizing:border-box;color:#edf1ff}
+body .admin-layout .content-area :is(.student-management-page,.teacher-management-page,.delivery-management-page){gap:13px!important}
+body .admin-layout .content-area :is(.page-header,.premium-header){display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px 18px!important;margin:0 0 13px!important;border:1px solid #26365f!important;border-radius:13px!important;background:linear-gradient(110deg,#111b3b,#101538)!important;box-shadow:none!important;color:#f3f5ff!important}
+body .admin-layout .content-area :is(.page-header h1,.page-header h2,.heading-group h1,.header-text h2){margin:0 0 4px!important;color:#f3f5ff!important;font-size:clamp(17px,2vw,22px)!important;letter-spacing:-.025em!important}
+body .admin-layout .content-area :is(.page-header p,.heading-group p){margin:0!important;color:#a5b1ce!important;font-size:11px!important;line-height:1.5!important}
+body .admin-layout .content-area :is(.table-card,.table-section,.search-card,.orders-container,.order-details-container .order-card,.faq-wrapper,.form-glass-card,.ticket-card){border:1px solid #26365f!important;border-radius:13px!important;background:#101936!important;color:#edf1ff!important;box-shadow:0 8px 24px #02081720!important}
+body .admin-layout .content-area :is(.table-card,.table-section,.search-card,.orders-container){padding:15px!important}
+body .admin-layout .content-area :is(.table-title-bar h2,.table-title-bar h3,.orders-container h2,.detail-section h4,.order-details-container .card-header .id){color:#f3f5ff!important}
+body .admin-layout .content-area :is(.table-title-bar p,.cell-secondary,.secondary-text,.order-date,.text-muted){color:#9eaccb!important}
+body .admin-layout .content-area :is(.summary-pill div,.summary-pill .summary-item){background:#141f40!important;border-color:#2a3961!important;border-radius:10px!important}
+body .admin-layout .content-area .summary-pill{grid-template-columns:repeat(3,minmax(80px,1fr));gap:8px}
+body .admin-layout .content-area .summary-pill div{padding:9px 12px}
+body .admin-layout .content-area .summary-pill span{font-size:9px;color:#a5b1ce}
+body .admin-layout .content-area .summary-pill strong{font-size:18px;color:#f4f6ff}
+body .admin-layout .content-area :is(.search-bar input,.search-box input,.search-input){max-width:100%;min-height:38px;box-sizing:border-box;padding:9px 12px!important;border:1px solid #2a3961!important;border-radius:9px!important;background:#0b1530!important;color:#f3f5ff!important;font-size:11px!important;outline:0}
+body .admin-layout .content-area :is(.search-bar input,.search-box input,.search-input)::placeholder{color:#8997b7!important}
+body .admin-layout .content-area :is(.search-bar input,.search-box input,.search-input):focus{border-color:#866bea!important;box-shadow:0 0 0 3px #8162e522!important}
+body .admin-layout .content-area :is(.table-responsive,.table-container){width:100%;max-width:100%;overflow:auto;overscroll-behavior-x:contain}
+body .admin-layout .content-area :is(.premium-table,.student-table,.teacher-table,.delivery-table){width:100%;border-collapse:separate;border-spacing:0 5px;text-align:left}
+body .admin-layout .content-area :is(.premium-table,.student-table,.teacher-table,.delivery-table) th{padding:9px 10px;color:#9eaed0!important;background:transparent!important;font-size:9px!important;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+body .admin-layout .content-area :is(.premium-table,.student-table,.teacher-table,.delivery-table) tbody tr{background:#131e3b!important;box-shadow:none!important}
+body .admin-layout .content-area :is(.premium-table,.student-table,.teacher-table,.delivery-table) tbody tr:hover{background:#182448!important;transform:none!important}
+body .admin-layout .content-area :is(.premium-table,.student-table,.teacher-table,.delivery-table) td{padding:10px!important;border-top:1px solid #26365f!important;border-bottom:1px solid #26365f!important;color:#e1e7f7!important;font-size:10px!important;vertical-align:middle}
+body .admin-layout .content-area :is(.premium-table,.student-table,.teacher-table,.delivery-table) td:first-child{border-left:1px solid #26365f!important;border-radius:9px 0 0 9px}
+body .admin-layout .content-area :is(.premium-table,.student-table,.teacher-table,.delivery-table) td:last-child{border-right:1px solid #26365f!important;border-radius:0 9px 9px 0}
+body .admin-layout .content-area :is(.status-dropdown,.action-button,.btn-delete-order,.btn-cancel){max-width:100%;border-radius:8px!important;font-size:10px!important}
+body .admin-layout .content-area :is(.status-dropdown){min-height:32px;padding:6px 8px!important;background:#0b1530!important;border:1px solid #33446d!important;color:#e9edfb!important}
+body .admin-layout .content-area :is(.empty-state,.loading-state,.loading-panel){padding:24px!important;color:#9eaccb!important;text-align:center}
+body .admin-layout .content-area .orders-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+body .admin-layout .content-area .order-details-container .order-card{padding:14px!important;min-width:0}
+body .admin-layout .content-area .order-details-container .card-body{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+body .admin-layout .content-area .order-details-container .detail-section{min-width:0;padding:11px;border:1px solid #26365f;border-radius:10px;background:#0c1631}
+body .admin-layout .content-area .order-details-container .detail-section p{overflow-wrap:anywhere;color:#cbd5e8;font-size:10px}
+body.app-theme-light .admin-layout .content-area :is(.page-header,.premium-header){background:linear-gradient(110deg,#fff,#f7f8ff)!important;border-color:#dce2f1!important;color:#202b49!important}
+body.app-theme-light .admin-layout .content-area :is(.page-header h1,.page-header h2,.heading-group h1,.header-text h2,.table-title-bar h2,.table-title-bar h3,.orders-container h2,.detail-section h4,.order-details-container .card-header .id){color:#202b49!important}
+body.app-theme-light .admin-layout .content-area :is(.page-header p,.heading-group p,.table-title-bar p,.cell-secondary,.secondary-text,.order-date,.text-muted){color:#66728b!important}
+body.app-theme-light .admin-layout .content-area :is(.table-card,.table-section,.search-card,.orders-container,.order-details-container .order-card,.faq-wrapper,.form-glass-card,.ticket-card){background:#fff!important;border-color:#dce2f1!important;color:#202b49!important;box-shadow:0 8px 22px #27375c10!important}
+body.app-theme-light .admin-layout .content-area :is(.summary-pill div,.summary-pill .summary-item){background:#f5f6fc!important;border-color:#e1e5f0!important}
+body.app-theme-light .admin-layout .content-area .summary-pill :is(span,strong){color:#4c5873!important}
+body.app-theme-light .admin-layout .content-area :is(.search-bar input,.search-box input,.search-input){background:#fff!important;border-color:#d7deec!important;color:#202b49!important}
+body.app-theme-light .admin-layout .content-area :is(.search-bar input,.search-box input,.search-input)::placeholder{color:#7a859c!important}
+body.app-theme-light .admin-layout .content-area :is(.premium-table,.student-table,.teacher-table,.delivery-table) th{color:#66728b!important}
+body.app-theme-light .admin-layout .content-area :is(.premium-table,.student-table,.teacher-table,.delivery-table) tbody tr{background:#f6f8fc!important}
+body.app-theme-light .admin-layout .content-area :is(.premium-table,.student-table,.teacher-table,.delivery-table) tbody tr:hover{background:#eff2fa!important}
+body.app-theme-light .admin-layout .content-area :is(.premium-table,.student-table,.teacher-table,.delivery-table) td{border-color:#e1e6f0!important;color:#283451!important}
+body.app-theme-light .admin-layout .content-area :is(.status-dropdown){background:#fff!important;border-color:#d7deec!important;color:#283451!important}
+body.app-theme-light .admin-layout .content-area :is(.empty-state,.loading-state,.loading-panel){color:#66728b!important}
+body.app-theme-light .admin-layout .content-area .order-details-container .detail-section{background:#f7f8fc;border-color:#e1e6f0}
+body.app-theme-light .admin-layout .content-area .order-details-container .detail-section p{color:#47536e}
+@media(max-width:900px){body .admin-layout .content-area .orders-grid{grid-template-columns:1fr}}
+@media(max-width:620px){body .admin-layout .content-area :is(.page-header,.premium-header){align-items:flex-start;flex-direction:column;padding:13px!important}.admin-layout .content-area .summary-pill{width:100%;grid-template-columns:repeat(3,minmax(0,1fr))}.admin-layout .content-area :is(.student-table,.teacher-table,.delivery-table){min-width:700px}.admin-layout .content-area .premium-table{min-width:980px}.admin-layout .content-area .order-details-container .card-body{grid-template-columns:1fr}.admin-layout .content-area :is(.search-card,.table-section,.table-card){padding:11px!important}}
+@media(max-width:620px){body .admin-layout .content-area .manage-orders-container .header-actions{width:100%;max-width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px}.admin-layout .content-area .manage-orders-container .search-box{width:100%;min-width:0}.admin-layout .content-area .manage-orders-container .search-input{width:100%!important;min-width:0}.admin-layout .content-area :is(.student-management-page,.delivery-management-page) .table-section{max-width:100%;overflow-x:auto}}
+.quotation-panel {
+  display: grid;
+  gap: 0.55rem;
+  color: var(--text-primary);
+
+  label, small, p { color: var(--text-secondary); }
+  input, textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.65rem 0.75rem;
+    border: 1px solid var(--glass-border);
+    border-radius: 0.65rem;
+    background: var(--bg-input);
+    color: var(--text-primary);
+    font: inherit;
+  }
+  button {
+    justify-self: start;
+    padding: 0.6rem 0.85rem;
+    border: 1px solid var(--glass-border);
+    border-radius: 0.65rem;
+    background: var(--primary-strong);
+    color: #fff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  button:disabled { opacity: 0.55; cursor: not-allowed; }
+}
+
+.quotation-history-row {
+  padding: 0.7rem;
+  border: 1px solid var(--glass-border);
+  border-radius: 0.7rem;
+  background: var(--bg-panel-soft);
+  overflow-wrap: anywhere;
+}
+
+.quote-version, .quote-decision { display: block; color: var(--text-muted); font-size: 0.8rem; }
+.quote-actions { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.4rem; }
+.quote-actions button { border: 1px solid var(--glass-border); border-radius: 0.55rem; padding: 0.35rem 0.55rem; background: var(--primary-soft); color: var(--text-primary); cursor: pointer; }
+
+/* Global Utility & Public Design Tokens */
+.glass-panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 16px;
+  box-shadow: var(--shadow-soft);
+}
+
+.section-kicker {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+
+.section-title {
+  font-size: 2.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.75rem;
+  color: var(--text-primary);
+}
+
+.section-subtitle {
+  font-size: 1.05rem;
+  color: var(--text-muted);
+  max-width: 680px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0.65rem 1.25rem;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  line-height: 1.2;
+  text-decoration: none;
+  transition: all 0.2s ease;
+
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-strong) 100%);
+  color: #fff;
+  box-shadow: 0 4px 14px var(--primary-soft);
+  &:hover:not(:disabled) { transform: translateY(-2px); }
+}
+
+.btn-outline {
+  background: transparent;
+  border-color: var(--glass-border);
+  color: var(--text-primary);
+  &:hover:not(:disabled) { background: var(--primary-soft); border-color: var(--primary); }
+}
+
+.btn-large {
+  padding: 0.85rem 1.65rem;
+  font-size: 1.05rem;
+  border-radius: 12px;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+/* Standardized Admin Table & Toolbar Elements */
+.header-actions-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.action-buttons-group {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.btn-admin-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 0.95rem;
+  border-radius: 9px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--glass-border);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  transition: all 0.15s ease;
+
+  &:hover:not(:disabled) {
+    border-color: var(--primary);
+    background: var(--primary-soft);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &.export-btn {
+    border-color: var(--success);
+    color: var(--success);
+  }
+}
+
+.pdf-button {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(244, 63, 94, 0.25));
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #f87171;
+  font-weight: 700;
+  padding: 0.55rem 1rem;
+  border-radius: 9px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: rgba(239, 68, 68, 0.35);
+    transform: translateY(-1px);
+  }
+}
+
+.pagination-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 0.5rem 0.5rem;
+  border-top: 1px solid var(--glass-border);
+  margin-top: 1rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+
+  .pagination-info {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+
+    strong {
+      color: var(--text-primary);
+    }
+  }
+
+  .pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    .page-btn {
+      background: var(--bg-surface);
+      border: 1px solid var(--glass-border);
+      color: var(--text-primary);
+      padding: 0.45rem 0.9rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+
+      &:hover:not(:disabled) {
+        border-color: var(--primary);
+        background: var(--primary-soft);
+      }
+
+      &:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+    }
+
+    .page-indicator {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+  }
 }

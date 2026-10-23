@@ -201,7 +201,8 @@ $primary-gradient: linear-gradient(135deg, #0ea5e9, #6366f1); // Ocean to Purple
     color: #fbbf24;
     border-color: rgba(245, 158, 11, 0.4);
   }
-  &.processing {
+  &.processing,
+  &.in-progress {
     background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.2));
     color: #60a5fa;
     border-color: rgba(59, 130, 246, 0.4);
@@ -507,4 +508,192 @@ $primary-gradient: linear-gradient(135deg, #0ea5e9, #6366f1); // Ocean to Purple
 /* Ensure table cells don't collapse into each other */
 .premium-table {
   table-layout: auto; /* prefer auto so widths respect content but we set min-widths above */
+}
+.ledger-review-link{display:inline-flex;align-items:center;gap:6px;color:var(--accent);font-size:.82rem;font-weight:750;text-decoration:none}.ledger-review-link:hover{text-decoration:underline}.legacy-payment-note{display:block;max-width:190px;margin-top:5px;color:var(--text-muted);font-size:.7rem;line-height:1.35}
+
+/* Header Action Buttons */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--glass-border);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    border-color: var(--primary);
+    background: var(--primary-soft);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &.refresh-btn {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  &.export-btn {
+    border-color: var(--success);
+    color: var(--success);
+  }
+}
+
+/* Toolbar Card */
+.toolbar-card {
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  border-radius: 14px;
+  background: var(--bg-surface);
+  border: 1px solid var(--glass-border);
+}
+
+.toolbar-grid {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+
+  .search-box {
+    flex: 1;
+    min-width: 240px;
+    position: relative;
+    display: flex;
+    align-items: center;
+
+    .search-input {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      padding: 0.6rem 2.2rem 0.6rem 0.85rem;
+      color: var(--text-primary);
+      font-size: 0.9rem;
+
+      &:focus {
+        outline: none;
+        border-color: var(--primary);
+      }
+    }
+
+    .clear-btn {
+      position: absolute;
+      right: 8px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1.1rem;
+    }
+  }
+
+  .filter-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .filter-select {
+      background: var(--bg-input);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      padding: 0.5rem 0.75rem;
+      color: var(--text-primary);
+      font-size: 0.85rem;
+
+      &:focus {
+        outline: none;
+        border-color: var(--primary);
+      }
+    }
+  }
+
+  .total-badge {
+    margin-left: auto;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    padding: 0.4rem 0.85rem;
+    background: var(--primary-soft);
+    border-radius: 8px;
+    border: 1px solid var(--glass-border);
+
+    strong {
+      color: var(--accent);
+    }
+  }
+}
+
+/* Pagination Footer */
+.pagination-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 0.5rem 0.5rem;
+  border-top: 1px solid var(--glass-border);
+  margin-top: 1rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+
+  .pagination-info {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+
+    strong {
+      color: var(--text-primary);
+    }
+  }
+
+  .pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    .page-btn {
+      background: var(--bg-surface);
+      border: 1px solid var(--glass-border);
+      color: var(--text-primary);
+      padding: 0.45rem 0.9rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+
+      &:hover:not(:disabled) {
+        border-color: var(--primary);
+        background: var(--primary-soft);
+      }
+
+      &:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+    }
+
+    .page-indicator {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+  }
 }

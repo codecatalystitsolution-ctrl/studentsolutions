@@ -1,62 +1,21 @@
 <div class="admin-layout">
-  
-  <aside class="sidebar admin-sidebar" [class.open]="isSidebarOpen">
-    <div class="sidebar-header">
-      <div class="logo-wrapper">
-        <span class="shield-icon">🛡️</span>
-        <h2 class="logo">Admin Center</h2>
-      </div>
-      <button class="close-btn mobile-only" (click)="toggleSidebar()">✕</button>
-    </div>
-
-    <div class="admin-badge">System Administrator</div>
-
-    <nav class="nav-menu">
-      <a routerLink="./dashboard" routerLinkActive="active" class="nav-item">
-        <span class="icon">📊</span> Overview
-      </a>
-      <a routerLink="./orders" routerLinkActive="active" class="nav-item">
-        <span class="icon">📑</span> Manage Orders
-      </a>
-      <a routerLink="./students" routerLinkActive="active" class="nav-item">
-        <span class="icon">🎓</span> Student Management
-      </a>
-      <a routerLink="./order-details" routerLinkActive="active" class="nav-item">
-        <span class="icon">📄</span> Order Details
-      </a>
-      <a routerLink="./complaints" routerLinkActive="active" class="nav-item">
-        <span class="icon">🎫</span> Support Desk
-      </a>
-      </nav>
-
-    <div class="sidebar-footer">
-      <button class="logout-btn" (click)="logout()">
-        <span class="icon">🚪</span> Secure Logout
-      </button>
-    </div>
+  <aside class="sidebar admin-sidebar" [class.open]="isSidebarOpen" aria-label="Admin sidebar">
+    <div class="sidebar-brand-row"><a class="sidebar-brand" routerLink="/admin/dashboard" (click)="closeSidebar()"><span class="brand-mark" aria-hidden="true">FC</span><span class="brand-copy"><strong>FileCrafters</strong><small>Admin workspace</small></span></a><button class="close-btn mobile-only" type="button" (click)="closeSidebar()" aria-label="Close navigation"><span aria-hidden="true">&times;</span></button></div>
+    <div class="sidebar-label">WORKSPACE</div>
+    <nav class="nav-menu" aria-label="Admin navigation">
+      <a routerLink="/admin/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-item" (click)="closeSidebar()"><span class="nav-icon" aria-hidden="true">D</span><span>Dashboard</span></a>
+      <a routerLink="/admin/orders" routerLinkActive="active" class="nav-item" (click)="closeSidebar()"><span class="nav-icon" aria-hidden="true">O</span><span>Manage Orders</span></a>
+      <a routerLink="/admin/payments" routerLinkActive="active" class="nav-item" (click)="closeSidebar()"><span class="nav-icon" aria-hidden="true">P</span><span>Financial Ledger</span></a>
+      <a routerLink="/admin/notifications" routerLinkActive="active" class="nav-item" (click)="closeSidebar()"><span class="nav-icon" aria-hidden="true">N</span><span>Notification Center</span></a>
+      <a routerLink="/admin/students" routerLinkActive="active" class="nav-item" (click)="closeSidebar()"><span class="nav-icon" aria-hidden="true">S</span><span>Student Management</span></a>
+      <a routerLink="/admin/teachers" routerLinkActive="active" class="nav-item" (click)="closeSidebar()"><span class="nav-icon" aria-hidden="true">T</span><span>Teacher Management</span></a>
+      <a routerLink="/admin/delivery" routerLinkActive="active" class="nav-item" (click)="closeSidebar()"><span class="nav-icon" aria-hidden="true">L</span><span>Delivery Management</span></a>
+      <a routerLink="/admin/order-details" routerLinkActive="active" class="nav-item" (click)="closeSidebar()"><span class="nav-icon" aria-hidden="true">I</span><span>Order Insights</span></a>
+      <a routerLink="/admin/complaints" routerLinkActive="active" class="nav-item" (click)="closeSidebar()"><span class="nav-icon" aria-hidden="true">H</span><span>Support Desk</span></a>
+      <a routerLink="/admin/audit" routerLinkActive="active" class="nav-item" (click)="closeSidebar()"><span class="nav-icon" aria-hidden="true">A</span><span>Audit History</span></a>
+    </nav>
+    <div class="sidebar-footer"><div class="admin-user"><span class="admin-avatar">A</span><span><strong>Administrator</strong><small>System access</small></span></div><button class="logout-btn" type="button" (click)="logout()"><span aria-hidden="true">&rarr;</span> Sign out</button></div>
   </aside>
-
-  <main class="main-content">
-    <header class="top-header glass-panel">
-      <div class="header-left">
-        <button class="menu-btn mobile-only" (click)="toggleSidebar()">☰</button>
-        <div class="breadcrumb">
-          <span class="text-muted">FileCrafters</span> / <span class="highlight">Live Setup</span>
-        </div>
-      </div>
-      
-      <div class="header-right">
-        <div class="live-indicator">
-          <span class="dot pulse"></span> Live System
-        </div>
-        <div class="admin-avatar">A</div>
-      </div>
-    </header>
-
-    <div class="content-area">
-      <router-outlet></router-outlet>
-    </div>
-  </main>
-
-  <div class="sidebar-overlay" *ngIf="isSidebarOpen" (click)="toggleSidebar()"></div>
+  <button class="sidebar-overlay" *ngIf="isSidebarOpen" type="button" (click)="closeSidebar()" aria-label="Close navigation overlay"></button>
+  <main class="main-content"><header class="top-header"><div class="header-left"><button class="menu-btn mobile-only" type="button" (click)="toggleSidebar()" aria-label="Open navigation"><span aria-hidden="true">&#9776;</span></button><form class="global-search" (ngSubmit)="searchOrders()"><span aria-hidden="true">&#9906;</span><input name="globalSearch" [(ngModel)]="globalSearch" placeholder="Search by order ID, student, email..." aria-label="Search orders"><button type="submit">Search</button></form></div><div class="header-right"><a class="notification-link" routerLink="/notifications" aria-label="Open notification inbox" title="Notification inbox">&#128276;</a><span class="live-indicator"><span class="dot"></span>Live system</span><button class="theme-toggle" type="button" (click)="toggleTheme()" [attr.aria-label]="theme() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'" [title]="theme() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"><span aria-hidden="true">{{ theme() === 'dark' ? 'Light' : 'Dark' }}</span></button><span class="header-avatar" aria-label="Administrator">A</span></div></header><section class="content-area"><router-outlet></router-outlet></section></main>
 </div>

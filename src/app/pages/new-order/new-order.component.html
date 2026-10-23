@@ -1,253 +1,93 @@
-<div class="order-layout">
-  <header class="page-header">
-    <a routerLink="/dashboard/home" class="back-btn">← Back to Dashboard</a>
-    <h1>Create New File Order</h1>
-    <p class="subtitle">Fill in the requirements and let our experts handle the rest.</p>
-  </header>
-
-  <div class="order-grid">
-    <div class="form-section glass-card">
-      <form [formGroup]="orderForm">
-        <h3 class="section-title"><span class="step-num">1</span> Choose File Type</h3>
-        <div class="input-group">
-          <label>What do you want us to make?</label>
-          <select formControlName="fileType" class="highlight-select">
-            <option value="" disabled selected>-- Select a File Type --</option>
-            <option value="practical">Practical File</option>
-            <option value="project">Project File</option>
-            <option value="assignment">Assignment File</option>
-          </select>
-        </div>
-
-        <div class="divider"></div>
-
-        <div *ngIf="orderForm.get('fileType')?.value" class="dynamic-form-section fade-in">
-          <h3 class="section-title"><span class="step-num">2</span> Academic Details</h3>
-          <div class="input-row">
-            <div class="input-group">
-              <label>Course & Year</label>
-              <input type="text" formControlName="course" placeholder="e.g. B.Tech 3rd Year" />
-            </div>
-            <div class="input-group">
-              <label>Subject</label>
-              <input
-                type="text"
-                formControlName="subject"
-                placeholder="e.g. Software Engineering"
-              />
-            </div>
-          </div>
-
-          <div class="input-group" *ngIf="orderForm.get('fileType')?.value === 'practical'">
-            <label>List of Experiments / Syllabus</label>
-            <textarea
-              formControlName="experimentDetails"
-              rows="2"
-              placeholder="Mention experiment names or paste syllabus link"
-            ></textarea>
-          </div>
-
-          <div
-            class="input-group"
-            *ngIf="
-              orderForm.get('fileType')?.value === 'project' ||
-              orderForm.get('fileType')?.value === 'assignment'
-            "
-          >
-            <label>Exact Topic / Title</label>
-            <input type="text" formControlName="topic" placeholder="Exact Title of the File" />
-          </div>
-
-          <div class="input-row">
-            <div class="input-group">
-              <label>Submitted To</label>
-              <input type="text" formControlName="submittedTo" placeholder="Teacher's Name" />
-            </div>
-            <div class="input-group">
-              <label>Submitted By</label>
-              <input type="text" formControlName="submittedBy" placeholder="Your Name" />
-            </div>
-          </div>
-
-          <div class="input-row">
-            <div class="input-group">
-              <label>Roll Number</label>
-              <input type="text" formControlName="rollNumber" placeholder="College Roll No." />
-            </div>
-          </div>
-
-          <div class="divider"></div>
-
-          <h3 class="section-title"><span class="step-num">3</span> Print Settings</h3>
-
-          <div class="input-row custom-radios">
-            <div class="input-group">
-              <label>Pages Slab</label>
-              <select formControlName="pageSlab">
-                <option *ngFor="let slab of availableSlabs" [value]="slab.price">
-                  {{ slab.label }}
-                </option>
-              </select>
-            </div>
-
-            <div class="input-group" *ngIf="orderForm.get('fileType')?.value === 'project'">
-              <label>Binding Style</label>
-              <select formControlName="bindingType">
-                <option value="stick">Stick File (₹20)</option>
-                <option value="spiral">Spiral Binding (₹50)</option>
-                <option value="hardbound" *ngIf="orderForm.get('fileType')?.value === 'project'">
-                  Hardbound (₹150)
-                </option>
-              </select>
-            </div>
-
-            <div class="input-group" *ngIf="orderForm.get('fileType')?.value === 'assignment' || orderForm.get('fileType')?.value === 'practical'">
-              <label>Number of Files</label>
-              <select formControlName="fileQuantity">
-                <option [value]="1">1 File</option>
-                <option [value]="2">2 Files</option>
-                <option [value]="3">3 Files</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="divider"></div>
-
-          <h3 class="section-title"><span class="step-num">4</span> Upload Preference</h3>
-          <div class="upload-card">
-            <label class="toggle-row">
-              <input type="checkbox" formControlName="uploadOwnFile" (change)="onUploadOptionChange($event)" />
-              <span>I will upload my own PDF file</span>
-            </label>
-            <p class="hint-text">
-              If you upload your own PDF, we will deduct ₹50 from the total estimate. If you skip this,
-              our admin will prepare the file and no deduction will be applied.
-            </p>
-
-            <div class="upload-box" *ngIf="orderForm.get('uploadOwnFile')?.value">
-              <label class="upload-label" for="studentFile">Upload up to 3 PDFs (max 1MB each)</label>
-              <input id="studentFile" type="file" accept="application/pdf" multiple (change)="onFileSelected($event)" />
-              <div class="upload-meta" *ngIf="uploadedFileNames && !isFileUploading">
-                <span>Selected: {{ uploadedFileNames }}</span>
-                <span *ngIf="uploadedFilesSizeLabel">({{ uploadedFilesSizeLabel }})</span>
-              </div>
-              <div class="upload-meta" *ngIf="!uploadedFileNames && !isFileUploading">
-                Please choose up to 3 PDF files to apply the discount.
-              </div>
-              <div class="upload-meta" *ngIf="isFileUploading">Reading your PDF file(s)…</div>
-            </div>
-          </div>
-        </div>
-      </form>
-    </div>
-
-    <div class="summary-section">
-      <div class="summary-card glass-card">
-        <h3>Order Summary</h3>
-        <p class="info-text">Your price updates automatically based on requirements.</p>
-        
-        <div class="cost-breakdown">
-          
-          <div class="cost-row">
-            <span>
-              {{ currentFileTypeLabel }}
-              <small *ngIf="currentSlabLabel" style="display:block; color:#94a3b8; font-size: 0.8rem; margin-top: 4px;">
-                {{ currentSlabLabel }}
-              </small>
-            </span>
-            <span>₹{{ currentPrintCost }}</span>
-          </div>
-
-          <div class="cost-row" *ngIf="orderForm.get('fileType')?.value === 'project'">
-            <span style="text-transform: capitalize;">Binding Charges ({{ orderForm.get('bindingType')?.value }})</span>
-            <span>₹{{ currentBindingCost }}</span>
-          </div>
-
-          <div class="cost-row discount-row" *ngIf="selfUploadFeeDeduction > 0">
-            <span>Self-upload discount</span>
-            <span>-₹{{ selfUploadFeeDeduction }}</span>
-          </div>
-
-          <div class="cost-row muted-row" *ngIf="selfUploadFeeDeduction === 0 && orderForm.get('fileType')?.value">
-            <span>Preparation mode</span>
-            <span>Admin will prepare</span>
-          </div>
-
-        </div>
-
-        <div class="total-row">
-          <span>Total Estimate</span>
-          <span class="total-price">₹{{ totalEstimatedPrice }}</span>
-        </div>
-
-        <div class="advance-notice" *ngIf="totalEstimatedPrice > 0">
-          <span class="icon">💡</span>
-          50% advance (₹{{ totalEstimatedPrice / 2 }}) required to start processing.
-        </div>
-
-        <div class="status-note" *ngIf="uploadStatusMessage">
-          {{ uploadStatusMessage }}
-        </div>
-
-        <button class="btn-checkout" (click)="openPaymentModal()" [disabled]="orderForm.invalid || totalEstimatedPrice === 0">
-          Confirm & Place Order
-        </button>
+﻿<div class="order-layout">
+  <main class="order-wizard" aria-labelledby="order-title">
+    <header class="wizard-heading">
+      <div class="heading-icon" aria-hidden="true">
+        <svg viewBox="0 0 32 32"><path d="M7 10.5 16 5l9 5.5v13L16 29l-9-5.5z"/><path d="m7 10.5 9 5.6 9-5.6M16 16v13M11.5 13.3l9-5.6"/></svg>
       </div>
-    </div>
-  </div>
-  
-</div>
+      <div>
+        <p class="eyebrow">STUDENT SERVICES</p>
+        <h1 id="order-title">Place a New Order</h1>
+        <p class="wizard-subtitle">Choose a file type and share the details. Our team will take it from there.</p>
+      </div>
+      <button type="button" class="wizard-theme-toggle" (click)="toggleTheme()" [attr.aria-label]="theme() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'" [title]="theme() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"><span aria-hidden="true">{{ theme() === 'dark' ? '☼' : '☾' }}</span></button>
+    </header>
 
-<div class="payment-overlay" *ngIf="showPaymentModal">
-  <div class="payment-card glass-card fade-in">
-    
-    <div class="step-container" *ngIf="paymentStep === 1">
-      <div class="modal-header">
-        <span class="icon-lock">🔒</span>
-        <h3>Advance Payment</h3>
-        <p>Start processing by paying 50% advance</p>
-      </div>
-
-      <div class="summary-box">
-        <div class="row"><span>Total Estimate:</span> <span>₹{{ totalEstimatedPrice }}</span></div>
-        <div class="row" *ngIf="selfUploadFeeDeduction > 0"><span>Upload Discount:</span> <span>-₹{{ selfUploadFeeDeduction }}</span></div>
-        <div class="row highlight"><span>To Pay Now (50%):</span> <span class="neon-text">₹{{ totalEstimatedPrice / 2 }}</span></div>
-      </div>
-      <button class="btn-next" (click)="paymentStep = 2">Generate QR Code</button>
-    </div>
-
-    <div class="step-container text-center" *ngIf="paymentStep === 2">
-      <h3>Scan to Pay ₹{{ totalEstimatedPrice / 2 }}</h3>
-      <div class="qr-box">
-        <img src="../../assets/images/qr.png" alt="UPI QR" class="qr-img">
-      </div>
-      <p class="upi-id">UPI ID: 8954697879@sbi</p>
-      
-      <div class="btn-group">
-        <button class="btn-back" (click)="paymentStep = 1">Back</button>
-        <button class="btn-next" (click)="paymentStep = 3">I have Paid</button>
-      </div>
-    </div>
-
-    <div class="step-container" *ngIf="paymentStep === 3">
-      <h3>Payment Verification</h3>
-      <p>Enter Transaction ID or Name you used to pay.</p>
-      
-      <div class="input-group">
-        <label for="upiId">UPI ID / Pay Name</label>
-        <input type="text" [(ngModel)]="transactionUPIId" placeholder="e.g. UPI No. / Pay Name" class="modal-input">
-      </div>
-      <div class="input-group">
-        <label for="transactionRef">Transaction Reference</label>
-        <input type="text" [(ngModel)]="transactionRef" placeholder="e.g. UPI Ref No. / GPay Name" class="modal-input">
-      </div>
-
-      <button class="btn-confirm" (click)="submitFinalOrder()" [disabled]="isLoading">
-        <span *ngIf="!isLoading">Confirm Payment & Order</span>
-        <span *ngIf="isLoading" class="spinner"></span>
+    <nav class="wizard-steps" aria-label="Order progress">
+      <button type="button" class="wizard-step" [class.active]="currentStep === 1" [class.complete]="currentStep > 1" [attr.aria-current]="currentStep === 1 ? 'step' : null" (click)="goToStep(1)">
+        <span class="step-dot">1</span><span>File Type</span>
       </button>
-    </div>
+      <span class="step-connector" [class.complete]="currentStep > 1"></span>
+      <button type="button" class="wizard-step" [class.active]="currentStep === 2" [class.complete]="currentStep > 2" [attr.aria-current]="currentStep === 2 ? 'step' : null" (click)="goToStep(2)">
+        <span class="step-dot">2</span><span>Order Details</span>
+      </button>
+      <span class="step-connector" [class.complete]="currentStep > 2"></span>
+      <button type="button" class="wizard-step" [class.active]="currentStep === 3" [attr.aria-current]="currentStep === 3 ? 'step' : null" (click)="goToStep(3)">
+        <span class="step-dot">3</span><span>Review &amp; Submit</span>
+      </button>
+    </nav>
 
-    <button class="close-btn" (click)="closePaymentModal()">×</button>
-  </div>
+    <form [formGroup]="orderForm" class="wizard-form" novalidate>
+      <section class="wizard-panel" *ngIf="currentStep === 1" aria-labelledby="file-type-title">
+        <h2 id="file-type-title" class="visually-hidden">Choose a file type</h2>
+        <div class="file-type-grid" role="group" aria-label="File type">
+          <button type="button" class="file-type-card" [class.selected]="orderForm.get('fileType')?.value === 'assignment'" [attr.aria-pressed]="orderForm.get('fileType')?.value === 'assignment'" (click)="selectFileType('assignment')">
+            <span class="type-icon assignment-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v6h5M10 13h6M10 17h6"/></svg></span>
+            <span class="type-copy"><strong>Assignment</strong><small>Homework &amp; solutions</small></span>
+            <span class="selected-check" aria-hidden="true">&#10003;</span>
+          </button>
+          <button type="button" class="file-type-card" [class.selected]="orderForm.get('fileType')?.value === 'project'" [attr.aria-pressed]="orderForm.get('fileType')?.value === 'project'" (click)="selectFileType('project')">
+            <span class="type-icon project-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v6h5M10 13h6M10 17h6"/></svg></span>
+            <span class="type-copy"><strong>Project</strong><small>Academic projects</small></span>
+            <span class="selected-check" aria-hidden="true">&#10003;</span>
+          </button>
+          <button type="button" class="file-type-card" [class.selected]="orderForm.get('fileType')?.value === 'practical'" [attr.aria-pressed]="orderForm.get('fileType')?.value === 'practical'" (click)="selectFileType('practical')">
+            <span class="type-icon practical-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v6h5M10 13h6M10 17h6"/></svg></span>
+            <span class="type-copy"><strong>Practical File</strong><small>Lab reports &amp; records</small></span>
+            <span class="selected-check" aria-hidden="true">&#10003;</span>
+          </button>
+        </div>
+        <p class="field-error" *ngIf="orderForm.get('fileType')?.touched && orderForm.get('fileType')?.invalid">Choose a file type to continue.</p>
+      </section>
+
+      <section class="wizard-panel details-panel" *ngIf="currentStep === 2" aria-labelledby="details-title">
+        <div class="panel-heading"><span class="panel-kicker">STEP 2 OF 3</span><h2 id="details-title">Order details</h2><p>Tell us what to prepare and how to format it.</p></div>
+        <div class="detail-grid">
+          <div class="field"><label for="order-course">Course &amp; Year</label><input id="order-course" type="text" formControlName="course" placeholder="e.g. B.Tech, 3rd Year" autocomplete="off"><small class="field-error" *ngIf="orderForm.get('course')?.touched && orderForm.get('course')?.invalid">Enter your course and year.</small></div>
+          <div class="field"><label for="order-subject">Subject</label><input id="order-subject" type="text" formControlName="subject" placeholder="e.g. Software Engineering" autocomplete="off"><small class="field-error" *ngIf="orderForm.get('subject')?.touched && orderForm.get('subject')?.invalid">Enter the subject.</small></div>
+          <div class="field full-width" *ngIf="orderForm.get('fileType')?.value === 'practical'"><label for="order-experiments">Experiments or syllabus</label><textarea id="order-experiments" formControlName="experimentDetails" rows="3" placeholder="List experiment names or paste the syllabus"></textarea><small class="field-error" *ngIf="orderForm.get('experimentDetails')?.touched && orderForm.get('experimentDetails')?.invalid">Add experiment details or the syllabus.</small></div>
+          <div class="field full-width" *ngIf="orderForm.get('fileType')?.value !== 'practical'"><label for="order-topic">{{ orderForm.get('fileType')?.value === 'project' ? 'Project title or topic' : 'Assignment topic or title' }}</label><input id="order-topic" type="text" formControlName="topic" placeholder="Enter the exact title or topic"><small class="field-error" *ngIf="orderForm.get('topic')?.touched && orderForm.get('topic')?.invalid">Enter a title or topic.</small></div>
+          <div class="field"><label for="submitted-to">Submitted to</label><input id="submitted-to" type="text" formControlName="submittedTo" placeholder="Teacher's name"></div>
+          <div class="field"><label for="submitted-by">Submitted by</label><input id="submitted-by" type="text" formControlName="submittedBy" placeholder="Your name"></div>
+          <div class="field"><label for="roll-number">Roll number</label><input id="roll-number" type="text" formControlName="rollNumber" placeholder="College roll number"></div>
+          <div class="field"><label for="page-slab">Page range</label><select id="page-slab" formControlName="pageSlab"><option *ngFor="let slab of availableSlabs" [value]="slab.price">{{ slab.label }}</option></select></div>
+          <div class="field" *ngIf="orderForm.get('fileType')?.value === 'project'"><label for="binding-type">Binding style</label><select id="binding-type" formControlName="bindingType"><option value="stick">Stick file (&#8377;20)</option><option value="spiral">Spiral binding (&#8377;50)</option><option value="hardbound">Hardbound (&#8377;150)</option></select></div>
+          <div class="field" *ngIf="orderForm.get('fileType')?.value !== 'project'"><label for="file-quantity">Number of files</label><select id="file-quantity" formControlName="fileQuantity"><option [value]="1">1 file</option><option [value]="2">2 files</option><option [value]="3">3 files</option></select></div>
+          <div class="field full-width"><label for="order-instructions">Special instructions <span class="optional-label">Optional</span></label><textarea id="order-instructions" formControlName="specialInstructions" rows="2" placeholder="Anything else our team should know?"></textarea></div>
+        </div>
+        <div class="upload-card">
+          <label class="upload-toggle"><input type="checkbox" formControlName="uploadOwnFile" (change)="onUploadOptionChange($event)"><span class="toggle-mark"></span><span><strong>I will upload my own PDF</strong><small>Upload up to 3 files, max 1 MB each. A &#8377;50 discount applies after files are added.</small></span></label>
+          <div class="upload-box" *ngIf="orderForm.get('uploadOwnFile')?.value"><label for="studentFile" class="upload-label">Choose PDF files</label><input id="studentFile" type="file" accept="application/pdf,.pdf" multiple (change)="onFileSelected($event)"><p class="upload-meta" *ngIf="uploadedFileNames && !isFileUploading">{{ uploadedFileNames }} <span *ngIf="uploadedFilesSizeLabel">({{ uploadedFilesSizeLabel }})</span></p><p class="upload-meta" *ngIf="isFileUploading">Reading your PDF files...</p><p class="field-error" *ngIf="fileUploadError">{{ fileUploadError }}</p></div>
+        </div>
+      </section>
+
+      <section class="wizard-panel review-panel" *ngIf="currentStep === 3" aria-labelledby="review-title">
+        <div class="panel-heading"><span class="panel-kicker">STEP 3 OF 3</span><h2 id="review-title">Review your order</h2><p>Check your details and requested estimate before sending them to our team.</p></div>
+        <div class="review-card">
+          <div class="review-heading"><span class="review-file-icon" aria-hidden="true">{{ currentFileTypeLabel.charAt(0) }}</span><div><strong>{{ currentFileTypeLabel }}</strong><small>{{ currentSlabLabel || 'Page range not selected' }}</small></div><button type="button" class="text-button" (click)="goToStep(1)">Change type</button></div>
+          <dl class="review-details"><div><dt>Course</dt><dd>{{ orderForm.get('course')?.value }}</dd></div><div><dt>Subject</dt><dd>{{ orderForm.get('subject')?.value }}</dd></div><div><dt>{{ orderForm.get('fileType')?.value === 'practical' ? 'Experiments / syllabus' : 'Topic' }}</dt><dd>{{ orderForm.get('fileType')?.value === 'practical' ? orderForm.get('experimentDetails')?.value : orderForm.get('topic')?.value }}</dd></div><div><dt>Submitted to</dt><dd>{{ orderForm.get('submittedTo')?.value }}</dd></div><div><dt>Submitted by</dt><dd>{{ orderForm.get('submittedBy')?.value }}</dd></div><div><dt>Roll number</dt><dd>{{ orderForm.get('rollNumber')?.value }}</dd></div><div *ngIf="orderForm.get('fileType')?.value === 'project'"><dt>Binding</dt><dd>{{ orderForm.get('bindingType')?.value | titlecase }}</dd></div><div><dt>Files</dt><dd>{{ orderForm.get('fileType')?.value === 'project' ? 1 : orderForm.get('fileQuantity')?.value }}</dd></div><div *ngIf="uploadedFileNames"><dt>Uploaded PDFs</dt><dd>{{ uploadedFileNames }}</dd></div></dl>
+          <button type="button" class="text-button edit-details" (click)="goToStep(2)">Edit order details</button>
+        </div>
+        <div class="review-total"><div><span>Requested estimate</span><small>Your final price will be shown in the quotation.</small></div><strong>&#8377;{{ totalEstimatedPrice }}</strong></div>
+        <p class="payment-disclaimer">Our team will send a quotation. Approve it in My Orders before submitting payment details for manual review.</p>
+      </section>
+
+      <footer class="wizard-actions">
+        <a routerLink="/dashboard/home" class="wizard-back" *ngIf="currentStep === 1"><span aria-hidden="true">&larr;</span> Back</a>
+        <button type="button" class="wizard-back" *ngIf="currentStep > 1" (click)="goToStep(currentStep - 1)"><span aria-hidden="true">&larr;</span> Back</button>
+        <span class="action-spacer"></span>
+        <button type="button" class="wizard-continue" *ngIf="currentStep < 3" (click)="continueStep()">Continue <span aria-hidden="true">&rarr;</span></button>
+        <button type="button" class="wizard-continue" *ngIf="currentStep === 3" (click)="submitOrder()"><span *ngIf="!isLoading">Submit order</span><span *ngIf="isLoading" class="spinner" aria-label="Submitting"></span></button>
+      </footer>
+    </form>
+  </main>
 </div>

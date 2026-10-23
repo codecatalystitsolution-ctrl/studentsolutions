@@ -1,0 +1,295 @@
+<div class="admin-payments-page fade-in">
+  <div class="page-header premium-header">
+    <div class="heading-group">
+      <h1>Payment &amp; Refund Management</h1>
+      <p>Audit financial ledger entries, verify bank/UPI transaction references, and process student refunds.</p>
+    </div>
+
+    <div class="header-actions-row">
+      <div class="summary-pill">
+        <div>
+          <span>Verified Funds</span>
+          <strong>&#8377;{{ totalCollected | number }}</strong>
+        </div>
+        <div>
+          <span>Pending</span>
+          <strong class="text-warning">{{ pendingCount }}</strong>
+        </div>
+        <div>
+          <span>Verified</span>
+          <strong class="text-success">{{ verifiedCount }}</strong>
+        </div>
+        <div>
+          <span>Refunded</span>
+          <strong class="text-danger">{{ refundedCount }}</strong>
+        </div>
+      </div>
+
+      <div class="action-buttons-group">
+        <button
+          type="button"
+          class="btn-admin-action"
+          (click)="refresh()"
+          [disabled]="isRefreshing"
+          title="Refresh payment records"
+        >
+          <span *ngIf="!isRefreshing">&#8635; Refresh</span>
+          <span *ngIf="isRefreshing">Refreshing...</span>
+        </button>
+
+        <button
+          type="button"
+          class="btn-admin-action export-btn"
+          (click)="exportCsv()"
+          [disabled]="filteredPayments.length === 0"
+          title="Download CSV"
+        >
+          &#8681; Download CSV
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter & Search Toolbar (PRD Section 7.4) -->
+  <div class="toolbar-card glass-card">
+    <div class="toolbar-grid">
+      <div class="search-box">
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          (input)="filterPayments()"
+          placeholder="Search by transaction reference, order ID, student UID, or UPI..."
+          class="search-input"
+        />
+        <button class="clear-btn" *ngIf="searchTerm" (click)="searchTerm=''; filterPayments()">&times;</button>
+      </div>
+
+      <div class="filter-group">
+        <label for="pStatusSelect">Status:</label>
+        <select
+          id="pStatusSelect"
+          [(ngModel)]="statusFilter"
+          (change)="filterPayments()"
+          class="filter-select"
+        >
+          <option value="">All Statuses</option>
+          <option value="pending">Pending Verification</option>
+          <option value="verified">Verified</option>
+          <option value="rejected">Rejected</option>
+          <option value="refunded">Refunded</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="pDateSelect">Date Range:</label>
+        <select
+          id="pDateSelect"
+          [(ngModel)]="dateFilter"
+          (change)="filterPayments()"
+          class="filter-select"
+        >
+          <option value="all">All Time</option>
+          <option value="today">Today</option>
+          <option value="week">Current Week</option>
+          <option value="month">Current Month</option>
+        </select>
+      </div>
+
+      <div class="total-badge">
+        <span>Records: <strong>{{ filteredPayments.length }}</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table Section -->
+  <div class="table-card glass-card">
+    <div *ngIf="isLoading" class="loading-panel">
+      <div class="spinner"></div>
+      <span>Loading financial records...</span>
+    </div>
+
+    <div class="table-responsive" *ngIf="!isLoading">
+      <table class="premium-table">
+        <thead>
+          <tr>
+            <th>Transaction Ref</th>
+            <th>Related Order</th>
+            <th>Amount (INR)</th>
+            <th>Payment Method</th>
+            <th>Submitted At</th>
+            <th>Ledger Status</th>
+            <th>Verification Note</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of paginatedPayments">
+            <td>
+              <strong class="ref-code">{{ p.transactionRef || p.id }}</strong>
+            </td>
+            <td>
+              <a
+                class="order-link"
+                [routerLink]="['/admin/order-details']"
+                [queryParams]="{ search: p.orderId }"
+                title="View full order details"
+              >
+                #{{ shortId(p.orderId) | uppercase }} &#8599;
+              </a>
+            </td>
+            <td>
+              <span class="amount-badge">&#8377;{{ p.amount | number }}</span>
+            </td>
+            <td>
+              <span class="method-text">{{ p.upiId || 'UPI Direct' }}</span>
+            </td>
+            <td>
+              <span class="date-text">{{ p.createdAt | date: 'MMM d, y, h:mm a' }}</span>
+            </td>
+            <td>
+              <span
+                class="status-pill"
+                [ngClass]="{
+                  'status-pending': p.status === 'pending',
+                  'status-verified': p.status === 'verified',
+                  'status-rejected': p.status === 'rejected',
+                  'status-refunded': p.status === 'refunded'
+                }"
+              >
+                {{ (p.status || 'pending') | uppercase }}
+              </span>
+            </td>
+            <td>
+              <span class="note-text" *ngIf="p.verificationNote">{{ p.verificationNote }}</span>
+              <span class="text-muted" *ngIf="!p.verificationNote">&mdash;</span>
+            </td>
+            <td class="action-cell">
+              <ng-container *ngIf="p.status === 'pending'">
+                <button
+                  type="button"
+                  class="btn-table-action verify-btn"
+                  (click)="openDecisionModal(p, 'verify')"
+                  title="Verify payment against bank/UPI records"
+                >
+                  Verify
+                </button>
+                <button
+                  type="button"
+                  class="btn-table-action reject-btn"
+                  (click)="openDecisionModal(p, 'reject')"
+                  title="Reject invalid transaction reference"
+                >
+                  Reject
+                </button>
+              </ng-container>
+
+              <ng-container *ngIf="p.status === 'verified'">
+                <span class="verified-tag">&#10003; Audited</span>
+              </ng-container>
+
+              <ng-container *ngIf="p.status === 'rejected' || p.status === 'refunded'">
+                <span class="finalized-tag">Finalized</span>
+              </ng-container>
+            </td>
+          </tr>
+
+          <tr *ngIf="filteredPayments.length === 0">
+            <td colspan="8" class="empty-state">No payment records match your filters.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination Controls (PRD Section 7.6) -->
+    <div class="pagination-footer" *ngIf="filteredPayments.length > 0">
+      <div class="pagination-info">
+        Showing
+        <strong>{{ (currentPage - 1) * pageSize + 1 }}</strong>
+        to
+        <strong>{{ (currentPage * pageSize > filteredPayments.length) ? filteredPayments.length : (currentPage * pageSize) }}</strong>
+        of
+        <strong>{{ filteredPayments.length }}</strong>
+        records
+      </div>
+
+      <div class="pagination-controls">
+        <button
+          type="button"
+          class="page-btn"
+          (click)="prevPage()"
+          [disabled]="currentPage === 1"
+        >
+          &larr; Previous
+        </button>
+        <span class="page-indicator">Page {{ currentPage }} of {{ totalPages }}</span>
+        <button
+          type="button"
+          class="page-btn"
+          (click)="nextPage()"
+          [disabled]="currentPage === totalPages"
+        >
+          Next &rarr;
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Decision Modal (Verify / Reject / Refund) -->
+  <div class="modal-backdrop" *ngIf="selectedPayment" (click)="closeDecisionModal()">
+    <div class="modal-dialog glass-panel" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>
+          <span *ngIf="decisionAction === 'verify'">Verify Payment Reference</span>
+          <span *ngIf="decisionAction === 'reject'">Reject Payment Reference</span>
+          <span *ngIf="decisionAction === 'refund'">Process Refund</span>
+        </h3>
+        <button class="modal-close-btn" type="button" (click)="closeDecisionModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="payment-summary-box">
+          <div>
+            <small>Transaction Reference</small>
+            <strong>{{ selectedPayment.transactionRef }}</strong>
+          </div>
+          <div>
+            <small>Amount</small>
+            <strong>&#8377;{{ selectedPayment.amount | number }}</strong>
+          </div>
+          <div>
+            <small>Payer UPI</small>
+            <strong>{{ selectedPayment.upiId || 'N/A' }}</strong>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="decisionNoteInput">
+            <span *ngIf="decisionAction === 'verify'">Verification Evidence / Bank Reference Note *</span>
+            <span *ngIf="decisionAction === 'reject'">Rejection Reason (Visible in ledger) *</span>
+            <span *ngIf="decisionAction === 'refund'">Refund Processing Note *</span>
+          </label>
+          <textarea
+            id="decisionNoteInput"
+            [(ngModel)]="decisionNote"
+            rows="3"
+            placeholder="e.g. Bank statement ref #9823 confirms receipt of funds on 22 Oct."
+            class="modal-textarea"
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" (click)="closeDecisionModal()">Cancel</button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="isSubmittingDecision || !decisionNote.trim()"
+          (click)="submitDecision()"
+        >
+          <span *ngIf="!isSubmittingDecision">Confirm Decision &rarr;</span>
+          <span *ngIf="isSubmittingDecision">Processing...</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

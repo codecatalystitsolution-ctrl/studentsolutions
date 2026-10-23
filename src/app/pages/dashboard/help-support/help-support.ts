@@ -1,7 +1,7 @@
-import { Component, OnInit, inject, ChangeDetectorRef, NgZone } from '@angular/core';
+﻿import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Database, ref, push, set, onValue } from '@angular/fire/database';
+import { Database, ref, query, orderByChild, equalTo, limitToFirst, push, set, onValue, off } from '@angular/fire/database';
 import { Auth, authState } from '@angular/fire/auth'; // Auth imports
 import { Router } from '@angular/router'; // Router for unauthenticated users
 import { NotificationService } from '../../../shared/notification/notification.service';
@@ -9,19 +9,19 @@ import { NotificationService } from '../../../shared/notification/notification.s
 @Component({
   selector: 'app-help-support',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule], 
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './help-support.html',
   styleUrls: ['./help-support.scss']
 })
-export class HelpSupportComponent implements OnInit {
+export class HelpSupportComponent implements OnInit, OnDestroy {
   ticketForm!: FormGroup;
   isSubmitting = false;
   showCustomDialog = false;
-  
-  // 🚀 MAIN CONTROLLER: 'form' dikhana hai ya 'tickets' list
-  activeTab: 'form' | 'tickets' = 'form'; 
-  
-  tickets: any[] = []; 
+
+  // ðŸš€ MAIN CONTROLLER: 'form' dikhana hai ya 'tickets' list
+  activeTab: 'form' | 'tickets' = 'form';
+
+  tickets: any[] = [];
 
   // Injects
   private fb = inject(FormBuilder);
@@ -30,6 +30,8 @@ export class HelpSupportComponent implements OnInit {
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
   private ngZone = inject(NgZone);
+  private notificationService = inject(NotificationService);
+  private complaintsRef: any;
 
   // Firebase Auth UID aur Custom FC-ID
   userId: string = '';
@@ -53,17 +55,23 @@ export class HelpSupportComponent implements OnInit {
     authState(this.auth).subscribe(user => {
       if (user) {
         this.userId = user.uid;
-        
+        this.ticketForm.patchValue({ name: '', email: user.email || '' });
+
         // 2. Database se custom studentID fetch
         const userRef = ref(this.db, `users/${this.userId}`);
         onValue(userRef, (snapshot) => {
-          if (snapshot.exists() && snapshot.val().studentID) {
-            this.studentID = snapshot.val().studentID;
+          if (snapshot.exists()) {
+            const profile = snapshot.val();
+            this.studentID = profile.studentID || '';
+            this.ticketForm.patchValue({
+              name: profile.fullName || '',
+              email: profile.email || user.email || ''
+            });
           }
           // ID milne ke baad hi tickets load karein
           this.loadTicketsLive();
         }, { onlyOnce: true });
-        
+
       } else {
         this.router.navigate(['/login']);
       }
@@ -71,24 +79,24 @@ export class HelpSupportComponent implements OnInit {
   }
 
   loadTicketsLive(): void {
-    const complaintsRef = ref(this.db, 'complaints');
-    onValue(complaintsRef, (snapshot) => {
+    this.complaintsRef = query(ref(this.db, 'complaints'), orderByChild('uid'), equalTo(this.userId), limitToFirst(100));
+    onValue(this.complaintsRef, (snapshot) => {
       this.ngZone.run(() => {
         const data = snapshot.val();
         this.tickets = [];
-        
+
         if (data) {
           this.tickets = Object.keys(data)
             .map(key => ({ id: key, ...data[key] }))
             // === FILTER: Sirf usi student ki tickets fetch karein ===
-            .filter((ticket: any) => 
-              (ticket.uid === this.userId) || 
+            .filter((ticket: any) =>
+              (ticket.uid === this.userId) ||
               (this.studentID !== '' && ticket.studentID === this.studentID)
             )
             .reverse();
         }
       });
-      
+
       this.cdr.detectChanges(); // UI force update
     });
   }
@@ -107,7 +115,7 @@ export class HelpSupportComponent implements OnInit {
       try {
         const complaintsRef = ref(this.db, 'complaints');
         const newComplaintRef = push(complaintsRef);
-        
+
         // === PAYLOAD UPDATE: Naye tickets me UID aur studentID save ho raha hai ===
         const newTicketData = {
           ...this.ticketForm.value,
@@ -120,13 +128,12 @@ export class HelpSupportComponent implements OnInit {
         await set(newComplaintRef, newTicketData);
 
         this.isSubmitting = false;
-        this.showCustomDialog = true; 
+        this.showCustomDialog = true;
         this.ticketForm.reset();
       } catch (error) {
         this.isSubmitting = false;
         console.error(error);
-          const notification = inject(NotificationService);
-          notification.show('error', 'Database sync failed. Please try again.', 'Sync Failed');
+        this.notificationService.show('error', 'Database sync failed. Please try again.', 'Sync Failed');
       }
     } else {
       this.ticketForm.markAllAsTouched();
@@ -134,8 +141,11 @@ export class HelpSupportComponent implements OnInit {
   }
 
   closeModal(): void {
-    this.router.navigate(['/dashboard/home']);
+    this.router.navigate(['/dashboard/my-tickets']);
     this.showCustomDialog = false;
-    this.activeTab = 'tickets'; 
+  }
+
+  ngOnDestroy(): void {
+    if (this.complaintsRef) off(this.complaintsRef);
   }
 }

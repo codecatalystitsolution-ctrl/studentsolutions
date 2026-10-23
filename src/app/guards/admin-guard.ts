@@ -4,29 +4,24 @@ import { Auth, authState } from '@angular/fire/auth';
 import { map } from 'rxjs/operators';
 import { NotificationService } from '../shared/notification/notification.service';
 
-export const adminGuard: CanActivateFn = (route, state) => {
+const allowedAdminEmails = new Set([
+  'admin@filecrafters.in',
+  'wmohd2514@outlook.com'
+]);
+
+export const adminGuard: CanActivateFn = () => {
   const auth = inject(Auth);
   const router = inject(Router);
   const notification = inject(NotificationService);
 
-  // Yahan apna Admin Email likhein (Multiple admins bhi add kar sakte hain)
-  const allowedAdminEmails = [
-    'admin@filecrafters.in', 
-    'wmohd2514@outlook.com' // Isey apne actual email se replace karein
-  ];
-
   return authState(auth).pipe(
     map(user => {
-      // Check 1: User logged in hona chahiye
-      // Check 2: User ka email humari admin list mein hona chahiye
-      if (user && user.email && allowedAdminEmails.includes(user.email)) {
-        return true; // Access Granted! ✅
-      } else {
-        // Access Denied! ❌ Wapas login page par bhejo
-        notification.show('error', 'Access Denied: Restricted Admin Area.', 'Access Denied');
-        router.navigate(['/login']);
-        return false;
+      if (user?.email && allowedAdminEmails.has(user.email.toLowerCase())) {
+        return true;
       }
+
+      notification.show('error', 'Access Denied: Restricted Admin Area.', 'Access Denied');
+      return router.createUrlTree(['/admin/login']);
     })
   );
 };

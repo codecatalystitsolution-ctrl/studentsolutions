@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { Auth, sendPasswordResetEmail } from '@angular/fire/auth';
 import { CommonModule } from '@angular/common';
 import { NotificationService } from '../../shared/notification/notification.service';
+import { ThemeService } from '../../services/theme.service';
 
 @Component({
   selector: 'app-login',
@@ -22,11 +23,18 @@ export class LoginComponent implements OnInit {
   private router = inject(Router);
   private auth = inject(Auth);
   private notificationService = inject(NotificationService);
+  private themeService = inject(ThemeService);
 
   // Naye variables Forgot Password ke liye
   isForgotPasswordMode: boolean = false; 
   resetEmail: string = '';
   isResetting: boolean = false;
+  theme = this.themeService.theme();
+
+  toggleTheme(): void {
+    this.themeService.toggleTheme();
+    this.theme = this.themeService.theme();
+  }
 
   ngOnInit(): void {
     this.loginForm = this.fb.group({
@@ -53,12 +61,18 @@ if (this.loginForm.valid) {
       const adminEmails = ['admin@filecrafters.in', 'wmohd2514@outlook.com'];
 
       // Smart Routing Logic: Admin ko Admin page, Student ko Student page
-      if (adminEmails.includes(email)) {
+      if (adminEmails.includes((user.email || email).toLowerCase())) {
         console.log('Admin detected. Redirecting to Operations Center...');
         this.router.navigate(['/admin/dashboard']);
+      } else if (userProfile?.role === 'Teacher' && userProfile?.status === 'active') {
+        this.router.navigate(['/teacher/referrals']);
+      } else if (userProfile?.role === 'Delivery' && userProfile?.status === 'active') {
+        this.router.navigate(['/delivery-portal']);
+      } else if (userProfile?.role === 'Student' && userProfile?.status === 'active') {
+        this.router.navigate(['/dashboard/home']);
       } else {
-        console.log('Student detected. Redirecting to Student Dashboard...');
-        this.router.navigate(['/dashboard/home']); 
+        await this.authService.logout();
+        this.notificationService.show('error', 'This account does not have an active student, teacher, delivery, or administrator role.', 'Account Not Active');
       }
       
     } catch (error: any) {
@@ -74,6 +88,10 @@ if (this.loginForm.valid) {
   toggleForgotPassword() {
     this.isForgotPasswordMode = !this.isForgotPasswordMode;
     this.resetEmail = ''; // Mode switch karne par input clear kar do
+  }
+
+  goSupport() {
+    this.router.navigate(['/login-support']);
   }
 
   async sendResetLink() {

@@ -1,0 +1,144 @@
+<div class="delivery-management-page fade-in">
+  <div class="page-header premium-header">
+    <div class="heading-group">
+      <h1>Delivery Personnel Management</h1>
+      <p>Assign delivery milestones, oversee staff assignments, and track physical orders.</p>
+    </div>
+
+    <div class="header-actions-row">
+      <div class="summary-pill">
+        <div>
+          <span>Total Staff</span>
+          <strong>{{ totalDelivery }}</strong>
+        </div>
+        <div>
+          <span>Active</span>
+          <strong>{{ activeDelivery }}</strong>
+        </div>
+        <div>
+          <span>Suspended</span>
+          <strong>{{ suspendedDelivery }}</strong>
+        </div>
+      </div>
+
+      <div class="action-buttons-group">
+        <button
+          type="button"
+          class="btn-admin-action"
+          (click)="refresh()"
+          [disabled]="isRefreshing"
+          title="Refresh delivery staff list"
+        >
+          <span *ngIf="!isRefreshing">&#8635; Refresh</span>
+          <span *ngIf="isRefreshing">Refreshing...</span>
+        </button>
+
+        <button
+          type="button"
+          class="btn-admin-action export-btn"
+          (click)="exportCsv()"
+          [disabled]="filteredDelivery.length === 0"
+          title="Download CSV"
+        >
+          &#8681; Download CSV
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="search-card glass-card">
+    <div class="search-bar">
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        (input)="filterDelivery()"
+        placeholder="Search delivery personnel by name, email, vehicle, or area..."
+      />
+      <button type="button" *ngIf="searchTerm" (click)="searchTerm=''; filterDelivery();">Clear</button>
+    </div>
+  </div>
+
+  <div class="table-section glass-card">
+    <div class="table-title-bar">
+      <div>
+        <h2>Active Delivery Staff</h2>
+        <p>Operational personnel assigned for pickup and doorstep drop-offs.</p>
+      </div>
+      <span class="status-pill">{{ filteredDelivery.length }} staff found</span>
+    </div>
+
+    <div *ngIf="isLoading" class="loading-panel">
+      <div class="spinner"></div>
+      <span>Loading delivery personnel roster...</span>
+    </div>
+
+    <table *ngIf="!isLoading" class="delivery-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Vehicle</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let staff of paginatedDelivery">
+          <td>
+            <a [routerLink]="['/admin/delivery', staff.uid]" class="delivery-link">
+              {{ staff.fullName || 'N/A' }} &rarr;
+            </a>
+          </td>
+          <td>{{ staff.email || 'N/A' }}</td>
+          <td>{{ staff.phone || 'N/A' }}</td>
+          <td>{{ staff.vehicleNumber || staff.vehicleType || 'Standard' }}</td>
+          <td>
+            <span [ngClass]="statusBadgeClass(staff.status)">{{ staff.status || 'active' | titlecase }}</span>
+          </td>
+          <td>
+            <button class="action-button" (click)="toggleDeliveryStatus(staff)">
+              {{ staff.status === 'suspended' ? 'Activate' : 'Suspend' }}
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="!isLoading && filteredDelivery.length === 0">
+          <td colspan="6" class="empty-state">No delivery personnel found matching your search.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Pagination Controls (PRD 7.6) -->
+    <div class="pagination-footer" *ngIf="filteredDelivery.length > 0">
+      <div class="pagination-info">
+        Showing
+        <strong>{{ (currentPage - 1) * pageSize + 1 }}</strong>
+        to
+        <strong>{{ (currentPage * pageSize > filteredDelivery.length) ? filteredDelivery.length : (currentPage * pageSize) }}</strong>
+        of
+        <strong>{{ filteredDelivery.length }}</strong>
+        staff
+      </div>
+
+      <div class="pagination-controls">
+        <button
+          type="button"
+          class="page-btn"
+          (click)="prevPage()"
+          [disabled]="currentPage === 1"
+        >
+          &larr; Previous
+        </button>
+        <span class="page-indicator">Page {{ currentPage }} of {{ totalPages }}</span>
+        <button
+          type="button"
+          class="page-btn"
+          (click)="nextPage()"
+          [disabled]="currentPage === totalPages"
+        >
+          Next &rarr;
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

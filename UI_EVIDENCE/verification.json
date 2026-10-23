@@ -1,0 +1,964 @@
+[
+  {
+    "route": "/login",
+    "theme": "light",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "login-light-1440x1000.png",
+    "pageBackground": "#edf3ff",
+    "hasThemeToggle": true,
+    "afterToggle": "dark",
+    "afterReload": "dark",
+    "pageErrors": [],
+    "interaction": null,
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/login",
+    "theme": "dark",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "login-dark-1440x1000.png",
+    "pageBackground": "#070d1f",
+    "hasThemeToggle": true,
+    "afterToggle": "light",
+    "afterReload": "light",
+    "pageErrors": [],
+    "interaction": null,
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/login-support",
+    "theme": "light",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "login-support-light-1440x1000.png",
+    "pageBackground": "#edf3ff",
+    "hasThemeToggle": false,
+    "afterToggle": "light",
+    "afterReload": "light",
+    "pageErrors": [],
+    "interaction": null,
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/login-support",
+    "theme": "dark",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "login-support-dark-1440x1000.png",
+    "pageBackground": "#070d1f",
+    "hasThemeToggle": false,
+    "afterToggle": "dark",
+    "afterReload": "dark",
+    "pageErrors": [],
+    "interaction": null,
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/register",
+    "theme": "light",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "register-light-1440x1000.png",
+    "pageBackground": "#edf3ff",
+    "hasThemeToggle": true,
+    "afterToggle": "dark",
+    "afterReload": "dark",
+    "pageErrors": [],
+    "interaction": null,
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/register",
+    "theme": "dark",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "register-dark-1440x1000.png",
+    "pageBackground": "#070d1f",
+    "hasThemeToggle": true,
+    "afterToggle": "light",
+    "afterReload": "light",
+    "pageErrors": [],
+    "interaction": null,
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/dashboard",
+    "theme": "light",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "student-shell-light-1440x1000.png",
+    "pageBackground": "#edf3ff",
+    "hasThemeToggle": true,
+    "afterToggle": "dark",
+    "afterReload": "dark",
+    "pageErrors": [],
+    "interaction": null,
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/dashboard",
+    "theme": "dark",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "student-shell-dark-1440x1000.png",
+    "pageBackground": "#070d1f",
+    "hasThemeToggle": true,
+    "afterToggle": "light",
+    "afterReload": "light",
+    "pageErrors": [],
+    "interaction": null,
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/dashboard/home",
+    "theme": "light",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "student-home-light-1440x1000.png",
+    "pageBackground": "#edf3ff",
+    "hasThemeToggle": true,
+    "afterToggle": "dark",
+    "afterReload": "dark",
+    "pageErrors": [],
+    "interaction": {
+      "logoutReturnedToLogin": true,
+      "reloginReturnedToRoleHome": true
+    },
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/dashboard/home",
+    "theme": "dark",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "student-home-dark-1440x1000.png",
+    "pageBackground": "#070d1f",
+    "hasThemeToggle": true,
+    "afterToggle": "light",
+    "afterReload": "light",
+    "pageErrors": [],
+    "interaction": {
+      "logoutReturnedToLogin": true,
+      "reloginReturnedToRoleHome": true
+    },
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/dashboard/profile",
+    "theme": "light",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "student-profile-light-1440x1000.png",
+    "pageBackground": "#edf3ff",
+    "hasThemeToggle": true,
+    "afterToggle": "dark",
+    "afterReload": "dark",
+    "pageErrors": [],
+    "interaction": {
+      "editModeOpened": true,
+      "cancelRestoredProfile": true
+    },
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/dashboard/profile",
+    "theme": "dark",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "student-profile-dark-1440x1000.png",
+    "pageBackground": "#070d1f",
+    "hasThemeToggle": true,
+    "afterToggle": "light",
+    "afterReload": "light",
+    "pageErrors": [],
+    "interaction": {
+      "editModeOpened": true,
+      "cancelRestoredProfile": true
+    },
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/dashboard/settings",
+    "theme": "light",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "student-settings-light-1440x1000.png",
+    "pageBackground": "#edf3ff",
+    "hasThemeToggle": true,
+    "afterToggle": "dark",
+    "afterReload": "dark",
+    "pageErrors": [],
+    "interaction": null,
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/dashboard/settings",
+    "theme": "dark",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "student-settings-dark-1440x1000.png",
+    "pageBackground": "#070d1f",
+    "hasThemeToggle": true,
+    "afterToggle": "light",
+    "afterReload": "light",
+    "pageErrors": [],
+    "interaction": null,
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/dashboard/quizzes",
+    "theme": "light",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "student-quizzes-light-1440x1000.png",
+    "pageBackground": "#edf3ff",
+    "hasThemeToggle": true,
+    "afterToggle": "dark",
+    "afterReload": "dark",
+    "pageErrors": [],
+    "interaction": {
+      "quizPlayerOpened": true
+    },
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/dashboard/quizzes",
+    "theme": "dark",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "student-quizzes-dark-1440x1000.png",
+    "pageBackground": "#070d1f",
+    "hasThemeToggle": true,
+    "afterToggle": "light",
+    "afterReload": "light",
+    "pageErrors": [],
+    "interaction": {
+      "quizPlayerOpened": true
+    },
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/dashboard/quiz-player",
+    "theme": "light",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "student-quiz-player-light-1440x1000.png",
+    "pageBackground": "#edf3ff",
+    "hasThemeToggle": true,
+    "afterToggle": "dark",
+    "afterReload": "dark",
+    "pageErrors": [],
+    "interaction": null,
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/dashboard/quiz-player",
+    "theme": "dark",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "student-quiz-player-dark-1440x1000.png",
+    "pageBackground": "#070d1f",
+    "hasThemeToggle": true,
+    "afterToggle": "light",
+    "afterReload": "light",
+    "pageErrors": [],
+    "interaction": null,
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/dashboard/my-orders",
+    "theme": "light",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "student-orders-light-1440x1000.png",
+    "pageBackground": "#edf3ff",
+    "hasThemeToggle": true,
+    "afterToggle": "dark",
+    "afterReload": "dark",
+    "pageErrors": [],
+    "interaction": null,
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/dashboard/my-orders",
+    "theme": "dark",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "student-orders-dark-1440x1000.png",
+    "pageBackground": "#070d1f",
+    "hasThemeToggle": true,
+    "afterToggle": "light",
+    "afterReload": "light",
+    "pageErrors": [],
+    "interaction": null,
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/dashboard/my-tickets",
+    "theme": "light",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "student-tickets-light-1440x1000.png",
+    "pageBackground": "#edf3ff",
+    "hasThemeToggle": true,
+    "afterToggle": "dark",
+    "afterReload": "dark",
+    "pageErrors": [],
+    "interaction": null,
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/dashboard/my-tickets",
+    "theme": "dark",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "student-tickets-dark-1440x1000.png",
+    "pageBackground": "#070d1f",
+    "hasThemeToggle": true,
+    "afterToggle": "light",
+    "afterReload": "light",
+    "pageErrors": [],
+    "interaction": null,
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/dashboard/help-support",
+    "theme": "light",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "student-support-light-1440x1000.png",
+    "pageBackground": "#edf3ff",
+    "hasThemeToggle": true,
+    "afterToggle": "dark",
+    "afterReload": "dark",
+    "pageErrors": [],
+    "interaction": {
+      "faqToggled": true
+    },
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/dashboard/help-support",
+    "theme": "dark",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "student-support-dark-1440x1000.png",
+    "pageBackground": "#070d1f",
+    "hasThemeToggle": true,
+    "afterToggle": "light",
+    "afterReload": "light",
+    "pageErrors": [],
+    "interaction": {
+      "faqToggled": true
+    },
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/new-order",
+    "theme": "light",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "new-order-light-1440x1000.png",
+    "pageBackground": "#edf3ff",
+    "hasThemeToggle": false,
+    "afterToggle": "light",
+    "afterReload": "light",
+    "pageErrors": [],
+    "interaction": {
+      "academicDetailsShown": true
+    },
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/new-order",
+    "theme": "dark",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "new-order-dark-1440x1000.png",
+    "pageBackground": "#070d1f",
+    "hasThemeToggle": false,
+    "afterToggle": "dark",
+    "afterReload": "dark",
+    "pageErrors": [],
+    "interaction": {
+      "academicDetailsShown": true
+    },
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/admin-login",
+    "theme": "light",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "admin-login-light-1440x1000.png",
+    "pageBackground": "#edf3ff",
+    "hasThemeToggle": true,
+    "afterToggle": "dark",
+    "afterReload": "dark",
+    "pageErrors": [],
+    "interaction": null,
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/admin-login",
+    "theme": "dark",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "admin-login-dark-1440x1000.png",
+    "pageBackground": "#070d1f",
+    "hasThemeToggle": true,
+    "afterToggle": "light",
+    "afterReload": "light",
+    "pageErrors": [],
+    "interaction": null,
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/admin",
+    "theme": "light",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "admin-shell-light-1440x1000.png",
+    "pageBackground": "#edf3ff",
+    "hasThemeToggle": true,
+    "afterToggle": "dark",
+    "afterReload": "dark",
+    "pageErrors": [],
+    "interaction": null,
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/admin",
+    "theme": "dark",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "admin-shell-dark-1440x1000.png",
+    "pageBackground": "#070d1f",
+    "hasThemeToggle": true,
+    "afterToggle": "light",
+    "afterReload": "light",
+    "pageErrors": [],
+    "interaction": null,
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/admin/dashboard",
+    "theme": "light",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "admin-dashboard-light-1440x1000.png",
+    "pageBackground": "#edf3ff",
+    "hasThemeToggle": true,
+    "afterToggle": "dark",
+    "afterReload": "dark",
+    "pageErrors": [],
+    "interaction": {
+      "logoutReturnedToLogin": true,
+      "reloginReturnedToRoleHome": true
+    },
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/admin/dashboard",
+    "theme": "dark",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "admin-dashboard-dark-1440x1000.png",
+    "pageBackground": "#070d1f",
+    "hasThemeToggle": true,
+    "afterToggle": "light",
+    "afterReload": "light",
+    "pageErrors": [],
+    "interaction": {
+      "logoutReturnedToLogin": true,
+      "reloginReturnedToRoleHome": true
+    },
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/admin/orders",
+    "theme": "light",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "admin-orders-light-1440x1000.png",
+    "pageBackground": "#edf3ff",
+    "hasThemeToggle": true,
+    "afterToggle": "dark",
+    "afterReload": "dark",
+    "pageErrors": [],
+    "interaction": {
+      "matchingRows": 1,
+      "restoredRows": 3
+    },
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/admin/orders",
+    "theme": "dark",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "admin-orders-dark-1440x1000.png",
+    "pageBackground": "#070d1f",
+    "hasThemeToggle": true,
+    "afterToggle": "light",
+    "afterReload": "light",
+    "pageErrors": [],
+    "interaction": {
+      "matchingRows": 1,
+      "restoredRows": 3
+    },
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/admin/students",
+    "theme": "light",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "admin-students-light-1440x1000.png",
+    "pageBackground": "#edf3ff",
+    "hasThemeToggle": true,
+    "afterToggle": "dark",
+    "afterReload": "dark",
+    "pageErrors": [],
+    "interaction": {
+      "matchingRows": 1
+    },
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/admin/students",
+    "theme": "dark",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "admin-students-dark-1440x1000.png",
+    "pageBackground": "#070d1f",
+    "hasThemeToggle": true,
+    "afterToggle": "light",
+    "afterReload": "light",
+    "pageErrors": [],
+    "interaction": {
+      "matchingRows": 1
+    },
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/admin/students/visual-student",
+    "theme": "light",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "admin-student-detail-light-1440x1000.png",
+    "pageBackground": "#edf3ff",
+    "hasThemeToggle": true,
+    "afterToggle": "dark",
+    "afterReload": "dark",
+    "pageErrors": [],
+    "interaction": null,
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/admin/students/visual-student",
+    "theme": "dark",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "admin-student-detail-dark-1440x1000.png",
+    "pageBackground": "#070d1f",
+    "hasThemeToggle": true,
+    "afterToggle": "light",
+    "afterReload": "light",
+    "pageErrors": [],
+    "interaction": null,
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/admin/teachers",
+    "theme": "light",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "admin-teachers-light-1440x1000.png",
+    "pageBackground": "#edf3ff",
+    "hasThemeToggle": true,
+    "afterToggle": "dark",
+    "afterReload": "dark",
+    "pageErrors": [],
+    "interaction": null,
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/admin/teachers",
+    "theme": "dark",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "admin-teachers-dark-1440x1000.png",
+    "pageBackground": "#070d1f",
+    "hasThemeToggle": true,
+    "afterToggle": "light",
+    "afterReload": "light",
+    "pageErrors": [],
+    "interaction": null,
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/admin/teachers/visual-teacher",
+    "theme": "light",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "admin-teacher-detail-light-1440x1000.png",
+    "pageBackground": "#edf3ff",
+    "hasThemeToggle": true,
+    "afterToggle": "dark",
+    "afterReload": "dark",
+    "pageErrors": [],
+    "interaction": null,
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/admin/teachers/visual-teacher",
+    "theme": "dark",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "admin-teacher-detail-dark-1440x1000.png",
+    "pageBackground": "#070d1f",
+    "hasThemeToggle": true,
+    "afterToggle": "light",
+    "afterReload": "light",
+    "pageErrors": [],
+    "interaction": null,
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/admin/delivery",
+    "theme": "light",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "admin-delivery-light-1440x1000.png",
+    "pageBackground": "#edf3ff",
+    "hasThemeToggle": true,
+    "afterToggle": "dark",
+    "afterReload": "dark",
+    "pageErrors": [],
+    "interaction": null,
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/admin/delivery",
+    "theme": "dark",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "admin-delivery-dark-1440x1000.png",
+    "pageBackground": "#070d1f",
+    "hasThemeToggle": true,
+    "afterToggle": "light",
+    "afterReload": "light",
+    "pageErrors": [],
+    "interaction": null,
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/admin/delivery/visual-delivery",
+    "theme": "light",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "admin-delivery-detail-light-1440x1000.png",
+    "pageBackground": "#edf3ff",
+    "hasThemeToggle": true,
+    "afterToggle": "dark",
+    "afterReload": "dark",
+    "pageErrors": [],
+    "interaction": null,
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/admin/delivery/visual-delivery",
+    "theme": "dark",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "admin-delivery-detail-dark-1440x1000.png",
+    "pageBackground": "#070d1f",
+    "hasThemeToggle": true,
+    "afterToggle": "light",
+    "afterReload": "light",
+    "pageErrors": [],
+    "interaction": null,
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/admin/order-details",
+    "theme": "light",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "admin-order-details-light-1440x1000.png",
+    "pageBackground": "#edf3ff",
+    "hasThemeToggle": true,
+    "afterToggle": "dark",
+    "afterReload": "dark",
+    "pageErrors": [],
+    "interaction": null,
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/admin/order-details",
+    "theme": "dark",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "admin-order-details-dark-1440x1000.png",
+    "pageBackground": "#070d1f",
+    "hasThemeToggle": true,
+    "afterToggle": "light",
+    "afterReload": "light",
+    "pageErrors": [],
+    "interaction": null,
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/admin/complaints",
+    "theme": "light",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "admin-complaints-light-1440x1000.png",
+    "pageBackground": "#edf3ff",
+    "hasThemeToggle": true,
+    "afterToggle": "dark",
+    "afterReload": "dark",
+    "pageErrors": [],
+    "interaction": null,
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/admin/complaints",
+    "theme": "dark",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot": "admin-complaints-dark-1440x1000.png",
+    "pageBackground": "#070d1f",
+    "hasThemeToggle": true,
+    "afterToggle": "light",
+    "afterReload": "light",
+    "pageErrors": [],
+    "interaction": null,
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/login",
+    "theme": "light",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "screenshot": "login-light-390x844.png",
+    "pageBackground": "#edf3ff",
+    "hasThemeToggle": true,
+    "afterToggle": "dark",
+    "afterReload": "dark",
+    "pageErrors": [],
+    "interaction": null,
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/register",
+    "theme": "light",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "screenshot": "register-light-390x844.png",
+    "pageBackground": "#edf3ff",
+    "hasThemeToggle": true,
+    "afterToggle": "dark",
+    "afterReload": "dark",
+    "pageErrors": [],
+    "interaction": null,
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/dashboard/home",
+    "theme": "light",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "screenshot": "student-home-light-390x844.png",
+    "pageBackground": "#edf3ff",
+    "hasThemeToggle": true,
+    "afterToggle": "dark",
+    "afterReload": "dark",
+    "pageErrors": [],
+    "interaction": {
+      "skipped": "mobile viewport; sidebar logout is collapsed"
+    },
+    "consoleMessages": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/admin/dashboard",
+    "theme": "light",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "screenshot": "admin-dashboard-light-390x844.png",
+    "pageBackground": "#edf3ff",
+    "hasThemeToggle": true,
+    "afterToggle": "dark",
+    "afterReload": "dark",
+    "pageErrors": [],
+    "interaction": {
+      "skipped": "mobile viewport; sidebar logout is collapsed"
+    },
+    "consoleMessages": [],
+    "failedRequests": []
+  }
+]

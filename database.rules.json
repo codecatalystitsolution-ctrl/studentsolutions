@@ -1,0 +1,794 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "users": {
+      ".read": "auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')",
+      ".write": "auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')",
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "(auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')) || (auth != null && auth.uid === $uid && ((!data.exists() && newData.child('email').val() === auth.token.email && newData.child('role').val() === 'Student' && newData.child('status').val() === 'active') || (data.exists() && newData.child('role').val() === data.child('role').val() && newData.child('status').val() === data.child('status').val() && newData.child('email').val() === data.child('email').val() && newData.child('createdAt').val() === data.child('createdAt').val())))",
+        ".validate": "(auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')) || (newData.hasChildren(['role', 'email', 'status', 'createdAt']) && newData.child('role').isString() && newData.child('email').isString() && newData.child('status').isString() && newData.child('createdAt').isString())"
+      }
+    },
+    "orders": {
+      ".read": "(auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')) || (auth != null && query.orderByChild === 'uid' && query.equalTo === auth.uid && query.limitToFirst <= 100)",
+      ".write": "auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')",
+      ".indexOn": [
+        "uid",
+        "status",
+        "createdAt"
+      ],
+      "$orderId": {
+        ".read": "(auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')) || (auth != null && data.child('uid').val() === auth.uid)",
+        ".write": "(auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')) || (auth != null && !data.exists() && newData.child('uid').val() === auth.uid)",
+        ".validate": "(auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')) || (auth != null && newData.hasChildren(['uid', 'studentID', 'fileType', 'projectDetails', 'printSettings', 'pricing', 'paymentDetails', 'uploadDetails', 'status', 'createdAt', 'requestedPricing']) && newData.child('uid').val() === auth.uid && newData.child('studentID').val() === root.child('users').child(auth.uid).child('studentID').val() && (newData.child('fileType').val() === 'assignment' || newData.child('fileType').val() === 'project' || newData.child('fileType').val() === 'practical') && newData.child('projectDetails').hasChildren(['submittedBy', 'subject']) && newData.child('printSettings').hasChildren(['pagesLabel', 'binding', 'quantity']) && newData.child('status').val() === 'Pending' && newData.child('createdAt').isString() && newData.child('paymentDetails').child('status').val() === 'Awaiting Quotation' && newData.child('pricing').child('totalAmount').val() === 0 && newData.child('pricing').child('advancePaid').val() === 0 && !newData.child('uploadDetails').child('uploadedFileDataUrl').exists() && newData.child('requestedPricing').child('estimatedAmount').isNumber() && newData.child('requestedPricing').child('estimatedAmount').val() >= 0 && newData.child('requestedPricing').child('estimatedAmount').val() <= 1000000 && root.child('users').child(auth.uid).child('role').val() === 'Student' && root.child('users').child(auth.uid).child('status').val() === 'active')",
+        "status": {
+          ".validate": "newData.isString() && (newData.val() === 'Pending' || newData.val() === 'In Progress' || newData.val() === 'Printing' || newData.val() === 'Delivered' || newData.val() === 'Cancelled')"
+        },
+        "uploadDetails": {
+          ".validate": "(auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')) || (newData.child('selfUploaded').isBoolean() && !newData.child('uploadedFileDataUrl').exists())",
+          "files": {
+            "$fileIndex": {
+              ".validate": "(auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')) || (($fileIndex === '0' || $fileIndex === '1' || $fileIndex === '2') && newData.hasChildren(['name', 'sizeLabel', 'size', 'storagePath']) && newData.child('name').isString() && newData.child('name').val().length > 0 && newData.child('name').val().length <= 255 && newData.child('sizeLabel').isString() && newData.child('sizeLabel').val().length <= 32 && newData.child('size').isNumber() && newData.child('size').val() > 0 && newData.child('size').val() <= 1048576 && newData.child('storagePath').isString() && newData.child('storagePath').val().length > 0 && newData.child('storagePath').val().length <= 512)",
+              "dataUrl": {
+                ".validate": "auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')"
+              },
+              "$other": {
+                ".validate": false
+              }
+            }
+          },
+          "uploadedFileDataUrl": {
+            ".validate": "auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')"
+          }
+        }
+      }
+    },
+    "quotations": {
+      "$orderId": {
+        ".read": "(auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')) || (auth != null && root.child('orders').child($orderId).child('uid').val() === auth.uid)",
+        "currentVersionId": {
+          ".write": "auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')",
+          ".validate": "newData.isString() && root.child('quotations').child($orderId).child('versions').child(newData.val()).exists()"
+        },
+        "versions": {
+          "$versionId": {
+            ".write": "auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com') && !data.exists() && root.child('orders').child($orderId).exists() && root.child('orders').child($orderId).child('status').val() !== 'Cancelled' && root.child('orders').child($orderId).child('status').val() !== 'Delivered'",
+            ".validate": "newData.hasChildren(['amount', 'currency', 'terms', 'version', 'actorUid', 'actorEmail', 'createdAt']) && newData.child('amount').isNumber() && newData.child('amount').val() > 0 && newData.child('amount').val() <= 1000000 && newData.child('currency').val() === 'INR' && newData.child('terms').isString() && newData.child('terms').val().length <= 2000 && newData.child('version').isNumber() && newData.child('version').val() > 0 && newData.child('actorUid').val() === auth.uid && newData.child('actorEmail').val() === auth.token.email && newData.child('createdAt').isString()",
+            "amount": {
+              ".validate": "newData.isNumber()"
+            },
+            "currency": {
+              ".validate": "newData.isString()"
+            },
+            "terms": {
+              ".validate": "newData.isString()"
+            },
+            "version": {
+              ".validate": "newData.isNumber()"
+            },
+            "actorUid": {
+              ".validate": "newData.isString()"
+            },
+            "actorEmail": {
+              ".validate": "newData.isString()"
+            },
+            "createdAt": {
+              ".validate": "newData.isString()"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        }
+      }
+    },
+    "quotationDecisions": {
+      "$orderId": {
+        ".read": "(auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')) || (auth != null && root.child('orders').child($orderId).child('uid').val() === auth.uid)",
+        "$versionId": {
+          ".write": "auth != null && !data.exists() && root.child('orders').child($orderId).child('uid').val() === auth.uid && root.child('users').child(auth.uid).child('role').val() === 'Student' && root.child('users').child(auth.uid).child('status').val() === 'active' && root.child('quotations').child($orderId).child('currentVersionId').val() === $versionId",
+          ".validate": "newData.hasChildren(['uid', 'status', 'createdAt']) && newData.child('uid').val() === auth.uid && (newData.child('status').val() === 'approved' || newData.child('status').val() === 'rejected') && newData.child('createdAt').isString()",
+          "uid": {
+            ".validate": "newData.isString()"
+          },
+          "status": {
+            ".validate": "newData.isString()"
+          },
+          "createdAt": {
+            ".validate": "newData.isString()"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
+    },
+    "payments": {
+      ".read": "(auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')) || (auth != null && query.orderByChild === 'uid' && query.equalTo === auth.uid && query.limitToFirst <= 100)",
+      ".indexOn": [
+        "uid",
+        "orderId"
+      ],
+      "$paymentId": {
+        ".read": "(auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')) || (auth != null && data.child('uid').val() === auth.uid)",
+        ".write": "(auth != null && !data.exists() && $paymentId === newData.child('transactionRef').val() && newData.child('transactionRef').val().toUpperCase() === newData.child('transactionRef').val() && newData.child('transactionRef').val().matches(/^[A-Z0-9_-]{1,200}$/) && newData.child('uid').val() === auth.uid && root.child('users').child(auth.uid).child('role').val() === 'Student' && root.child('users').child(auth.uid).child('status').val() === 'active' && root.child('orders').child(newData.child('orderId').val()).child('uid').val() === auth.uid && root.child('quotations').child(newData.child('orderId').val()).child('currentVersionId').val() === newData.child('quoteVersionId').val() && root.child('quotationDecisions').child(newData.child('orderId').val()).child(newData.child('quoteVersionId').val()).child('uid').val() === auth.uid && root.child('quotationDecisions').child(newData.child('orderId').val()).child(newData.child('quoteVersionId').val()).child('status').val() === 'approved') || (auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com') && data.exists() && ((data.child('status').val() === 'pending' && (newData.child('status').val() === 'verified' || newData.child('status').val() === 'rejected')) || (data.child('status').val() === 'verified' && newData.child('status').val() === 'refunded' && root.child('refundProcessing').child($paymentId).child('status').val() === 'processed')))",
+        ".validate": "newData.hasChildren(['uid', 'orderId', 'quoteVersionId', 'amount', 'currency', 'transactionRef', 'upiId', 'status', 'createdAt']) && newData.child('uid').isString() && newData.child('orderId').isString() && newData.child('quoteVersionId').isString() && newData.child('amount').isNumber() && newData.child('amount').val() === root.child('quotations').child(newData.child('orderId').val()).child('versions').child(newData.child('quoteVersionId').val()).child('amount').val() && newData.child('currency').val() === 'INR' && newData.child('transactionRef').isString() && newData.child('transactionRef').val().length > 0 && newData.child('transactionRef').val().length <= 200 && newData.child('transactionRef').val() === $paymentId && newData.child('transactionRef').val().toUpperCase() === newData.child('transactionRef').val() && newData.child('transactionRef').val().matches(/^[A-Z0-9_-]{1,200}$/) && newData.child('upiId').isString() && newData.child('upiId').val().length <= 200 && newData.child('createdAt').isString() && ((!data.exists() && newData.child('status').val() === 'pending' && !newData.child('verifiedAt').exists() && !newData.child('verifiedBy').exists() && !newData.child('verificationNote').exists() && !newData.child('rejectedAt').exists() && !newData.child('rejectedBy').exists() && !newData.child('rejectionNote').exists() && !newData.child('refundedAt').exists() && !newData.child('refundedBy').exists() && !newData.child('refundNote').exists()) || (data.exists() && newData.child('uid').val() === data.child('uid').val() && newData.child('orderId').val() === data.child('orderId').val() && newData.child('quoteVersionId').val() === data.child('quoteVersionId').val() && newData.child('amount').val() === data.child('amount').val() && newData.child('currency').val() === data.child('currency').val() && newData.child('transactionRef').val() === data.child('transactionRef').val() && newData.child('upiId').val() === data.child('upiId').val() && newData.child('createdAt').val() === data.child('createdAt').val() && ((data.child('status').val() === 'pending' && newData.child('status').val() === 'verified' && newData.child('verifiedAt').isString() && newData.child('verifiedBy').val() === auth.uid && newData.child('verificationNote').isString() && newData.child('verificationNote').val().length > 0 && !newData.child('rejectedAt').exists() && !newData.child('rejectedBy').exists() && !newData.child('rejectionNote').exists()) || (data.child('status').val() === 'pending' && newData.child('status').val() === 'rejected' && newData.child('rejectedAt').isString() && newData.child('rejectedBy').val() === auth.uid && newData.child('rejectionNote').isString() && newData.child('rejectionNote').val().length > 0 && !newData.child('verifiedAt').exists() && !newData.child('verifiedBy').exists() && !newData.child('verificationNote').exists()) || (data.child('status').val() === 'verified' && newData.child('status').val() === 'refunded' && newData.child('verifiedAt').val() === data.child('verifiedAt').val() && newData.child('verifiedBy').val() === data.child('verifiedBy').val() && newData.child('verificationNote').val() === data.child('verificationNote').val() && newData.child('refundedAt').isString() && newData.child('refundedBy').val() === auth.uid && newData.child('refundNote').isString() && newData.child('refundNote').val().length > 0))))",
+        "uid": {
+          ".validate": "newData.isString()"
+        },
+        "orderId": {
+          ".validate": "newData.isString()"
+        },
+        "quoteVersionId": {
+          ".validate": "newData.isString()"
+        },
+        "amount": {
+          ".validate": "newData.isNumber()"
+        },
+        "currency": {
+          ".validate": "newData.isString()"
+        },
+        "transactionRef": {
+          ".validate": "newData.isString()"
+        },
+        "upiId": {
+          ".validate": "newData.isString()"
+        },
+        "createdAt": {
+          ".validate": "newData.isString()"
+        },
+        "verifiedAt": {
+          ".write": "auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com') && root.child('payments').child($paymentId).child('status').val() === 'pending' && newData.isString()",
+          ".validate": "newData.isString()"
+        },
+        "verifiedBy": {
+          ".write": "auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com') && root.child('payments').child($paymentId).child('status').val() === 'pending' && newData.isString() && newData.val() === auth.uid",
+          ".validate": "newData.isString()"
+        },
+        "refundedAt": {
+          ".write": "auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com') && root.child('payments').child($paymentId).child('status').val() === 'verified' && root.child('refundProcessing').child($paymentId).child('status').val() === 'processed' && newData.isString()",
+          ".validate": "newData.isString()"
+        },
+        "refundedBy": {
+          ".write": "auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com') && root.child('payments').child($paymentId).child('status').val() === 'verified' && root.child('refundProcessing').child($paymentId).child('status').val() === 'processed' && newData.val() === auth.uid",
+          ".validate": "newData.isString()"
+        },
+        "status": {
+          ".write": "auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com') && ((data.val() === 'pending' && (newData.val() === 'verified' || newData.val() === 'rejected')) || (data.val() === 'verified' && newData.val() === 'refunded' && root.child('refundProcessing').child($paymentId).child('status').val() === 'processed'))",
+          ".validate": "newData.val() === 'pending' || newData.val() === 'verified' || newData.val() === 'rejected' || newData.val() === 'refunded'"
+        },
+        "$other": {
+          ".validate": false
+        },
+        "verificationNote": {
+          ".write": "auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com') && root.child('payments').child($paymentId).child('status').val() === 'pending' && newData.isString() && newData.val().length > 0 && newData.val().length <= 500",
+          ".validate": "newData.isString() && newData.val().length <= 500"
+        },
+        "rejectedAt": {
+          ".write": "auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com') && root.child('payments').child($paymentId).child('status').val() === 'pending' && newData.isString()",
+          ".validate": "newData.isString()"
+        },
+        "rejectedBy": {
+          ".write": "auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com') && root.child('payments').child($paymentId).child('status').val() === 'pending' && newData.isString() && newData.val() === auth.uid",
+          ".validate": "newData.isString()"
+        },
+        "rejectionNote": {
+          ".write": "auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com') && root.child('payments').child($paymentId).child('status').val() === 'pending' && newData.isString() && newData.val().length > 0 && newData.val().length <= 500",
+          ".validate": "newData.isString() && newData.val().length <= 500"
+        },
+        "refundNote": {
+          ".write": "auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com') && root.child('payments').child($paymentId).child('status').val() === 'verified' && root.child('refundProcessing').child($paymentId).child('status').val() === 'processed' && newData.isString() && newData.val().length > 0 && newData.val().length <= 500",
+          ".validate": "newData.isString() && newData.val().length <= 500"
+        }
+      }
+    },
+    "paymentHistory": {
+      "$paymentId": {
+        ".read": "(auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')) || (auth != null && root.child('payments').child($paymentId).child('uid').val() === auth.uid)",
+        "$eventId": {
+          ".write": "auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com') && !data.exists() && root.child('payments').child($paymentId).exists() && $eventId === \"decision_\" + newData.child(\"type\").val()",
+          ".validate": "newData.hasChildren(['type', 'actorUid', 'actorEmail', 'actorRole', 'message', 'createdAt']) && newData.child('type').isString() && newData.child('actorUid').val() === auth.uid && newData.child('actorEmail').val() === auth.token.email && newData.child('actorRole').val() === 'Admin' && newData.child('message').isString() && newData.child('message').val().length <= 500 && newData.child('createdAt').isString()",
+          "type": {
+            ".validate": "newData.isString()"
+          },
+          "actorUid": {
+            ".validate": "newData.isString()"
+          },
+          "actorEmail": {
+            ".validate": "newData.isString()"
+          },
+          "actorRole": {
+            ".validate": "newData.isString()"
+          },
+          "message": {
+            ".validate": "newData.isString()"
+          },
+          "createdAt": {
+            ".validate": "newData.isString()"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
+    },
+    "refunds": {
+      ".read": "(auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')) || (auth != null && query.orderByChild === 'uid' && query.equalTo === auth.uid && query.limitToFirst <= 100)",
+      ".indexOn": [
+        "uid",
+        "orderId"
+      ],
+      "$paymentId": {
+        ".read": "(auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')) || (auth != null && data.child('uid').val() === auth.uid)",
+        ".write": "(auth != null && !data.exists() && newData.child('uid').val() === auth.uid && root.child('payments').child($paymentId).child('uid').val() === auth.uid && root.child('payments').child($paymentId).child('status').val() === 'verified') || (auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com') && data.exists() && data.child('status').val() === 'pending' && (newData.child('status').val() === 'approved' || newData.child('status').val() === 'rejected') && newData.child('reviewedBy').val() === auth.uid)",
+        ".validate": "newData.hasChildren(['uid', 'paymentId', 'orderId', 'amount', 'currency', 'reason', 'status', 'createdAt']) && newData.child('uid').isString() && newData.child('paymentId').val() === $paymentId && newData.child('orderId').val() === root.child('payments').child($paymentId).child('orderId').val() && newData.child('amount').val() === root.child('payments').child($paymentId).child('amount').val() && newData.child('currency').val() === 'INR' && newData.child('reason').isString() && newData.child('reason').val().length > 0 && newData.child('reason').val().length <= 1000 && newData.child('createdAt').isString() && ((!data.exists() && newData.child('uid').val() === auth.uid && newData.child('status').val() === 'pending' && !newData.child('reviewedAt').exists() && !newData.child('reviewedBy').exists() && !newData.child('decisionNote').exists()) || (data.exists() && newData.child('uid').val() === data.child('uid').val() && newData.child('paymentId').val() === data.child('paymentId').val() && newData.child('orderId').val() === data.child('orderId').val() && newData.child('amount').val() === data.child('amount').val() && newData.child('currency').val() === data.child('currency').val() && newData.child('reason').val() === data.child('reason').val() && newData.child('createdAt').val() === data.child('createdAt').val() && data.child('status').val() === 'pending' && (newData.child('status').val() === 'approved' || newData.child('status').val() === 'rejected') && newData.child('reviewedAt').isString() && newData.child('reviewedBy').val() === auth.uid && newData.child('decisionNote').isString() && newData.child('decisionNote').val().length > 0 && newData.child('decisionNote').val().length <= 500))",
+        "uid": {
+          ".validate": "newData.isString()"
+        },
+        "paymentId": {
+          ".validate": "newData.isString()"
+        },
+        "orderId": {
+          ".validate": "newData.isString()"
+        },
+        "amount": {
+          ".validate": "newData.isNumber()"
+        },
+        "currency": {
+          ".validate": "newData.isString()"
+        },
+        "reason": {
+          ".validate": "newData.isString()"
+        },
+        "createdAt": {
+          ".validate": "newData.isString()"
+        },
+        "status": {
+          ".write": "auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com') && data.val() === 'pending' && (newData.val() === 'approved' || newData.val() === 'rejected')",
+          ".validate": "newData.val() === 'pending' || newData.val() === 'approved' || newData.val() === 'rejected'"
+        },
+        "$other": {
+          ".validate": false
+        },
+        "reviewedAt": {
+          ".write": "auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com') && root.child('refunds').child($paymentId).child('status').val() === 'pending' && newData.isString()",
+          ".validate": "newData.isString()"
+        },
+        "reviewedBy": {
+          ".write": "auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com') && root.child('refunds').child($paymentId).child('status').val() === 'pending' && newData.val() === auth.uid",
+          ".validate": "newData.isString()"
+        },
+        "decisionNote": {
+          ".write": "auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com') && root.child('refunds').child($paymentId).child('status').val() === 'pending' && newData.isString() && newData.val().length > 0 && newData.val().length <= 500",
+          ".validate": "newData.isString() && newData.val().length <= 500"
+        }
+      }
+    },
+    "refundHistory": {
+      "$paymentId": {
+        ".read": "(auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')) || (auth != null && root.child('payments').child($paymentId).child('uid').val() === auth.uid)",
+        "$eventId": {
+          ".write": "auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com') && !data.exists() && root.child('refunds').child($paymentId).exists() && $eventId === \"decision_\" + newData.child(\"type\").val()",
+          ".validate": "newData.hasChildren(['type', 'actorUid', 'actorEmail', 'actorRole', 'message', 'createdAt']) && newData.child('type').isString() && newData.child('actorUid').val() === auth.uid && newData.child('actorEmail').val() === auth.token.email && newData.child('actorRole').val() === 'Admin' && newData.child('message').isString() && newData.child('message').val().length <= 500 && newData.child('createdAt').isString()",
+          "type": {
+            ".validate": "newData.isString()"
+          },
+          "actorUid": {
+            ".validate": "newData.isString()"
+          },
+          "actorEmail": {
+            ".validate": "newData.isString()"
+          },
+          "actorRole": {
+            ".validate": "newData.isString()"
+          },
+          "message": {
+            ".validate": "newData.isString()"
+          },
+          "createdAt": {
+            ".validate": "newData.isString()"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
+    },
+    "refundProcessing": {
+      ".read": "auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')",
+      ".indexOn": [
+        "uid",
+        "status"
+      ],
+      "$paymentId": {
+        ".read": "(auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')) || (auth != null && data.child('uid').val() === auth.uid)",
+        ".write": "auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com') && root.child('refunds').child($paymentId).child('status').val() === 'approved' && root.child('payments').child($paymentId).child('status').val() === 'verified' && ((!data.exists() && newData.child('uid').val() === root.child('payments').child($paymentId).child('uid').val() && newData.child('paymentId').val() === $paymentId && newData.child('orderId').val() === root.child('payments').child($paymentId).child('orderId').val() && (newData.child('status').val() === 'failed' || newData.child('status').val() === 'processed')) || (data.exists() && data.child('status').val() === 'failed' && (newData.child('historyEventId').val() === data.child('historyEventId').val() || root.child('refundProcessingHistory').child($paymentId).child(data.child('historyEventId').val()).exists()) && newData.child('uid').val() === data.child('uid').val() && newData.child('paymentId').val() === data.child('paymentId').val() && newData.child('orderId').val() === data.child('orderId').val() && (newData.child('status').val() === 'failed' || newData.child('status').val() === 'processed'))) && newData.child('actorUid').val() === auth.uid && newData.child('actorEmail').val() === auth.token.email && newData.child('actorRole').val() === 'Admin'",
+        ".validate": "newData.hasChildren(['uid', 'paymentId', 'orderId', 'status', 'reference', 'note', 'actorUid', 'actorEmail', 'actorRole', 'createdAt', 'historyEventId']) && newData.child('uid').val() === root.child('payments').child($paymentId).child('uid').val() && newData.child('paymentId').val() === $paymentId && newData.child('orderId').val() === root.child('payments').child($paymentId).child('orderId').val() && (newData.child('status').val() === 'failed' || newData.child('status').val() === 'processed') && newData.child('reference').isString() && newData.child('reference').val().length <= 200 && (newData.child('status').val() !== 'processed' || newData.child('reference').val().length > 0) && newData.child('note').isString() && newData.child('note').val().length > 0 && newData.child('note').val().length <= 500 && newData.child('actorUid').val() === auth.uid && newData.child('actorEmail').val() === auth.token.email && newData.child('actorRole').val() === 'Admin' && newData.child('createdAt').isString() && newData.child('historyEventId').isString() && newData.child('historyEventId').val().length > 0 && newData.child('historyEventId').val().length <= 80",
+        "uid": {
+          ".validate": "newData.isString()"
+        },
+        "paymentId": {
+          ".validate": "newData.isString()"
+        },
+        "orderId": {
+          ".validate": "newData.isString()"
+        },
+        "status": {
+          ".validate": "newData.val() === 'failed' || newData.val() === 'processed'"
+        },
+        "reference": {
+          ".validate": "newData.isString() && newData.val().length <= 200"
+        },
+        "note": {
+          ".validate": "newData.isString() && newData.val().length <= 500"
+        },
+        "actorUid": {
+          ".validate": "newData.isString()"
+        },
+        "actorEmail": {
+          ".validate": "newData.isString()"
+        },
+        "actorRole": {
+          ".validate": "newData.val() === 'Admin'"
+        },
+        "createdAt": {
+          ".validate": "newData.isString()"
+        },
+        "$other": {
+          ".validate": false
+        },
+        "historyEventId": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 80"
+        }
+      }
+    },
+    "refundProcessingHistory": {
+      "$paymentId": {
+        ".read": "(auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')) || (auth != null && root.child('payments').child($paymentId).child('uid').val() === auth.uid)",
+        "$eventId": {
+          ".write": "auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com') && !data.exists() && root.child('refundProcessing').child($paymentId).exists() && $eventId === root.child(\"refundProcessing\").child($paymentId).child(\"historyEventId\").val()",
+          ".validate": "newData.hasChildren(['type', 'reference', 'actorUid', 'actorEmail', 'actorRole', 'message', 'createdAt']) && (newData.child('type').val() === 'failed' || newData.child('type').val() === 'processed') && newData.child('reference').isString() && newData.child('reference').val().length <= 200 && newData.child('actorUid').val() === auth.uid && newData.child('actorEmail').val() === auth.token.email && newData.child('actorRole').val() === 'Admin' && newData.child('message').isString() && newData.child('message').val().length > 0 && newData.child('message').val().length <= 700 && newData.child('createdAt').isString()",
+          "type": {
+            ".validate": "newData.isString()"
+          },
+          "reference": {
+            ".validate": "newData.isString() && newData.val().length <= 200"
+          },
+          "actorUid": {
+            ".validate": "newData.isString()"
+          },
+          "actorEmail": {
+            ".validate": "newData.isString()"
+          },
+          "actorRole": {
+            ".validate": "newData.val() === 'Admin'"
+          },
+          "message": {
+            ".validate": "newData.isString() && newData.val().length <= 700"
+          },
+          "createdAt": {
+            ".validate": "newData.isString()"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
+    },
+    "deliveryAssignments": {
+      ".read": "(auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')) || (auth != null && query.orderByChild === 'agentUid' && query.equalTo === auth.uid && query.limitToFirst <= 100)",
+      ".indexOn": [
+        "agentUid",
+        "uid",
+        "status"
+      ],
+      "$orderId": {
+        ".read": "(auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')) || (auth != null && (data.child('uid').val() === auth.uid || data.child('agentUid').val() === auth.uid))",
+        ".write": "auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com') && root.child('orders').child($orderId).exists() && root.child('orders').child($orderId).child('uid').val() === newData.child('uid').val() && root.child('orders').child($orderId).child('status').val() !== 'Cancelled' && root.child('orders').child($orderId).child('status').val() !== 'Delivered' && (!data.exists() || data.child('status').val() !== 'delivered') && root.child('users').child(newData.child('agentUid').val()).child('role').val() === 'Delivery' && root.child('users').child(newData.child('agentUid').val()).child('status').val() === 'active' && newData.child('assignedBy').val() === auth.uid && (!data.exists() || data.child('orderId').val() === newData.child('orderId').val())",
+        ".validate": "newData.hasChildren(['orderId', 'uid', 'agentUid', 'status', 'assignedAt', 'assignedBy', 'studentName', 'subject', 'phone', 'address', 'pincode']) && ((!newData.child('lastHistoryEventId').exists() && !newData.child('lastHistoryStatus').exists() && !newData.child('lastHistoryActorUid').exists() && !newData.child('lastHistoryActorEmail').exists() && !newData.child('lastHistoryNote').exists() && !newData.child('lastHistoryCreatedAt').exists()) || (newData.hasChildren(['lastHistoryEventId', 'lastHistoryStatus', 'lastHistoryActorUid', 'lastHistoryActorEmail', 'lastHistoryNote', 'lastHistoryCreatedAt']) && newData.child('lastHistoryStatus').val() === newData.child('status').val() && newData.child('lastHistoryEventId').isString() && newData.child('lastHistoryEventId').val().length > 0 && newData.child('lastHistoryEventId').val().length <= 80 && newData.child('lastHistoryActorUid').isString() && newData.child('lastHistoryActorEmail').isString() && newData.child('lastHistoryNote').isString() && newData.child('lastHistoryNote').val().length <= 1000 && newData.child('lastHistoryCreatedAt').isString())) && newData.child('orderId').val() === $orderId && (newData.child('status').val() === 'assigned' || newData.child('status').val() === 'picked_up' || newData.child('status').val() === 'in_transit' || newData.child('status').val() === 'delivered' || newData.child('status').val() === 'failed_delivery') && newData.child('assignedAt').isString() && newData.child('assignedBy').isString() && newData.child('studentName').isString() && newData.child('subject').isString() && newData.child('phone').isString() && newData.child('address').isString() && newData.child('pincode').isString()",
+        "orderId": {
+          ".validate": "newData.isString()"
+        },
+        "uid": {
+          ".validate": "newData.isString()"
+        },
+        "agentUid": {
+          ".validate": "newData.isString()"
+        },
+        "status": {
+          ".write": "auth != null && data.parent().child('agentUid').val() === auth.uid && root.child('users').child(auth.uid).child('role').val() === 'Delivery' && root.child('users').child(auth.uid).child('status').val() === 'active' && ((data.val() === 'assigned' && newData.val() === 'picked_up') || (data.val() === 'picked_up' && newData.val() === 'in_transit') || (data.val() === 'in_transit' && (newData.val() === 'delivered' || newData.val() === 'failed_delivery')) || (data.val() === 'failed_delivery' && newData.val() === 'in_transit')) && newData.parent().child('lastHistoryStatus').val() === newData.val() && newData.parent().child('lastHistoryActorUid').val() === auth.uid && newData.parent().child('lastHistoryActorEmail').val() === auth.token.email && newData.parent().child('lastHistoryEventId').isString() && newData.parent().child('lastHistoryEventId').val().length > 0 && newData.parent().child('lastHistoryNote').isString() && newData.parent().child('lastHistoryNote').val().length <= 1000 && newData.parent().child('lastHistoryCreatedAt').isString()",
+          ".validate": "newData.val() === 'assigned' || newData.val() === 'picked_up' || newData.val() === 'in_transit' || newData.val() === 'delivered' || newData.val() === 'failed_delivery'"
+        },
+        "assignedAt": {
+          ".validate": "newData.isString()"
+        },
+        "assignedBy": {
+          ".validate": "newData.isString()"
+        },
+        "studentName": {
+          ".validate": "newData.isString()"
+        },
+        "subject": {
+          ".validate": "newData.isString()"
+        },
+        "phone": {
+          ".validate": "newData.isString()"
+        },
+        "address": {
+          ".validate": "newData.isString()"
+        },
+        "pincode": {
+          ".validate": "newData.isString()"
+        },
+        "updatedAt": {
+          ".write": "auth != null && data.parent().child('agentUid').val() === auth.uid && root.child('users').child(auth.uid).child('role').val() === 'Delivery' && root.child('users').child(auth.uid).child('status').val() === 'active'",
+          ".validate": "newData.isString()"
+        },
+        "lastNote": {
+          ".write": "auth != null && data.parent().child('agentUid').val() === auth.uid && root.child('users').child(auth.uid).child('role').val() === 'Delivery' && root.child('users').child(auth.uid).child('status').val() === 'active'",
+          ".validate": "newData.isString() && newData.val().length <= 1000"
+        },
+        "$other": {
+          ".validate": false
+        },
+        "lastHistoryEventId": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 80",
+          ".write": "auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com') || auth != null && data.parent().child('agentUid').val() === auth.uid && root.child('users').child(auth.uid).child('role').val() === 'Delivery' && root.child('users').child(auth.uid).child('status').val() === 'active'"
+        },
+        "lastHistoryStatus": {
+          ".validate": "newData.isString() && newData.val() === newData.parent().child('status').val()",
+          ".write": "auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com') || auth != null && data.parent().child('agentUid').val() === auth.uid && root.child('users').child(auth.uid).child('role').val() === 'Delivery' && root.child('users').child(auth.uid).child('status').val() === 'active'"
+        },
+        "lastHistoryActorUid": {
+          ".validate": "newData.isString()",
+          ".write": "auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com') || (auth != null && data.parent().child('agentUid').val() === auth.uid && root.child('users').child(auth.uid).child('role').val() === 'Delivery' && root.child('users').child(auth.uid).child('status').val() === 'active' && newData.val() === auth.uid)"
+        },
+        "lastHistoryActorEmail": {
+          ".validate": "newData.isString()",
+          ".write": "auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com') || (auth != null && data.parent().child('agentUid').val() === auth.uid && root.child('users').child(auth.uid).child('role').val() === 'Delivery' && root.child('users').child(auth.uid).child('status').val() === 'active' && newData.val() === auth.token.email)"
+        },
+        "lastHistoryNote": {
+          ".validate": "newData.isString() && newData.val().length <= 1000",
+          ".write": "auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com') || auth != null && data.parent().child('agentUid').val() === auth.uid && root.child('users').child(auth.uid).child('role').val() === 'Delivery' && root.child('users').child(auth.uid).child('status').val() === 'active'"
+        },
+        "lastHistoryCreatedAt": {
+          ".validate": "newData.isString()",
+          ".write": "auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com') || auth != null && data.parent().child('agentUid').val() === auth.uid && root.child('users').child(auth.uid).child('role').val() === 'Delivery' && root.child('users').child(auth.uid).child('status').val() === 'active'"
+        }
+      }
+    },
+    "deliveryHistory": {
+      "$orderId": {
+        ".read": "(auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')) || (auth != null && (root.child('orders').child($orderId).child('uid').val() === auth.uid || root.child('deliveryAssignments').child($orderId).child('agentUid').val() === auth.uid))",
+        "$eventId": {
+          ".write": "auth != null && !data.exists() && root.child('deliveryAssignments').child($orderId).exists() && ((auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')) || (root.child('deliveryAssignments').child($orderId).child('agentUid').val() === auth.uid && root.child('users').child(auth.uid).child('role').val() === 'Delivery' && root.child('users').child(auth.uid).child('status').val() === 'active')) && $eventId === root.child(\"deliveryAssignments\").child($orderId).child(\"lastHistoryEventId\").val()",
+          ".validate": "newData.hasChildren(['orderId', 'agentUid', 'actorUid', 'actorEmail', 'status', 'note', 'createdAt']) && newData.child('orderId').val() === $orderId && newData.child('agentUid').val() === root.child('deliveryAssignments').child($orderId).child('agentUid').val() && newData.child('actorUid').val() === root.child('deliveryAssignments').child($orderId).child('lastHistoryActorUid').val() && newData.child('actorEmail').val() === root.child('deliveryAssignments').child($orderId).child('lastHistoryActorEmail').val() && newData.child('status').val() === root.child('deliveryAssignments').child($orderId).child('status').val() && newData.child('note').isString() && newData.child('note').val().length <= 1000 && newData.child('createdAt').isString()",
+          "orderId": {
+            ".validate": "newData.isString()"
+          },
+          "agentUid": {
+            ".validate": "newData.isString()"
+          },
+          "actorUid": {
+            ".validate": "newData.isString()"
+          },
+          "actorEmail": {
+            ".validate": "newData.isString()"
+          },
+          "status": {
+            ".validate": "newData.isString()"
+          },
+          "note": {
+            ".validate": "newData.isString()"
+          },
+          "createdAt": {
+            ".validate": "newData.isString()"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
+    },
+    "cancellationRequests": {
+      ".read": "(auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')) || (auth != null && query.orderByChild === 'uid' && query.equalTo === auth.uid && query.limitToFirst <= 100)",
+      ".write": "auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')",
+      ".indexOn": [
+        "uid",
+        "orderId",
+        "createdAt"
+      ],
+      "$requestId": {
+        ".read": "(auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')) || (auth != null && data.child('uid').val() === auth.uid)",
+        ".write": "(auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')) || (auth != null && !data.exists() && newData.child('uid').val() === auth.uid && root.child('orders').child(newData.child('orderId').val()).child('uid').val() === auth.uid && root.child('orders').child(newData.child('orderId').val()).child('status').val() !== 'Delivered' && root.child('orders').child(newData.child('orderId').val()).child('status').val() !== 'Cancelled')",
+        ".validate": "newData.hasChildren(['uid', 'orderId', 'reason', 'status', 'createdAt']) && newData.child('uid').val() === auth.uid && newData.child('status').val() === 'pending' && newData.child('reason').isString() && newData.child('reason').val().length <= 500 && newData.child('createdAt').isString()"
+      }
+    },
+    "complaints": {
+      ".read": "(auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')) || (auth != null && query.orderByChild === 'uid' && query.equalTo === auth.uid && query.limitToFirst <= 100)",
+      ".indexOn": [
+        "uid",
+        "status",
+        "createdAt"
+      ],
+      "$complaintId": {
+        ".read": "(auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')) || (auth != null && data.child('uid').val() === auth.uid)",
+        ".write": "((auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')) && (newData.exists() || !root.child('supportReplies').child($complaintId).exists())) || (!data.exists() && ((auth != null && newData.child('uid').val() === auth.uid && root.child('users').child(auth.uid).child('role').val() === 'Student' && root.child('users').child(auth.uid).child('status').val() === 'active') || (auth == null && newData.child('source').val() === 'login-support'))) ",
+        ".validate": "(auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')) || (newData.hasChildren(['name', 'email', 'subject', 'message', 'createdAt', 'status']) && newData.child('name').isString() && newData.child('name').val().length <= 100 && newData.child('email').isString() && newData.child('email').val().length <= 254 && newData.child('subject').isString() && newData.child('subject').val().length <= 160 && newData.child('message').isString() && newData.child('message').val().length >= 10 && newData.child('message').val().length <= 4000 && newData.child('createdAt').isString() && ((auth == null && newData.child('source').val() === 'login-support' && newData.child('status').val() === 'pending') || (auth != null && !data.exists() && newData.child('uid').val() === auth.uid && root.child('users').child(auth.uid).child('role').val() === 'Student' && root.child('users').child(auth.uid).child('status').val() === 'active' && newData.child('status').val() === 'pending') || (auth != null && data.exists() && data.child('uid').val() === auth.uid && root.child('users').child(auth.uid).child('role').val() === 'Student' && root.child('users').child(auth.uid).child('status').val() === 'active' && newData.child('status').val() === 'In Progress')))",
+        "status": {
+          ".write": "auth != null && data.parent().child('uid').val() === auth.uid && root.child('users').child(auth.uid).child('role').val() === 'Student' && root.child('users').child(auth.uid).child('status').val() === 'active' && newData.val() === 'In Progress' && (data.val() === 'pending' || data.val() === 'In Progress' || data.val() === 'Resolved')",
+          ".validate": "newData.val() === 'pending' || newData.val() === 'In Progress' || newData.val() === 'Resolved'"
+        }
+      }
+    },
+    "supportReplies": {
+      "$ticketId": {
+        ".read": "(auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')) || (auth != null && root.child('complaints').child($ticketId).child('uid').val() === auth.uid)",
+        "$replyId": {
+          ".write": "auth != null && !data.exists() && root.child('complaints').child($ticketId).exists() && ((auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')) || (root.child('complaints').child($ticketId).child('uid').val() === auth.uid && root.child('users').child(auth.uid).child('role').val() === 'Student' && root.child('users').child(auth.uid).child('status').val() === 'active'))",
+          ".validate": "newData.hasChildren(['ticketId', 'authorUid', 'authorEmail', 'authorRole', 'message', 'createdAt']) && newData.child('ticketId').val() === $ticketId && newData.child('authorUid').val() === auth.uid && newData.child('authorEmail').val() === auth.token.email && ((newData.child('authorRole').val() === 'Admin' && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')) || (newData.child('authorRole').val() === 'Student' && root.child('complaints').child($ticketId).child('uid').val() === auth.uid && root.child('users').child(auth.uid).child('role').val() === 'Student' && root.child('users').child(auth.uid).child('status').val() === 'active')) && newData.child('message').isString() && newData.child('message').val().length >= 1 && newData.child('message').val().length <= 4000 && newData.child('createdAt').isNumber()",
+          "ticketId": {
+            ".validate": "newData.isString()"
+          },
+          "authorUid": {
+            ".validate": "newData.isString()"
+          },
+          "authorEmail": {
+            ".validate": "newData.isString()"
+          },
+          "authorRole": {
+            ".validate": "newData.isString()"
+          },
+          "message": {
+            ".validate": "newData.isString()"
+          },
+          "createdAt": {
+            ".validate": "newData.isNumber()"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
+    },
+    "referralCodes": {
+      ".read": "(auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')) || (auth != null && root.child('users').child(auth.uid).child('role').val() === 'Teacher' && root.child('users').child(auth.uid).child('status').val() === 'active' && query.orderByChild === 'teacherUid' && query.equalTo === auth.uid && query.limitToFirst <= 10)",
+      ".indexOn": [
+        "teacherUid"
+      ],
+      "$code": {
+        ".read": true,
+        ".write": "auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com') && ((!data.exists() && root.child('users').child(newData.child('teacherUid').val()).child('role').val() === 'Teacher' && root.child('users').child(newData.child('teacherUid').val()).child('status').val() === 'active' && newData.child('active').val() === true && newData.child('createdBy').val() === auth.uid) || (data.exists() && newData.child('teacherUid').val() === data.child('teacherUid').val() && newData.child('createdBy').val() === data.child('createdBy').val() && newData.child('createdAt').val() === data.child('createdAt').val() && (newData.child('active').val() === true || newData.child('active').val() === false)))",
+        ".validate": "newData.hasChildren(['code', 'teacherUid', 'active', 'createdBy', 'createdAt']) && newData.child('code').val() === $code && newData.child('teacherUid').isString() && newData.child('active').isBoolean() && newData.child('createdBy').isString() && newData.child('createdAt').isNumber() && newData.child('teacherUid').val() !== ''"
+      }
+    },
+    "referralAttributions": {
+      ".read": "auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com') || (auth != null && root.child('users').child(auth.uid).child('role').val() === 'Teacher' && root.child('users').child(auth.uid).child('status').val() === 'active' && query.orderByChild === 'teacherUid' && query.equalTo === auth.uid && query.limitToFirst <= 100)",
+      ".indexOn": [
+        "teacherUid",
+        "createdAt"
+      ],
+      "$studentUid": {
+        ".read": "auth != null && (auth.uid === $studentUid || (root.child('users').child(auth.uid).child('role').val() === 'Teacher' && root.child('users').child(auth.uid).child('status').val() === 'active' && data.child('teacherUid').val() === auth.uid) || (auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com'))) ",
+        ".write": "auth != null && auth.uid === $studentUid && !data.exists() && root.child('users').child(auth.uid).child('role').val() === 'Student' && root.child('users').child(auth.uid).child('status').val() === 'active' && newData.child('studentUid').val() === auth.uid && newData.child('teacherUid').val() !== auth.uid && root.child('referralCodes').child(newData.child('referralCode').val()).child('teacherUid').val() === newData.child('teacherUid').val() && root.child('referralCodes').child(newData.child('referralCode').val()).child('active').val() === true && root.child('users').child(newData.child('teacherUid').val()).child('role').val() === 'Teacher' && root.child('users').child(newData.child('teacherUid').val()).child('status').val() === 'active'",
+        ".validate": "newData.hasChildren(['studentUid', 'teacherUid', 'referralCode', 'createdAt']) && newData.child('studentUid').val() === $studentUid && newData.child('teacherUid').isString() && newData.child('referralCode').isString() && newData.child('createdAt').isNumber() && newData.child('teacherUid').val() !== $studentUid",
+        "studentUid": {
+          ".validate": "newData.isString()"
+        },
+        "teacherUid": {
+          ".validate": "newData.isString()"
+        },
+        "referralCode": {
+          ".validate": "newData.isString()"
+        },
+        "createdAt": {
+          ".validate": "newData.isNumber()"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "commissions": {
+      ".read": "auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com') || (auth != null && root.child('users').child(auth.uid).child('role').val() === 'Teacher' && root.child('users').child(auth.uid).child('status').val() === 'active' && query.orderByChild === 'teacherUid' && query.equalTo === auth.uid && query.limitToFirst <= 100)",
+      ".indexOn": [
+        "teacherUid",
+        "orderId",
+        "status",
+        "createdAt"
+      ],
+      "$commissionId": {
+        ".read": "auth != null && ((auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')) || (root.child('users').child(auth.uid).child('role').val() === 'Teacher' && root.child('users').child(auth.uid).child('status').val() === 'active' && data.child('teacherUid').val() === auth.uid))",
+        ".write": "auth != null && auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com') && ((!data.exists() && $commissionId === newData.child('paymentId').val() && newData.child('status').val() === 'pending' && root.child('orders').child(newData.child('orderId').val()).child('uid').val() === newData.child('studentUid').val() && root.child('referralAttributions').child(newData.child('studentUid').val()).child('teacherUid').val() === newData.child('teacherUid').val() && root.child('payments').child(newData.child('paymentId').val()).child('orderId').val() === newData.child('orderId').val() && root.child('payments').child(newData.child('paymentId').val()).child('uid').val() === newData.child('studentUid').val() && root.child('payments').child(newData.child('paymentId').val()).child('status').val() === 'verified' && newData.child('createdBy').val() === auth.uid) || (data.exists() && newData.child('teacherUid').val() === data.child('teacherUid').val() && newData.child('studentUid').val() === data.child('studentUid').val() && newData.child('orderId').val() === data.child('orderId').val() && newData.child('paymentId').val() === data.child('paymentId').val() && newData.child('amount').val() === data.child('amount').val() && newData.child('calculationBaseAmount').val() === data.child('calculationBaseAmount').val() && newData.child('calculationRatePercent').val() === data.child('calculationRatePercent').val() && newData.child('proposedAmount').val() === data.child('proposedAmount').val() && newData.child('calculationFormula').val() === data.child('calculationFormula').val() && newData.child('roundingPolicy').val() === data.child('roundingPolicy').val() && newData.child('currency').val() === data.child('currency').val() && newData.child('memo').val() === data.child('memo').val() && newData.child('createdBy').val() === data.child('createdBy').val() && newData.child('createdAt').val() === data.child('createdAt').val() && newData.child('creationHistoryId').val() === data.child('creationHistoryId').val() && newData.child('updatedBy').val() === auth.uid && ((data.child('status').val() === 'pending' && (newData.child('status').val() === 'approved' || newData.child('status').val() === 'rejected')) || (data.child('status').val() === 'approved' && newData.child('status').val() === 'paid'))))",
+        ".validate": "newData.hasChildren(['teacherUid', 'studentUid', 'orderId', 'paymentId', 'amount', 'calculationBaseAmount', 'calculationRatePercent', 'proposedAmount', 'calculationFormula', 'roundingPolicy', 'currency', 'status', 'memo', 'createdBy', 'createdAt', 'creationHistoryId']) && newData.child('teacherUid').isString() && newData.child('studentUid').isString() && newData.child('orderId').isString() && newData.child('paymentId').val() === $commissionId && newData.child('amount').isNumber() && newData.child('amount').val() > 0 && newData.child('amount').val() <= 1000000 && newData.child('calculationBaseAmount').val() === root.child('payments').child(newData.child('paymentId').val()).child('amount').val() && newData.child('calculationRatePercent').isNumber() && newData.child('calculationRatePercent').val() > 0 && newData.child('calculationRatePercent').val() <= 100 && (newData.child('calculationRatePercent').val() * 100) % 1 === 0 && (newData.child('amount').val() * 100) % 1 === 0 && (newData.child('calculationBaseAmount').val() * newData.child('calculationRatePercent').val()) >= (newData.child('amount').val() * 100 - 0.5) && (newData.child('calculationBaseAmount').val() * newData.child('calculationRatePercent').val()) < (newData.child('amount').val() * 100 + 0.5) && newData.child('proposedAmount').val() === newData.child('amount').val() && newData.child('calculationFormula').val() === 'verified-payment-times-admin-rate-v1' && newData.child('roundingPolicy').val() === 'half-up-to-0.01-INR' && newData.child('currency').val() === 'INR' && (newData.child('status').val() === 'pending' || newData.child('status').val() === 'approved' || newData.child('status').val() === 'rejected' || newData.child('status').val() === 'paid') && newData.child('memo').isString() && newData.child('memo').val().length <= 1000 && newData.child('createdBy').val() === auth.uid && newData.child('createdAt').isNumber()",
+        "teacherUid": {
+          ".validate": "newData.isString()"
+        },
+        "studentUid": {
+          ".validate": "newData.isString()"
+        },
+        "orderId": {
+          ".validate": "newData.isString()"
+        },
+        "paymentId": {
+          ".validate": "newData.isString()"
+        },
+        "amount": {
+          ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= 1000000"
+        },
+        "currency": {
+          ".validate": "newData.val() === 'INR'"
+        },
+        "status": {
+          ".validate": "newData.val() === 'pending' || newData.val() === 'approved' || newData.val() === 'rejected' || newData.val() === 'paid'"
+        },
+        "memo": {
+          ".validate": "newData.isString() && newData.val().length <= 1000"
+        },
+        "createdBy": {
+          ".validate": "newData.isString()"
+        },
+        "createdAt": {
+          ".validate": "newData.isNumber()"
+        },
+        "updatedBy": {
+          ".validate": "newData.isString()"
+        },
+        "updatedAt": {
+          ".validate": "newData.isNumber()"
+        },
+        "$other": {
+          ".validate": false
+        },
+        "calculationBaseAmount": {
+          ".validate": "newData.isNumber() && newData.val() > 0"
+        },
+        "calculationRatePercent": {
+          ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= 100"
+        },
+        "proposedAmount": {
+          ".validate": "newData.isNumber() && newData.val() > 0"
+        },
+        "calculationFormula": {
+          ".validate": "newData.val() === 'verified-payment-times-admin-rate-v1'"
+        },
+        "roundingPolicy": {
+          ".validate": "newData.val() === 'half-up-to-0.01-INR'"
+        },
+        "creationHistoryId": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 80"
+        }
+      }
+    },
+    "commissionHistory": {
+      "$commissionId": {
+        ".read": "auth != null && ((auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')) || (root.child('users').child(auth.uid).child('role').val() === 'Teacher' && root.child('users').child(auth.uid).child('status').val() === 'active' && root.child('commissions').child($commissionId).child('teacherUid').val() === auth.uid))",
+        "$eventId": {
+          ".write": "auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com') && !data.exists() && root.child('commissions').child($commissionId).exists() && ($eventId === root.child(\"commissions\").child($commissionId).child(\"creationHistoryId\").val() || $eventId === \"transition_\" + newData.child(\"status\").val())",
+          ".validate": "newData.hasChildren(['commissionId', 'teacherUid', 'status', 'actorUid', 'actorEmail', 'message', 'createdAt']) && newData.child('commissionId').val() === $commissionId && newData.child('teacherUid').val() === root.child('commissions').child($commissionId).child('teacherUid').val() && newData.child('status').isString() && newData.child('actorUid').val() === auth.uid && newData.child('actorEmail').val() === auth.token.email && newData.child('message').isString() && newData.child('message').val().length > 0 && newData.child('message').val().length <= 1000 && newData.child('createdAt').isNumber()",
+          "commissionId": {
+            ".validate": "newData.isString()"
+          },
+          "teacherUid": {
+            ".validate": "newData.isString()"
+          },
+          "status": {
+            ".validate": "newData.isString()"
+          },
+          "actorUid": {
+            ".validate": "newData.isString()"
+          },
+          "actorEmail": {
+            ".validate": "newData.isString()"
+          },
+          "message": {
+            ".validate": "newData.isString() && newData.val().length <= 1000"
+          },
+          "createdAt": {
+            ".validate": "newData.isNumber()"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
+    },
+    "notifications": {
+      ".read": "auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')",
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || (auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')))",
+        "$notificationId": {
+          ".write": "((auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com') && !data.exists() && newData.child('recipientUid').val() === $uid && root.child('users').child($uid).child('status').val() === 'active' && newData.child('actorUid').val() === auth.uid && newData.child('actorEmail').val() === auth.token.email && newData.child('actorRole').val() === 'Admin') || (auth != null && auth.uid === $uid && data.exists() && data.child('isRead').val() === false && newData.child('isRead').val() === true && newData.child('recipientUid').val() === data.child('recipientUid').val() && newData.child('type').val() === data.child('type').val() && newData.child('title').val() === data.child('title').val() && newData.child('message').val() === data.child('message').val() && newData.child('route').val() === data.child('route').val() && newData.child('actorUid').val() === data.child('actorUid').val() && newData.child('actorEmail').val() === data.child('actorEmail').val() && newData.child('actorRole').val() === data.child('actorRole').val() && newData.child('createdAt').val() === data.child('createdAt').val() && newData.child('readBy').val() === auth.uid))",
+          ".validate": "newData.hasChildren(['recipientUid', 'type', 'title', 'message', 'route', 'actorUid', 'actorEmail', 'actorRole', 'createdAt', 'isRead']) && newData.child('recipientUid').val() === $uid && (newData.child('type').val() === 'quotation' || newData.child('type').val() === 'payment' || newData.child('type').val() === 'refund' || newData.child('type').val() === 'delivery' || newData.child('type').val() === 'support' || newData.child('type').val() === 'commission' || newData.child('type').val() === 'system') && newData.child('title').isString() && newData.child('title').val().length > 0 && newData.child('title').val().length <= 120 && newData.child('message').isString() && newData.child('message').val().length > 0 && newData.child('message').val().length <= 1000 && (newData.child('route').val() === '/dashboard/my-orders' || newData.child('route').val() === '/dashboard/my-tickets' || newData.child('route').val() === '/delivery-portal' || newData.child('route').val() === '/teacher/referrals' || newData.child('route').val() === '/admin/order-details') && newData.child('actorUid').isString() && newData.child('actorEmail').isString() && newData.child('actorRole').val() === 'Admin' && newData.child('createdAt').isNumber() && newData.child('isRead').isBoolean() && ((!data.exists() && newData.child('isRead').val() === false) || (data.exists() && newData.child('isRead').val() === true && newData.child('readBy').val() === auth.uid && newData.child('readAt').isNumber()))",
+          "recipientUid": {
+            ".validate": "newData.isString()"
+          },
+          "type": {
+            ".validate": "newData.isString()"
+          },
+          "title": {
+            ".validate": "newData.isString() && newData.val().length <= 120"
+          },
+          "message": {
+            ".validate": "newData.isString() && newData.val().length <= 1000"
+          },
+          "route": {
+            ".validate": "newData.isString()"
+          },
+          "actorUid": {
+            ".validate": "newData.isString()"
+          },
+          "actorEmail": {
+            ".validate": "newData.isString()"
+          },
+          "actorRole": {
+            ".validate": "newData.val() === 'Admin'"
+          },
+          "createdAt": {
+            ".validate": "newData.isNumber()"
+          },
+          "isRead": {
+            ".validate": "newData.isBoolean()"
+          },
+          "readBy": {
+            ".validate": "newData.isString()"
+          },
+          "readAt": {
+            ".validate": "newData.isNumber()"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
+    },
+    "auditEvents": {
+      ".read": "auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')",
+      ".indexOn": [
+        "createdAt",
+        "entityType",
+        "entityId"
+      ],
+      "$eventId": {
+        ".write": "auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com') && !data.exists() && newData.child('actorUid').val() === auth.uid && newData.child('actorEmail').val() === auth.token.email && newData.child('actorRole').val() === 'Admin'",
+        ".validate": "newData.hasChildren(['actorUid', 'actorEmail', 'actorRole', 'type', 'entityType', 'entityId', 'summary', 'createdAt']) && newData.child('actorUid').val() === auth.uid && newData.child('actorEmail').val() === auth.token.email && newData.child('actorRole').val() === 'Admin' && newData.child('type').isString() && newData.child('type').val().length > 0 && newData.child('type').val().length <= 80 && newData.child('entityType').isString() && newData.child('entityType').val().length <= 50 && newData.child('entityId').isString() && newData.child('entityId').val().length <= 120 && newData.child('summary').isString() && newData.child('summary').val().length <= 500 && newData.child('createdAt').isNumber()",
+        "actorUid": {
+          ".validate": "newData.isString()"
+        },
+        "actorEmail": {
+          ".validate": "newData.isString()"
+        },
+        "actorRole": {
+          ".validate": "newData.val() === 'Admin'"
+        },
+        "type": {
+          ".validate": "newData.isString()"
+        },
+        "entityType": {
+          ".validate": "newData.isString()"
+        },
+        "entityId": {
+          ".validate": "newData.isString()"
+        },
+        "summary": {
+          ".validate": "newData.isString()"
+        },
+        "createdAt": {
+          ".validate": "newData.isNumber()"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "analytics": {
+      "visitorCount": {
+        ".read": true,
+        ".write": "auth != null && auth.token.email != null && (auth.token.email === 'admin@filecrafters.in' || auth.token.email === 'wmohd2514@outlook.com')",
+        ".validate": "newData.isNumber() && newData.val() >= 1420 && newData.val() <= 10000000"
+      }
+    }
+  }
+}

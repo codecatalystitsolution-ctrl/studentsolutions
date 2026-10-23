@@ -1,0 +1,50 @@
+<main class="teacher-referrals-page">
+  <header class="referrals-header">
+    <div>
+      <p class="eyebrow">TEACHER WORKSPACE</p>
+      <h1>Referrals & commissions</h1>
+      <p>Review student referrals and the status of manually reviewed commissions.</p>
+    </div>
+    <div class="teacher-links"><a routerLink="/notifications">Notifications</a><a routerLink="/login" class="sign-out-link">Sign in as another user</a></div>
+  </header>
+
+  <section class="referral-card">
+    <h2>Your referral codes</h2>
+    <p *ngIf="!codes.length">Your administrator has not created a referral code yet.</p>
+    <div class="code-list" *ngIf="codes.length">
+      <article *ngFor="let code of codes" class="code-item">
+        <strong>{{ code.code }}</strong><span [class.inactive]="!code.active">{{ code.active ? 'Active' : 'Inactive' }}</span>
+      </article>
+    </div>
+  </section>
+
+  <div class="referral-grid">
+    <section class="referral-card">
+      <div class="section-heading"><div><h2>Referred students</h2><p>{{ students.length }} recorded referrals</p></div></div>
+      <p *ngIf="!loading && !students.length" class="empty-state">No students have registered with your code yet.</p>
+      <div class="student-list" *ngIf="students.length">
+        <article *ngFor="let student of students" class="student-item">
+          <div><strong>Student · {{ student.studentUid | slice:0:8 }}</strong><small>Code {{ student.referralCode }}</small></div>
+          <time>{{ student.createdAt | date:'mediumDate' }}</time>
+        </article>
+      </div>
+    </section>
+
+    <section class="referral-card">
+      <div class="section-heading"><div><h2>Commission ledger</h2><p>Only administrators can record or approve amounts.</p></div></div>
+      <p *ngIf="!loading && !commissions.length" class="empty-state">No commission records are available.</p>
+      <article *ngFor="let commission of commissions" class="commission-item">
+        <div class="commission-top">
+          <div><strong>Order · {{ commission.orderId | slice:0:8 }}</strong><small>Student · {{ commission.studentUid | slice:0:8 }}</small></div>
+          <span class="status-pill" [attr.data-status]="commission.status">{{ statusLabel(commission.status) }}</span>
+        </div>
+        <div class="commission-amount">₹{{ commission.amount | number:'1.2-2' }} {{ commission.currency }}</div>
+        <p>{{ commission.memo || 'No additional note.' }}</p>
+        <small>Recorded {{ commission.createdAt | date:'medium' }}</small>
+        <div class="commission-history" *ngFor="let event of (histories[commission.id] | keyvalue)">
+          <strong>{{ statusLabel(event.value.status) }}</strong><span>{{ event.value.message }}</span><time>{{ event.value.createdAt | date:'medium' }}</time>
+        </div>
+      </article>
+    </section>
+  </div>
+</main>

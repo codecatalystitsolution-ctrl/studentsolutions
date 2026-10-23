@@ -1,0 +1,139 @@
+<div class="student-detail-page fade-in">
+  <div class="detail-header glass-card">
+    <div>
+      <h1>Student Profile</h1>
+      <p>Complete registration details for the selected student.</p>
+    </div>
+    <div class="header-actions">
+      <button class="pdf-button" type="button" (click)="downloadPdf()">&#8681; Download PDF</button>
+      <button class="back-button" type="button" (click)="goBack()">← Back to Students</button>
+    </div>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-panel">
+    <div class="spinner"></div>
+    <span>Loading student profile...</span>
+  </div>
+
+  <div *ngIf="!isLoading && errorMessage" class="error-panel">
+    <p>{{ errorMessage }}</p>
+    <button class="back-button" type="button" (click)="goBack()">Back to Students</button>
+  </div>
+
+  <div *ngIf="!isLoading && student" class="profile-grid glass-card">
+    <section class="profile-summary">
+      <div class="profile-badge">🎓</div>
+      <h2>{{ student.fullName || 'N/A' }}</h2>
+      <p>{{ student.email || 'No email provided' }}</p>
+      <div class="status-row">
+        <span class="status-label">Status</span>
+        <span [ngClass]="{ 'badge-active': student.status !== 'suspended', 'badge-suspended': student.status === 'suspended' }">
+          {{ (student.status || 'active') | titlecase }}
+        </span>
+      </div>
+      <div class="summary-chips">
+        <span class="chip">Orders: {{ orders.length }}</span>
+        <span class="chip">Complaints: {{ complaints.length }}</span>
+      </div>
+    </section>
+
+    <section class="profile-details">
+      <div class="detail-card">
+        <span class="label">Student ID</span>
+        <strong>{{ student.studentID || 'N/A' }}</strong>
+      </div>
+      <div class="detail-card">
+        <span class="label">Phone</span>
+        <strong>{{ student.phone || 'N/A' }}</strong>
+      </div>
+      <div class="detail-card">
+        <span class="label">WhatsApp</span>
+        <strong>{{ student.whatsapp || 'N/A' }}</strong>
+      </div>
+      <div class="detail-card">
+        <span class="label">College</span>
+        <strong>{{ student.collegeName || 'N/A' }}</strong>
+      </div>
+      <div class="detail-card">
+        <span class="label">Course</span>
+        <strong>{{ student.courseName || 'N/A' }}</strong>
+      </div>
+      <div class="detail-card">
+        <span class="label">Branch</span>
+        <strong>{{ student.branch || 'N/A' }}</strong>
+      </div>
+      <div class="detail-card">
+        <span class="label">Year</span>
+        <strong>{{ student.year || 'N/A' }}</strong>
+      </div>
+      <div class="detail-card">
+        <span class="label">Semester</span>
+        <strong>{{ student.semester || 'N/A' }}</strong>
+      </div>
+      <div class="detail-card">
+        <span class="label">Roll Number</span>
+        <strong>{{ student.rollNumber || 'N/A' }}</strong>
+      </div>
+      <div class="detail-card full-width">
+        <span class="label">Address</span>
+        <strong>{{ student.address || 'N/A' }}</strong>
+      </div>
+      <div class="detail-card full-width">
+        <span class="label">Pincode</span>
+        <strong>{{ student.pincode || 'N/A' }}</strong>
+      </div>
+      <div class="detail-card full-width">
+        <span class="label">Category</span>
+        <strong>{{ student.category || 'N/A' }}</strong>
+      </div>
+      <div class="detail-card full-width">
+        <span class="label">Registered On</span>
+        <strong>{{ student.createdAt ? (student.createdAt | date:'medium') : 'N/A' }}</strong>
+      </div>
+      <div class="detail-card full-width">
+        <span class="label">Last Updated</span>
+        <strong>{{ student.updatedAt ? (student.updatedAt | date:'medium') : 'N/A' }}</strong>
+      </div>
+      <div class="detail-card full-width">
+        <span class="label">UID</span>
+        <strong>{{ student.uid }}</strong>
+      </div>
+    </section>
+  </div>
+
+  <div *ngIf="!isLoading && student" class="activity-grid">
+    <section class="activity-card">
+      <div class="activity-header">
+        <h3>Recent Orders</h3>
+        <span class="activity-count">{{ orders.length }}</span>
+      </div>
+      <div *ngIf="orders.length === 0" class="empty-state">No orders found for this student.</div>
+      <div *ngFor="let order of orders" class="activity-item">
+        <div class="item-head">
+          <strong>{{ order.projectDetails?.submittedBy || order.fileType || 'Order' }}</strong>
+          <span class="item-meta">{{ order.status || 'Pending' | titlecase }}</span>
+        </div>
+        <div class="item-line">Order ID: {{ order.id }}</div>
+        <div class="item-line">Amount: ₹{{ order.pricing?.totalAmount || order.totalCost || '0' }}</div>
+        <div class="item-line">Created: {{ order.createdAt ? (order.createdAt | date:'short') : 'N/A' }}</div>
+      </div>
+    </section>
+
+    <section class="activity-card">
+      <div class="activity-header">
+        <h3>Support Complaints</h3>
+        <span class="activity-count">{{ complaints.length }}</span>
+      </div>
+      <div *ngIf="complaints.length === 0" class="empty-state">No complaints found for this student.</div>
+      <div *ngFor="let complaint of complaints" class="activity-item">
+        <div class="item-head">
+          <strong>{{ complaint.subject || complaint.category || 'Complaint' }}</strong>
+          <span class="item-meta">{{ complaint.status || 'Open' | titlecase }}</span>
+        </div>
+        <div class="item-line">Ticket ID: {{ complaint.id }}</div>
+        <div class="item-line">Category: {{ complaint.category || 'N/A' }}</div>
+        <div class="item-line">Created: {{ complaint.createdAt ? (complaint.createdAt | date:'short') : 'N/A' }}</div>
+      </div>
+    </section>
+  </div>
+</div>

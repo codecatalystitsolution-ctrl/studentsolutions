@@ -1,4 +1,4 @@
-<div class="profile-layout" *ngIf="!isLoading">
+﻿<div class="profile-layout" *ngIf="!isLoading">
   <div class="profile-banner glass-card">
     <div class="banner-cover"></div>
     <div class="banner-content">
@@ -7,20 +7,20 @@
       </div>
       <div class="user-titles">
         <h2>{{ userData?.fullName || 'Student' }}</h2>
-        <p>{{ userData?.email }} • {{ userData?.studentID || 'Student Account' }}</p>
+        <p>{{ userData?.email || 'Email not provided' }} &middot; {{ userData?.studentID || 'Student Account' }}</p>
       </div>
       <div class="action-btns">
         <button class="btn-edit" *ngIf="!isEditMode" (click)="toggleEditMode()">
-          ✏️ Edit Profile
+          Edit Profile
         </button>
-        <button class="btn-cancel" *ngIf="isEditMode" (click)="toggleEditMode()">✕ Cancel</button>
+        <button class="btn-cancel" *ngIf="isEditMode" (click)="toggleEditMode()">Cancel</button>
         <button
           class="btn-save"
           *ngIf="isEditMode"
           (click)="saveProfile()"
           [disabled]="profileForm.invalid"
         >
-          💾 Save Changes
+          Save Changes
         </button>
       </div>
     </div>
@@ -29,43 +29,43 @@
   <div class="profile-grid" [class.edit-mode]="isEditMode">
     <ng-container *ngIf="!isEditMode">
       <div class="info-card glass-card">
-        <h3>🎓 Academic Identity</h3>
+        <h3>Academic Details</h3>
         <div class="info-list">
           <div class="info-item">
-            <span>College</span> <strong>{{ userData?.collegeName }}</strong>
+            <span>College</span> <strong>{{ userData?.collegeName || 'Not provided' }}</strong>
           </div>
           <div class="info-item">
-            <span>Course</span> <strong>{{ userData?.courseName }} ({{ userData?.branch }})</strong>
+            <span>Course</span> <strong>{{ userData?.courseName || 'Not provided' }}<ng-container *ngIf="userData?.branch"> ({{ userData.branch }})</ng-container></strong>
           </div>
           <div class="info-item">
-            <span>Year & Semester</span> <strong>{{ userData?.year || 'N/A' }} • {{ userData?.semester || 'N/A' }}</strong>
+            <span>Year & Semester</span> <strong>{{ userData?.year || 'Not provided' }} &middot; {{ userData?.semester || 'Not provided' }}</strong>
           </div>
           <div class="info-item">
-            <span>Roll Number</span> <strong>{{ userData?.rollNumber }}</strong>
+            <span>Roll Number</span> <strong>{{ userData?.rollNumber || 'Not provided' }}</strong>
           </div>
         </div>
       </div>
 
       <div class="info-card glass-card">
-        <h3>📞 Contact Information</h3>
+        <h3>Contact Information</h3>
         <div class="info-list">
           <div class="info-item">
-            <span>Phone</span> <strong>+91 {{ userData?.phone }}</strong>
+            <span>Phone</span> <strong>{{ userData?.phone ? '+91 ' + userData.phone : 'Not provided' }}</strong>
           </div>
           <div class="info-item">
-            <span>WhatsApp</span> <strong>+91 {{ userData?.whatsapp || 'Not provided' }}</strong>
+            <span>WhatsApp</span> <strong>{{ userData?.whatsapp ? '+91 ' + userData.whatsapp : 'Not provided' }}</strong>
           </div>
         </div>
       </div>
 
       <div class="info-card glass-card span-full">
-        <h3>📍 Delivery Address</h3>
+        <h3>Delivery Address</h3>
         <div class="info-list">
           <div class="info-item">
-            <span>Address</span> <strong>{{ userData?.address }}</strong>
+            <span>Address</span> <strong>{{ userData?.address || 'Not provided' }}</strong>
           </div>
           <div class="info-item">
-            <span>Pincode</span> <strong>{{ userData?.pincode }}</strong>
+            <span>Pincode</span> <strong>{{ userData?.pincode || 'Not provided' }}</strong>
           </div>
         </div>
       </div>

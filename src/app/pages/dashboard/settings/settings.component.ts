@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { ThemeService } from '../../../services/theme.service';
 
 @Component({
   selector: 'app-settings',
@@ -10,5 +11,10 @@ import { RouterLink } from '@angular/router';
   styleUrls: ['./settings.component.scss']
 })
 export class SettingsComponent {
-  // Filhal yahan kisi logic ki zaroorat nahi hai
+  private readonly themeService = inject(ThemeService);
+  readonly theme = this.themeService.theme;
+
+  setDarkMode(enabled: boolean): void {
+    this.themeService.setTheme(enabled ? 'dark' : 'light');
+  }
 }

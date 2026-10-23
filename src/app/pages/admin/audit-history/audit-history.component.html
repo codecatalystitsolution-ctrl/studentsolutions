@@ -1,0 +1,14 @@
+<main class="audit-page">
+  <header class="audit-header">
+    <div><p class="eyebrow">ADMIN CONTROLS</p><h1>Audit history</h1><p>Recent administrator actions recorded by the application.</p></div>
+    <span class="record-count">{{ events.length }} recent records</span>
+  </header>
+  <section class="audit-card">
+    <p class="audit-state" *ngIf="loading">Loading audit events…</p>
+    <p class="audit-state" *ngIf="!loading && !events.length">No administrator audit events have been recorded.</p>
+    <article *ngFor="let event of events" class="audit-row">
+      <span class="event-mark" aria-hidden="true">✓</span>
+      <div><div class="event-heading"><strong>{{ event.type | titlecase }}</strong><span>{{ event.entityType }} · {{ event.entityId }}</span></div><p>{{ event.summary }}</p><small>{{ event.createdAt | date:'medium' }} · {{ event.actorEmail }}</small></div>
+    </article>
+  </section>
+</main>

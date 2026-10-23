@@ -51,6 +51,13 @@
               ],
               "outputHashing": "all"
             },
+            "visual-test-auth": {
+              "browser": "src/main.visual-test.ts",
+              "tsConfig": "tsconfig.visual-test.json",
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            },
             "development": {
               "optimization": false,
               "extractLicenses": false,
@@ -65,6 +72,9 @@
             "production": {
               "buildTarget": "filecrafters-web:build:production"
             },
+            "visual-test-auth": {
+              "buildTarget": "filecrafters-web:build:visual-test-auth"
+            },
             "development": {
               "buildTarget": "filecrafters-web:build:development"
             }
@@ -72,7 +82,10 @@
           "defaultConfiguration": "development"
         },
         "test": {
-          "builder": "@angular/build:unit-test"
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "setupFiles": ["src/test-setup.ts"]
+          }
         }
       }
     }

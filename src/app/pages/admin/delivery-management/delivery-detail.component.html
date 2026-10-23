@@ -1,0 +1,71 @@
+<div class="delivery-detail-page fade-in">
+  <div class="detail-header glass-card">
+    <div>
+      <h1>Delivery Staff Profile</h1>
+      <p>Complete registration details for the selected staff member.</p>
+    </div>
+    <div class="header-actions">
+      <button class="pdf-button" type="button" (click)="downloadPdf()">&#8681; Download PDF</button>
+      <button class="back-button" type="button" (click)="goBack()">← Back to Delivery Staff</button>
+    </div>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-panel">
+    <div class="spinner"></div>
+    <span>Loading delivery staff profile...</span>
+  </div>
+
+  <div *ngIf="!isLoading && errorMessage" class="error-panel">
+    <p>{{ errorMessage }}</p>
+    <button class="back-button" type="button" (click)="goBack()">Back to Delivery Staff</button>
+  </div>
+
+  <div *ngIf="!isLoading && delivery" class="profile-grid glass-card">
+    <section class="profile-summary">
+      <div class="profile-badge">D</div>
+      <h2>{{ delivery.fullName || 'N/A' }}</h2>
+      <p>{{ delivery.email || 'No email provided' }}</p>
+      <div class="status-row">
+        <span class="status-label">Status</span>
+        <span [ngClass]="{ 'badge-active': delivery.status !== 'suspended', 'badge-suspended': delivery.status === 'suspended' }">
+          {{ (delivery.status || 'active') | titlecase }}
+        </span>
+      </div>
+    </section>
+
+    <section class="profile-details">
+        <div class="detail-card">
+            <span class="label">Delivery ID</span>
+            <strong>{{ delivery.deliveryID || 'N/A' }}</strong>
+        </div>
+        <div class="detail-card">
+            <span class="label">Phone</span>
+            <strong>{{ delivery.phone || 'N/A' }}</strong>
+        </div>
+        <div class="detail-card">
+            <span class="label">WhatsApp</span>
+            <strong>{{ delivery.whatsapp || 'N/A' }}</strong>
+        </div>
+        <div class="detail-card">
+            <span class="label">Vehicle Number</span>
+            <strong>{{ delivery.vehicleNumber || 'N/A' }}</strong>
+        </div>
+        <div class="detail-card full-width">
+            <span class="label">Address</span>
+            <strong>{{ delivery.address || 'N/A' }}</strong>
+        </div>
+        <div class="detail-card full-width">
+            <span class="label">Registered On</span>
+            <strong>{{ delivery.createdAt ? (delivery.createdAt | date:'medium') : 'N/A' }}</strong>
+        </div>
+        <div class="detail-card full-width">
+            <span class="label">Last Updated</span>
+            <strong>{{ delivery.updatedAt ? (delivery.updatedAt | date:'medium') : 'N/A' }}</strong>
+        </div>
+        <div class="detail-card full-width">
+            <span class="label">UID</span>
+            <strong>{{ delivery.uid }}</strong>
+        </div>
+    </section>
+  </div>
+</div>

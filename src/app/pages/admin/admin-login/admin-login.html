@@ -1,4 +1,7 @@
 <div class="admin-login-container">
+  <button class="auth-theme-toggle" type="button" (click)="toggleTheme()" [attr.aria-label]="theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'">
+    {{ theme === 'dark' ? '☀' : '☾' }}
+  </button>
   <div class="glow-bg"></div>
 
   <div class="login-card fade-in">

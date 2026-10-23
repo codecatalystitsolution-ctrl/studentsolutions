@@ -1,17 +1,28 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+import { Auth } from '@angular/fire/auth';
+import { Database } from '@angular/fire/database';
+import { SupportReplyService } from '../../../../services/support-reply.service';
+import { NotificationService } from '../../../../shared/notification/notification.service';
+import { TicketStatusComponent } from './ticket-status';
 
-import { TicketModal } from './ticket-status';
-
-describe('TicketModal', () => {
-  let component: TicketModal;
-  let fixture: ComponentFixture<TicketModal>;
+describe('TicketStatusComponent', () => {
+  let component: TicketStatusComponent;
+  let fixture: ComponentFixture<TicketStatusComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TicketModal],
+      imports: [TicketStatusComponent],
+      providers: [
+        provideRouter([]),
+        { provide: Auth, useValue: {} },
+        { provide: Database, useValue: {} },
+        { provide: SupportReplyService, useValue: { watchTicket: vi.fn(() => () => undefined) } },
+        { provide: NotificationService, useValue: { show: vi.fn() } },
+      ],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(TicketModal);
+    fixture = TestBed.createComponent(TicketStatusComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

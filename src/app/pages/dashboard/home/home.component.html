@@ -1,108 +1,42 @@
-<div class="welcome-banner">
-  <div class="banner-text">
-    <h2>Welcome back, {{ userName }}! 👋</h2>
-    <p>
-      Ready to submit your next assignment? Let us handle the formatting and printing for your
-      CareFinder project and other subjects.
-    </p>
-    <button class="btn-action" routerLink="/new-order">Create New File Order</button>
-  </div>
-  <div class="banner-visual">
-    <div class="shape shape-1"></div>
-    <div class="shape shape-2"></div>
-  </div>
-</div>
-
-<div class="stats-grid">
-  <div class="stat-card glass-card">
-    <div class="stat-icon blue">📦</div>
-    <div class="stat-details">
-      <h3>{{ activeOrdersCount < 10 ? '0' + activeOrdersCount : activeOrdersCount }}</h3>
-      <p>Active Orders</p>
+﻿<section class="student-home">
+  <section class="hero-panel">
+    <div class="hero-copy">
+      <span class="hero-tag">✦ YOUR STUDENT SUCCESS HUB</span>
+      <h1>Get Your Assignments,<br />Projects &amp; Notes Done<br />by Experts!</h1>
+      <p>Fast <i>•</i> Reliable <i>•</i> Student Friendly</p>
+      <a class="primary-btn" routerLink="/new-order">Place a New Order <span aria-hidden="true">→</span></a>
     </div>
-  </div>
-  <div class="stat-card glass-card">
-    <div class="stat-icon green">✅</div>
-    <div class="stat-details">
-      <h3>{{ completedOrdersCount < 10 ? '0' + completedOrdersCount : completedOrdersCount }}</h3>
-      <p>Completed Files</p>
+    <div class="hero-art" aria-hidden="true">
+      <div class="art-glow"></div><div class="wave wave-one"></div><div class="wave wave-two"></div>
+      <div class="laptop"><div class="screen"><div class="screen-shine"></div><span>✦</span></div><div class="keyboard"></div><div class="laptop-base"></div></div>
+      <div class="grad-cap"><div class="cap-top"></div><div class="cap-board"></div><div class="cap-tassel"></div></div>
+      <div class="books"><span></span><span></span><span></span></div>
+      <div class="pencil-cup"><i></i><i></i><i></i><b></b></div>
+      <span class="spark spark-a">✦</span><span class="spark spark-b">✧</span>
     </div>
-  </div>
-  <div class="stat-card glass-card">
-    <div class="stat-icon purple">💳</div>
-    <div class="stat-details">
-      <h3>₹{{ totalSpent }}</h3>
-      <p>Total Spent</p>
-    </div>
-  </div>
-</div>
+  </section>
 
-<div class="orders-section">
-  <div class="section-header">
-    <h3>Recent Orders</h3>
-  </div>
+  <nav class="services-strip" aria-label="Student services">
+    <a routerLink="/new-order" class="service-item"><span class="service-icon violet">▤</span><span><strong>Assignments</strong><small>Detailed solutions</small></span></a>
+    <a routerLink="/new-order" class="service-item"><span class="service-icon blue">◆</span><span><strong>Projects</strong><small>Complete projects</small></span></a>
+    <a routerLink="/new-order" class="service-item"><span class="service-icon teal">▤</span><span><strong>Practical Files</strong><small>Lab reports &amp; records</small></span></a>
+    <a routerLink="/dashboard/quizzes" [queryParams]="{ mode: 'papers' }" class="service-item"><span class="service-icon purple">▣</span><span><strong>Previous Papers</strong><small>Past year papers</small></span></a>
+  </nav>
 
-  <div class="table-container glass-card">
-    <table class="modern-table">
-      <thead>
-        <tr>
-          <th>Order ID</th>
-          <th>Subject/Topic</th>
-          <th>Est. Pages</th>
-          <th>Date</th>
-          <th>Status</th>
-          <th>Payment</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let order of recentOrders">
-          <td class="font-bold">{{ order.id | slice: 0 : 8 }}...</td>
-          <td>{{ order.projectDetails?.subject || order.subject }}</td>
-          <td>{{ order.printSettings?.pagesLabel || order.pagesLabel }}</td>
-          <td class="text-muted">{{ order.createdAt | date: 'mediumDate' }}</td>
-          <td>
-            <div class="status-pill-student" [ngClass]="(order.status || 'pending').toLowerCase()">
-              <span class="status-dot"></span>
-              {{ order.status || 'Pending' }}
-            </div>
-          </td>
-          
-          <td>
-            <div class="status-pill-student" [ngClass]="(order.paymentDetails?.status || 'pending-verification').toLowerCase().replace(' ', '-')">
-              <span class="status-dot"></span>
-              {{ order.paymentDetails?.status || 'Pending Verification' }}
-            </div>
-          </td>
+  <section class="stats-grid" aria-label="Order summary">
+    <a routerLink="/dashboard/my-orders" class="stat-card stat-purple"><span class="stat-icon">🛒</span><span class="stat-copy"><strong>{{ activeOrdersCount + completedOrdersCount }}</strong><small>Total Orders</small><em>↗ Live order count</em></span></a>
+    <a routerLink="/dashboard/my-orders" class="stat-card stat-blue"><span class="stat-icon">⌛</span><span class="stat-copy"><strong>{{ activeOrdersCount }}</strong><small>In Progress</small><em>View details →</em></span></a>
+    <a routerLink="/dashboard/my-orders" class="stat-card stat-green"><span class="stat-icon">✓</span><span class="stat-copy"><strong>{{ completedOrdersCount }}</strong><small>Delivered</small><em>✓ Completed orders</em></span></a>
+    <a routerLink="/dashboard/my-orders" class="stat-card stat-orange"><span class="stat-icon">▣</span><span class="stat-copy"><strong>₹{{ totalSpent | number:'1.0-0' }}</strong><small>Total Spent</small><em>Across all orders</em></span></a>
+  </section>
 
-          <td class="action-cell">
-            <div
-              class="action-buttons"
-              *ngIf="(order.status || 'Pending').toLowerCase() === 'pending'"
-            >
-              <button class="btn-cancel" (click)="cancelOrder(order.id)" title="Cancel Order">
-                ✖ Cancel
-              </button>
-            </div>
-
-            <div
-              class="locked-status"
-              *ngIf="(order.status || 'Pending').toLowerCase() !== 'pending'"
-            >
-              <span title="Order cannot be changed now">🔒 Locked</span>
-            </div>
-          </td>
-        </tr>
-
-        <tr *ngIf="recentOrders.length === 0">
-          <td
-            colspan="7"
-            style="text-align: center; padding: 3rem; color: #94a3b8; font-size: 0.95rem"
-          >
-            No recent orders found. Click on 'New Order' to get started!
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</div>
+  <section class="content-grid">
+    <section class="panel orders-panel"><header class="panel-header"><div><span class="eyebrow">YOUR WORKSPACE</span><h2>Recent orders</h2></div><a routerLink="/dashboard/my-orders">View all <span>→</span></a></header>
+      <div class="order-list" *ngIf="recentOrders.length; else emptyOrders">
+        <div class="order-row" *ngFor="let order of recentOrders | slice: 0 : 4"><span class="order-symbol">▤</span><div class="order-main"><strong>{{ order.projectDetails?.subject || order.subject || 'Assignment' }}</strong><small>#{{ (order.id || '').slice(0, 8) }} · {{ order.createdAt | date:'mediumDate' }}</small></div><span class="status-badge" [ngClass]="(order.status || 'pending').toLowerCase()">{{ order.status || 'Pending' }}</span><strong class="order-price">₹{{ order.pricing?.totalAmount || 0 }}</strong></div>
+      </div>
+      <ng-template #emptyOrders><div class="empty-state"><span>✧</span><h3>Your next big idea starts here</h3><p>Your active orders will show up here. Place an order and our experts will take it from there.</p><a class="secondary-btn" routerLink="/new-order">Create your first order <span>→</span></a></div></ng-template>
+    </section>
+    <aside class="side-cards"><section class="panel support-box"><span class="support-icon">♡</span><div><span class="eyebrow">HERE TO HELP</span><h3>Questions? We've got you.</h3><p>Talk to our student support team.</p></div><a routerLink="/dashboard/help-support" aria-label="Contact support">→</a></section><section class="panel profile-box"><span class="profile-avatar">{{ userName.charAt(0).toUpperCase() }}</span><div><span class="eyebrow">YOUR ACCOUNT</span><h3>{{ userName }}</h3><small>Student account</small></div><a routerLink="/dashboard/profile">Profile →</a></section></aside>
+  </section>
+</section>

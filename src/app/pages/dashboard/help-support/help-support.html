@@ -1,4 +1,4 @@
-<div class="support-wrapper">
+﻿<div class="support-wrapper">
   
   <div class="support-header">
     <div class="badge-tag">Center Support</div>
@@ -9,22 +9,22 @@
   <div class="support-grid">
     <div class="left-pane">
       <div class="action-cards">
-        <a href="https://wa.me/919286304340" target="_blank" class="glass-card whatsapp-card">
-          <div class="icon-box">💬</div>
+        <a href="https://wa.me/919286304340" target="_blank" rel="noopener noreferrer" class="glass-card whatsapp-card">
+          <div class="icon-box" aria-hidden="true">WA</div>
           <div class="card-info">
             <h3>WhatsApp Support</h3>
-            <p>Go to WhatsApp And Chat with Us</p>
+            <p>Chat with our support team on WhatsApp.</p>
           </div>
-          <span class="arrow-go">➔</span>
+          <span class="arrow-go" aria-hidden="true"></span>
         </a>
         
         <a href="mailto:codecatalystitsolution@gmail.com" class="glass-card email-card">
-          <div class="icon-box">📧</div>
+          <div class="icon-box" aria-hidden="true">@</div>
           <div class="card-info">
             <h3>Email Helpdesk</h3>
             <p>codecatalystitsolution@gmail.com</p>
           </div>
-          <span class="arrow-go">➔</span>
+          <span class="arrow-go" aria-hidden="true"></span>
         </a>
       </div>
 
@@ -33,13 +33,13 @@
         <h2>Frequently Asked Questions</h2>
         <div class="accordion">
           <div *ngFor="let faq of faqs; let i = index" class="accordion-item" [class.is-open]="faq.isOpen">
-            <div class="accordion-header" (click)="toggleFaq(i)">
+            <button type="button" class="accordion-header" (click)="toggleFaq(i)" [attr.aria-expanded]="faq.isOpen">
               <span class="q-text">{{ faq.question }}</span>
               <div class="toggle-icon">
                 <span class="line1"></span>
                 <span class="line2"></span>
               </div>
-            </div>
+            </button>
             <div class="accordion-body">
               <div class="inner-content">
                 <p>{{ faq.answer }}</p>
@@ -59,26 +59,26 @@
 
         <form [formGroup]="ticketForm" (ngSubmit)="onSubmitTicket()" class="premium-form">
           <div class="input-wrapper">
-            <label>Your Name</label>
+            <label for="ticket-name">Your Name</label>
             <div class="input-field-group">
-              <span class="field-icon">👤</span>
-              <input type="text" formControlName="name" placeholder="Your's Name" />
+              <span class="field-icon" aria-hidden="true">01</span>
+              <input id="ticket-name" type="text" formControlName="name" placeholder="Your name" />
             </div>
           </div>
 
           <div class="input-wrapper">
-            <label>Email Address</label>
+            <label for="ticket-email">Email Address</label>
             <div class="input-field-group">
-              <span class="field-icon">✉️</span>
-              <input type="email" formControlName="email" placeholder="example@mail.com" />
+              <span class="field-icon" aria-hidden="true">@</span>
+              <input id="ticket-email" type="email" formControlName="email" placeholder="example@mail.com" />
             </div>
           </div>
 
           <div class="input-wrapper">
-            <label>Category</label>
+            <label for="ticket-category">Category</label>
             <div class="input-field-group">
-              <span class="field-icon">📁</span>
-              <select formControlName="category">
+              <span class="field-icon" aria-hidden="true">02</span>
+              <select id="ticket-category" formControlName="category">
                 <option value="">-- Select Category --</option>
                 <option value="file-upload">File/Project Upload Issue</option>
                 <option value="payment">Payment & Refund</option>
@@ -89,18 +89,18 @@
           </div>
 
           <div class="input-wrapper">
-            <label>Subject</label>
+            <label for="ticket-subject">Subject</label>
             <div class="input-field-group">
-              <span class="field-icon">✏️</span>
-              <input type="text" formControlName="subject" placeholder="Enter subject of your query" />
+              <span class="field-icon" aria-hidden="true">03</span>
+              <input id="ticket-subject" type="text" formControlName="subject" placeholder="Enter subject of your query" />
             </div>
           </div>
 
           <div class="input-wrapper">
-            <label>Message / Details</label>
+            <label for="ticket-message">Message / Details</label>
             <div class="input-field-group alignment-top">
-              <span class="field-icon">💬</span>
-              <textarea formControlName="message" rows="4" placeholder="Describe your issue in detail..."></textarea>
+              <span class="field-icon" aria-hidden="true">04</span>
+              <textarea id="ticket-message" formControlName="message" rows="4" placeholder="Describe your issue in detail..."></textarea>
             </div>
           </div>
 
@@ -116,11 +116,11 @@
   <div class="custom-modal-overlay" *ngIf="showCustomDialog">
     <div class="custom-modal-card">
       <div class="success-icon-ring">
-        <span class="checkmark">✓</span>
+        <span class="checkmark">&#10003;</span>
       </div>
       <h2>Ticket Raised Successfully!</h2>
     <p>Your support ticket has been safely stored in our database. Our technical team will review your query and contact you shortly.</p>
-     <button class="modal-close-btn" (click)="closeModal()">Okay, Go to Dashboard</button>
+     <button class="modal-close-btn" (click)="closeModal()">View My Tickets</button>
     </div>
   </div>
 

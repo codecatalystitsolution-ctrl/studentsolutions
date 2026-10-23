@@ -2,21 +2,87 @@
   <div class="page-header">
     <div class="header-text">
       <h2>Manage Orders</h2>
-      <p>Track, process, and view complete details of student file requests.</p>
+      <p>Track, process, and view complete details of student project and file requests.</p>
     </div>
     <div class="header-actions">
+      <!-- Page-level Refresh Button (PRD Section 7.3) -->
+      <button
+        type="button"
+        class="action-btn refresh-btn"
+        (click)="refresh()"
+        [disabled]="isRefreshing"
+        title="Refresh orders list"
+      >
+        <span *ngIf="!isRefreshing">&#8635; Refresh</span>
+        <span *ngIf="isRefreshing">Refreshing...</span>
+      </button>
+
+      <!-- CSV Export Button (PRD Section 7.5) -->
+      <button
+        type="button"
+        class="action-btn export-btn"
+        (click)="exportCsv()"
+        [disabled]="filteredOrders.length === 0"
+        title="Download CSV of filtered orders"
+      >
+        <span>&#8681; Download CSV</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Filter & Search Toolbar (PRD Section 7.4) -->
+  <div class="toolbar-card glass-card">
+    <div class="toolbar-grid">
+      <!-- Search -->
       <div class="search-box">
-        <span class="search-icon">🔍</span>
         <input
           type="text"
           [(ngModel)]="searchTerm"
-          (keyup)="filterOrders()"
-          placeholder="Search by ID or Name..."
+          (input)="filterOrders()"
+          placeholder="Search by order ID, student name, email, roll number..."
           class="search-input"
         />
-        <button class="clear-btn" *ngIf="searchTerm" (click)="clearSearch()">✖</button>
+        <button class="clear-btn" *ngIf="searchTerm" (click)="clearSearch()">&times;</button>
       </div>
-      <div class="total-badge">Total Orders: {{ filteredOrders.length }}</div>
+
+      <!-- Status Filter -->
+      <div class="filter-group">
+        <label for="statusSelect">Status:</label>
+        <select
+          id="statusSelect"
+          [(ngModel)]="statusFilter"
+          (change)="filterOrders()"
+          class="filter-select"
+        >
+          <option value="">All Statuses</option>
+          <option value="pending">Pending</option>
+          <option value="in progress">In Progress</option>
+          <option value="printing">Printing</option>
+          <option value="delivered">Delivered</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+
+      <!-- Date Range Filter -->
+      <div class="filter-group">
+        <label for="dateSelect">Date Range:</label>
+        <select
+          id="dateSelect"
+          [(ngModel)]="dateFilter"
+          (change)="filterOrders()"
+          class="filter-select"
+        >
+          <option value="all">All Time</option>
+          <option value="today">Today</option>
+          <option value="week">Current Week</option>
+          <option value="month">Current Month</option>
+        </select>
+      </div>
+
+      <!-- Total count badge -->
+      <div class="total-badge">
+        <span>Orders: <strong>{{ filteredOrders.length }}</strong></span>
+      </div>
     </div>
   </div>
 
@@ -30,62 +96,65 @@
       <table class="premium-table">
         <thead>
           <tr>
-            <th>Order ID & Date</th>
-            <th>Student Info <span style="color: #60a5fa">(Front Page)</span></th>
+            <th>Uploaded Files</th>
+            <th>Order ID &amp; Date</th>
+            <th>Student Info</th>
             <th>Project Details</th>
-            <th>PDFs</th>
-            <th>Format & Price</th>
-            <th>Live Status</th>
-            <th>Payments</th>
+            <th>Format &amp; Price</th>
+            <th>Order Status</th>
+            <th>Financial Ledger</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let order of filteredOrders">
+          <tr *ngFor="let order of paginatedOrders">
             <td class="pdf-column">
               <div class="pdf-list">
                 <ng-container *ngIf="order.uploadDetails?.selfUploaded && (order.uploadDetails?.files?.length || order.uploadDetails?.uploadedFileDataUrl)">
                   <ng-container *ngIf="order.uploadDetails?.files?.length">
-                    <a *ngFor="let f of order.uploadDetails.files; let i = index"
-                       class="btn-download-order pdf-item"
-                       [href]="f.dataUrl"
-                       [download]="f.name || ('uploaded-'+i+'.pdf')"
-                       title="Download {{ f.name }}">
-                      ⬇️ {{ f.name }}
-                    </a>
+                    <button
+                      *ngFor="let f of order.uploadDetails.files"
+                      type="button"
+                      class="btn-download-order pdf-item"
+                      (click)="downloadOrderFile(f)"
+                      [title]="'Download ' + f.name"
+                    >
+                      &#8681; {{ f.name }}
+                    </button>
                   </ng-container>
                   <ng-container *ngIf="!order.uploadDetails?.files?.length && order.uploadDetails?.uploadedFileDataUrl">
-                    <a class="btn-download-order pdf-item"
-                       [href]="order.uploadDetails.uploadedFileDataUrl"
-                       [download]="order.uploadDetails.fileName || 'uploaded-file.pdf'"
-                       title="Download uploaded student PDF">
-                      ⬇️ Download
+                    <a
+                      class="btn-download-order pdf-item"
+                      [href]="order.uploadDetails.uploadedFileDataUrl"
+                      [download]="order.uploadDetails.fileName || 'uploaded-file.pdf'"
+                      title="Download uploaded student PDF"
+                    >
+                      &#8681; Download PDF
                     </a>
                   </ng-container>
                 </ng-container>
+                <span *ngIf="!order.uploadDetails?.selfUploaded" class="text-muted">No client files</span>
               </div>
             </td>
+
             <td>
               <a
                 class="order-id clickable-link"
                 [routerLink]="['/admin/order-details']"
-                [queryParams]="{ search: (order.id + '').substring(1, 9) }"
+                [queryParams]="{ search: order.id + '' }"
               >
-                #{{ order.id + '' | slice: 1 : 9 | uppercase }}
-                <span class="link-icon">↗</span>
+                #{{ shortOrderId(order.id + '') | uppercase }}
+                <span class="link-icon">&#8599;</span>
               </a>
               <div class="order-date">{{ order.createdAt | date: 'MMM d, y, h:mm a' }}</div>
             </td>
 
             <td>
-              <div class="primary-text" style="color: #60a5fa">
-                👤 {{ order.projectDetails?.submittedBy || 'Unknown' }}
+              <div class="primary-text highlight-student">
+                {{ order.projectDetails?.submittedBy || 'Unknown Student' }}
               </div>
               <div class="secondary-text">
-                Roll:
-                <strong style="color: #cbd5e1">{{
-                  order.projectDetails?.rollNumber || 'N/A'
-                }}</strong>
+                Roll: <strong>{{ order.projectDetails?.rollNumber || 'N/A' }}</strong>
               </div>
               <div class="secondary-text">Course: {{ order.projectDetails?.course || 'N/A' }}</div>
             </td>
@@ -97,24 +166,21 @@
                 {{
                   order.projectDetails?.topic ||
                     order.projectDetails?.experimentDetails ||
-                    'General' | slice: 0 : 20
-                }}...
+                    'General' | slice: 0 : 24
+                }}
               </div>
-              <div class="secondary-text" style="margin-top: 4px">
-                To: {{ order.projectDetails?.submittedTo || 'N/A' }}
+              <div class="secondary-text" *ngIf="order.projectDetails?.submittedTo">
+                Faculty: {{ order.projectDetails?.submittedTo }}
               </div>
             </td>
 
             <td>
-              <div class="price-text">₹{{ order.pricing?.totalAmount || 0 }}</div>
+              <div class="price-text">&#8377;{{ order.pricing?.totalAmount || 0 }}</div>
               <div class="secondary-text">
-                {{
-                  order.printSettings?.pagesLabel || order.projectDetails?.estimatedPages || 0
-                }}
-                Pages
+                {{ order.printSettings?.pagesLabel || order.projectDetails?.estimatedPages || 0 }} Pages
               </div>
               <div class="secondary-text">
-                {{ order.printSettings?.binding | titlecase }} Binding
+                {{ (order.printSettings?.binding || 'none') | titlecase }} Binding
               </div>
             </td>
 
@@ -123,27 +189,25 @@
                 [(ngModel)]="order.status"
                 (change)="updateOrderStatus(order.id, order.status)"
                 class="status-dropdown"
-                [ngClass]="(order.status || 'pending').toLowerCase()"
+                [ngClass]="(order.status || 'pending').toLowerCase().replace(' ', '-')"
               >
-                <option value="Pending">🟡 Pending</option>
-                <option value="Printing">🟠 Printing</option>
-                <option value="Delivered">🟢 Delivered</option>
-                <option value="Cancelled">🔴 Cancelled</option>
+                <option value="Pending">Pending</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Printing">Printing</option>
+                <option value="Delivered">Delivered</option>
+                <option value="Cancelled">Cancelled</option>
               </select>
             </td>
-            
+
             <td>
-              <select
-                [ngModel]="order.paymentDetails?.status || 'Pending Verification'"
-                (ngModelChange)="updatePaymentStatus(order.id, $event)"
-                class="status-dropdown payment-dropdown"
-                [ngClass]="(order.paymentDetails?.status || 'pending').toLowerCase().replace(' ', '-')"
+              <a
+                [routerLink]="['/admin/order-details']"
+                [queryParams]="{ search: order.id }"
+                class="ledger-review-link"
               >
-                <option value="Pending-Verification">🟡 Pending Verification</option>
-                <option value="Received-50%">🟠 Received 50%</option>
-                <option value="Received-100%">🟢 Received 100%</option>
-                <option value="Failed">🔴 Failed/Cancelled</option>
-              </select>
+                Review Ledger &#8599;
+              </a>
+              <small class="legacy-payment-note">Verified receipts only</small>
             </td>
 
             <td class="action-cell">
@@ -152,20 +216,56 @@
                 (click)="deleteOrder(order.id, $event)"
                 title="Delete Order Permanently"
               >
-                🗑️ Delete
+                Delete
               </button>
             </td>
-            </tr>
+          </tr>
 
           <tr *ngIf="filteredOrders.length === 0">
             <td colspan="8" class="empty-state">
-              <span class="empty-icon">🔍</span>
               <p *ngIf="searchTerm">No orders found matching "{{ searchTerm }}"</p>
-              <p *ngIf="!searchTerm">No orders received yet.</p>
+              <p *ngIf="!searchTerm">No orders match the current filter selection.</p>
             </td>
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Pagination Controls (PRD Section 7.6) -->
+    <div class="pagination-footer" *ngIf="filteredOrders.length > 0">
+      <div class="pagination-info">
+        Showing
+        <strong>{{ (currentPage - 1) * pageSize + 1 }}</strong>
+        to
+        <strong>{{ (currentPage * pageSize > filteredOrders.length) ? filteredOrders.length : (currentPage * pageSize) }}</strong>
+        of
+        <strong>{{ filteredOrders.length }}</strong>
+        orders
+      </div>
+
+      <div class="pagination-controls">
+        <button
+          type="button"
+          class="page-btn"
+          (click)="prevPage()"
+          [disabled]="currentPage === 1"
+          aria-label="Previous Page"
+        >
+          &larr; Previous
+        </button>
+
+        <span class="page-indicator">Page {{ currentPage }} of {{ totalPages }}</span>
+
+        <button
+          type="button"
+          class="page-btn"
+          (click)="nextPage()"
+          [disabled]="currentPage === totalPages"
+          aria-label="Next Page"
+        >
+          Next &rarr;
+        </button>
+      </div>
     </div>
   </div>
 </div>

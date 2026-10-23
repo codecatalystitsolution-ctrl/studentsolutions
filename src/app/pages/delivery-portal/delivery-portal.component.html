@@ -1,0 +1,45 @@
+<main class="delivery-page">
+  <header class="delivery-header">
+    <div>
+      <p class="eyebrow">DELIVERY WORKSPACE</p>
+      <h1>My assigned deliveries</h1>
+      <p>Update only the orders assigned to your account. Students can see your tracking updates.</p>
+    </div>
+    <div class="portal-actions"><a routerLink="/notifications">Notifications</a><span class="assignment-count">{{ assignments.length }} active / recent</span></div>
+  </header>
+
+  <div class="delivery-state" *ngIf="loading" role="status">Loading your assignments…</div>
+  <div class="delivery-state" *ngIf="!loading && !assignments.length">
+    <h2>No assigned deliveries</h2>
+    <p>New delivery assignments will appear here.</p>
+  </div>
+
+  <section class="assignment-list" *ngIf="!loading && assignments.length">
+    <article class="assignment-card" *ngFor="let assignment of assignments">
+      <div class="assignment-top">
+        <div><span class="order-id">Order #{{ assignment.orderId | slice:0:8 | uppercase }}</span><h2>{{ assignment.subject }}</h2></div>
+        <span class="delivery-status" [attr.data-status]="assignment.status">{{ statusLabel(assignment.status) }}</span>
+      </div>
+      <div class="delivery-details">
+        <p><strong>Student</strong>{{ assignment.studentName }}</p>
+        <p><strong>Phone</strong><a [href]="'tel:' + assignment.phone">{{ assignment.phone || 'Not provided' }}</a></p>
+        <p class="address"><strong>Delivery address</strong>{{ assignment.address || 'Not provided' }} {{ assignment.pincode }}</p>
+        <p><strong>Assigned</strong>{{ assignment.assignedAt | date:'medium' }}</p>
+      </div>
+
+      <div class="timeline" *ngIf="history[assignment.orderId] as events">
+        <h3>Tracking history</h3>
+        <div class="timeline-entry" *ngFor="let event of (events | keyvalue)">
+          <span class="timeline-dot"></span>
+          <div><strong>{{ statusLabel(event.value.status) }}</strong><p>{{ event.value.note }}</p><small>{{ event.value.createdAt | date:'medium' }}</small></div>
+        </div>
+      </div>
+
+      <form class="update-form" *ngIf="nextStatus(assignment.status) as next" (ngSubmit)="update(assignment)">
+        <label [for]="'delivery-note-' + assignment.orderId">Delivery note</label>
+        <textarea [id]="'delivery-note-' + assignment.orderId" [(ngModel)]="notes[assignment.orderId]" name="note-{{assignment.orderId}}" maxlength="1000" rows="2" placeholder="Optional: record a useful delivery update"></textarea>
+        <button type="submit">Mark {{ statusLabel(next) }}</button>
+      </form>
+    </article>
+  </section>
+</main>

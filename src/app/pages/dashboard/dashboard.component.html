@@ -1,159 +1,77 @@
-<div class="dashboard-layout">
-  
-  <aside class="sidebar glass-panel" [class.open]="isSidebarOpen">
-    <div class="sidebar-header">
-      <img src="assets/images/Studentlogo.png" alt="Logo" class="logo">
-      <button class="close-btn mobile-only" (click)="toggleSidebar()">✕</button>
+﻿<div class="dashboard-layout" [class.theme-light]="theme() === 'light'">
+  <aside class="sidebar" [class.open]="isSidebarOpen">
+    <div class="brand-block">
+      <div class="brand-icon" aria-hidden="true">S</div>
+      <div class="brand-copy"><span>STUDENT</span><strong>SOLUTION</strong></div>
     </div>
 
-    <nav class="nav-menu">
+    <nav class="nav-menu" aria-label="Student navigation">
+      <a routerLink="/dashboard/home" class="nav-item" routerLinkActive="active" (click)="closeSidebarOnMobile()">
+        <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg></span><span>Dashboard</span>
+      </a>
+      <a routerLink="/new-order" class="nav-item" routerLinkActive="active" (click)="closeSidebarOnMobile()">
+        <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span><span>Place Order</span>
+      </a>
+      <a routerLink="/dashboard/my-orders" class="nav-item" routerLinkActive="active" (click)="closeSidebarOnMobile()">
+        <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h12a2 2 0 0 1 2 2v14H4V5a2 2 0 0 1 2-2Z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span><span>My Orders</span>
+      </a>
+      <a routerLink="/notifications" class="nav-item" routerLinkActive="active" (click)="closeSidebarOnMobile()">
+        <span class="icon" aria-hidden="true">N</span><span>Notifications</span>
+      </a>
+      <a routerLink="/dashboard/help-support" class="nav-item" routerLinkActive="active" (click)="closeSidebarOnMobile()">
+        <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2-3 4M12 17h.01"/></svg></span><span>Help &amp; Support</span>
+      </a>
+
       <div class="nav-section">
-        <a routerLink="/dashboard/home" class="nav-item" routerLinkActive="active" (click)="closeSidebarOnMobile()">
-          <span class="icon">🏠</span>
-          <span class="text">Dashboard</span>
-        </a>
-        <a routerLink="/dashboard/my-orders" class="nav-item" routerLinkActive="active" (click)="closeSidebarOnMobile()">
-          <span class="icon">📦</span>
-          <span class="text">MY ORDERS</span>
-        </a>
-        <a routerLink="/dashboard/help-support" class="nav-item" routerLinkActive="active" (click)="closeSidebarOnMobile()">
-          <span class="icon">❓</span>
-          <span class="text">HELP & SUPPORT</span>
-        </a>
-      </div> 
-      
-      <div class="nav-section">
-        <div class="section-heading-wrapper" (click)="toggleLearningHub()">
-          <p class="section-heading">LEARNING HUB</p>
-          <span class="dropdown-arrow" [class.rotated]="isLearningHubOpen">▶</span>
-        </div>
-        <div class="nav-items-container" [class.show]="isLearningHubOpen">
-          <a routerLink="/dashboard/quizzes" class="nav-item" routerLinkActive="active" (click)="closeSidebarOnMobile()">
-            <span class="icon">📝</span>
-            <span class="text">Quiz Exams</span>
-          </a>
-          <a class="nav-item" routerLinkActive="active" (click)="closeSidebarOnMobile()">
-            <span class="icon">🏛️</span>
-            <span class="text">Govt. Mock Tests</span>
-          </a>
-          <a class="nav-item" routerLinkActive="active" (click)="closeSidebarOnMobile()">
-            <span class="icon">📄</span>
-            <span class="text">Previous Papers</span>
-            <span class="badge premium">PRO</span>
-          </a>
+        <button class="section-toggle" type="button" (click)="toggleLearningHub()" [attr.aria-expanded]="isLearningHubOpen"><span>Learning Hub</span><span class="caret" [class.rotated]="isLearningHubOpen" aria-hidden="true">›</span></button>
+        <div class="nav-subgroup" [class.show]="isLearningHubOpen">
+          <a routerLink="/dashboard/quizzes" [queryParams]="{ mode: 'quiz' }" class="nav-item sub-item" routerLinkActive="active" [routerLinkActiveOptions]="{ queryParams: 'exact' }" (click)="closeSidebarOnMobile()"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v18H6.5A2.5 2.5 0 0 1 4 17.5z"/><path d="M4 17.5A2.5 2.5 0 0 1 6.5 15H20M8 6h8M8 10h8"/></svg></span><span>Quiz Exams</span></a>
+          <a routerLink="/dashboard/quizzes" [queryParams]="{ mode: 'mock' }" class="nav-item sub-item" routerLinkActive="active" [routerLinkActiveOptions]="{ queryParams: 'exact' }" (click)="closeSidebarOnMobile()"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 8.5 16 12l-6 3.5z"/></svg></span><span>Mock Tests</span></a>
+          <a routerLink="/dashboard/quizzes" [queryParams]="{ mode: 'papers' }" class="nav-item sub-item" routerLinkActive="active" [routerLinkActiveOptions]="{ queryParams: 'exact' }" (click)="closeSidebarOnMobile()"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M14 3v5h5M8 12h8M8 16h8"/></svg></span><span>Previous Papers</span></a>
         </div>
       </div>
 
       <div class="nav-section">
-        <div class="section-heading-wrapper" (click)="toggleAccount()">
-          <p class="section-heading">ACCOUNT</p>
-          <span class="dropdown-arrow" [class.rotated]="isAccountOpen">▶</span>
-        </div>
-        <div class="nav-items-container" [class.show]="isAccountOpen">
-          <a routerLink="/dashboard/profile" class="nav-item" routerLinkActive="active" (click)="closeSidebarOnMobile()">
-            <span class="icon">👤</span>
-            <span class="text">My Profile</span>
-          </a>
-          <a routerLink="/dashboard/my-tickets" class="nav-item" routerLinkActive="active" (click)="closeSidebarOnMobile()">
-            <span class="icon">🎫</span>
-            <span class="text">Track Complaints</span>
-          </a>
-          <a routerLink="/dashboard/settings" class="nav-item" routerLinkActive="active" (click)="closeSidebarOnMobile()">
-            <span class="icon">⚙️</span>
-            <span class="text">Settings</span>
-          </a>
+        <button class="section-toggle" type="button" (click)="toggleAccount()" [attr.aria-expanded]="isAccountOpen"><span>Account</span><span class="caret" [class.rotated]="isAccountOpen" aria-hidden="true">›</span></button>
+        <div class="nav-subgroup" [class.show]="isAccountOpen">
+          <a routerLink="/dashboard/profile" class="nav-item sub-item" routerLinkActive="active" (click)="closeSidebarOnMobile()"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><span>My Profile</span></a>
+          <a routerLink="/dashboard/my-tickets" class="nav-item sub-item" routerLinkActive="active" (click)="closeSidebarOnMobile()"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM8 9h8M8 13h5"/><path d="m16 16 2 2 3-4"/></svg></span><span>Support Tickets</span></a>
+          <a routerLink="/dashboard/settings" class="nav-item sub-item" routerLinkActive="active" (click)="closeSidebarOnMobile()"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1 1.4 1.1-1.4 2.4-1.7-.7a8 8 0 0 1-1.5.9l-.3 1.8h-2.8l-.3-1.8a8 8 0 0 1-1.5-.9l-1.7.7-1.4-2.4 1.4-1.1a7 7 0 0 1 0-1.8l-1.4-1.1 1.4-2.4 1.7.7a8 8 0 0 1 1.5-.9l.3-1.8h2.8l.3 1.8a8 8 0 0 1 1.5.9l1.7-.7 1.4 2.4-1.4 1.1a7 7 0 0 1 0 1.8Z"/></svg></span><span>Settings</span></a>
         </div>
       </div>
     </nav>
 
     <div class="sidebar-footer">
-      <div class="user-mini-profile">
-        <div class="avatar">{{ userName.charAt(0).toUpperCase() }}</div>
-        <div class="info">
-          <span class="name">{{ userName }}</span>
-          <span class="role">{{ studentID }}</span>
-        </div>
-      </div>
-      <button class="logout-btn" (click)="logout()">Log Out</button>
+      <div class="user-mini-card"><div class="avatar">{{ userName.charAt(0).toUpperCase() }}</div><div class="user-meta"><strong>{{ userName }}</strong><span>{{ studentID || 'Student' }}</span></div></div>
+      <button class="logout-btn" type="button" (click)="logout()">Log Out</button>
     </div>
   </aside>
 
-  <main class="main-content">
-    <header class="top-header glass-panel">
-      <div class="header-left">
-        <button class="menu-btn mobile-only" (click)="toggleSidebar()">☰</button>
-        <h1 class="page-title">Dashboard</h1>
+  <main class="main-panel">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-btn mobile-only" type="button" (click)="toggleSidebar()" aria-label="Open navigation"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+        <label class="search-box"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.5"/><path d="m16 16 4 4"/></svg><input type="search" placeholder="Search subjects, orders, or help..." aria-label="Search" /></label>
       </div>
-      
-      <div class="header-right">
-        <a routerLink="/new-order" class="btn-primary-sm">New Order</a>
-
-        <div class="navbar-profile">
-          <div class="avatar-btn" (click)="toggleProfileMenu()">
-            {{ userName.charAt(0).toUpperCase() }}
-          </div>
-          
-          <div class="profile-dropdown glass-card" *ngIf="isProfileMenuOpen">
-            <div class="dropdown-header">
-              <span class="d-name">{{ userName }}</span>
-              <span class="d-email">{{ userEmail }}</span>
-            </div>
-            <div class="divider"></div>
-            <a routerLink="/dashboard/profile" class="dropdown-item" (click)="toggleProfileMenu()">
-              <span class="icon">👤</span> My Profile
-            </a>
-            <button class="dropdown-item text-danger" (click)="logout()">
-              <span class="icon">🚪</span> Log Out
-            </button>
-          </div>
-        </div>
+      <div class="topbar-right">
+        <button class="top-icon" type="button" aria-label="Notifications"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4"/></svg></button>
+        <button class="top-icon" type="button" aria-label="Toggle theme" (click)="toggleTheme()"><span aria-hidden="true">{{ theme() === 'dark' ? '☼' : '☾' }}</span></button>
+        <button class="profile-trigger" type="button" (click)="toggleProfileMenu()" aria-label="Open profile menu">{{ userName.charAt(0).toUpperCase() }}</button>
       </div>
     </header>
 
-    <div class="content-area">
-      <router-outlet></router-outlet>
-    </div>
+    <div class="content-shell"><router-outlet></router-outlet></div>
   </main>
-
   <div class="sidebar-overlay" *ngIf="isSidebarOpen" (click)="toggleSidebar()"></div>
 </div>
 
 <div class="welcome-overlay fade-in" *ngIf="showWelcomeModal">
-  <div class="welcome-dialog glass-card pop-in">
-    <div class="dialog-header">
-      <div class="icon-pulse">🚀</div>
-      <h2>Our Services are LIVE!</h2>
-      <p>Welcome to Student Solution. Here's everything you need to know.</p>
-    </div>
+  <div class="welcome-dialog" role="dialog" aria-modal="true" aria-labelledby="welcome-title">
+    <div class="dialog-header"><div class="icon-pulse" aria-hidden="true">✦</div><h2 id="welcome-title">Our Services Are Live!</h2><p>Welcome to Student Solution. Here is everything you need to know.</p></div>
     <div class="dialog-body">
-      <div class="feature-box">
-        <h3>✨ Premium Features</h3>
-        <ul class="feature-list">
-          <li><span>📄</span> <strong>Smart Formatting:</strong> Professional project alignments.</li>
-          <li><span>🚚</span> <strong>Fast Delivery:</strong> Get your printed files on time.</li>
-          <li><span>🔔</span> <strong>Live Tracking:</strong> Real-time updates on your dashboard.</li>
-        </ul>
-      </div>
-      <div class="steps-box">
-        <h3>🛠️ How to use?</h3>
-        <div class="step-items">
-          <div class="step">
-            <div class="step-num">1</div>
-            <div class="step-text">Click <strong>'New Order'</strong> and fill project details.</div>
-          </div>
-          <div class="step">
-            <div class="step-num">2</div>
-            <div class="step-text">Pay securely and confirm your request.</div>
-          </div>
-          <div class="step">
-            <div class="step-num">3</div>
-            <div class="step-text">Track your live status until delivery!</div>
-          </div>
-        </div>
-      </div>
+      <div class="feature-box"><h3>Premium Features</h3><ul><li>Smart Formatting</li><li>Fast Delivery</li><li>Real-Time Order Tracking</li></ul></div>
+      <div class="steps-box"><h3>How It Works</h3><div class="step-items"><div class="step"><span class="step-num">1</span><p>Place your order</p></div><div class="step"><span class="step-num">2</span><p>Share your requirements</p></div><div class="step"><span class="step-num">3</span><p>Track your delivery</p></div></div></div>
     </div>
-    <div class="dialog-footer">
-      <button class="btn-start" (click)="closeWelcomeModal()">Let's Get Started! 🎉</button>
-    </div>
+    <button class="btn-start" type="button" (click)="closeWelcomeModal()">Get Started</button>
   </div>
 </div>

@@ -1,110 +1,30 @@
-<div class="admin-dashboard-container fade-in">
-  
-  <div class="dashboard-header">
-    <h2>System Overview</h2>
-    <p>Live snapshot of FileCrafters operations.</p>
-  </div>
-
+﻿<section class="admin-dashboard-container fade-in">
+  <header class="dashboard-heading">
+    <div><p class="section-eyebrow">ADMIN OVERVIEW</p><h1>Good morning, Admin <span aria-hidden="true">&#128075;</span></h1><p>Here is what is happening across your platform today.</p></div>
+    <div class="heading-actions"><span class="date-chip">{{ today | date:'EEE, d MMM y' }}</span><button class="primary-action" type="button" (click)="openCreateOrder()"><span aria-hidden="true">+</span> Create new order</button></div>
+  </header>
   <div class="stats-grid">
-    
-    <div class="stat-card emerald-gradient">
-      <div class="stat-content">
-        <span class="stat-title">Total Revenue</span>
-        <h3 class="stat-value">₹{{ totalRevenue | number }}</h3>
-      </div>
-      <div class="stat-icon-wrapper">
-        <span class="icon">💰</span>
-      </div>
-      <div class="bg-glow"></div>
-    </div>
-
-    <div class="stat-card rose-gradient">
-      <div class="stat-content">
-        <span class="stat-title">Cancelled Orders</span>
-        <h3 class="stat-value">{{ cancelledOrders < 10 ? '0'+cancelledOrders : cancelledOrders }}</h3>
-        <div class="stat-trend negative"></div>
-      </div>
-      <div class="stat-icon-wrapper">
-        <span class="icon">🚫</span>
-      </div>
-      <div class="bg-glow"></div>
-    </div>
-
-    <div class="stat-card sunset-gradient">
-      <div class="stat-content">
-        <span class="stat-title">Needs Attention (Pending)</span>
-        <h3 class="stat-value">{{ pendingOrders < 10 ? '0'+pendingOrders : pendingOrders }}</h3>
-      </div>
-      <div class="stat-icon-wrapper">
-        <span class="icon">⏳</span>
-      </div>
-      <div class="bg-glow"></div>
-    </div>
-
-    <div class="stat-card amethyst-gradient">
-      <div class="stat-content">
-        <span class="stat-title">Files Delivered</span>
-        <h3 class="stat-value">{{ completedOrders < 10 ? '0'+completedOrders : completedOrders }}</h3>
-      </div>
-      <div class="stat-icon-wrapper">
-        <span class="icon">✅</span>
-      </div>
-      <div class="bg-glow"></div>
-    </div>
-
+    <article class="metric-card metric-revenue"><div class="metric-top"><span class="metric-icon">&#8377;</span><span class="metric-caption">VERIFIED REVENUE</span></div><strong class="metric-value">&#8377;{{ totalRevenue | number }}</strong><small>Only manually verified payments</small></article>
+    <article class="metric-card metric-orders"><div class="metric-top"><span class="metric-icon">&#9638;</span><span class="metric-caption">TOTAL ORDERS</span></div><strong class="metric-value">{{ totalOrders }}</strong><small>{{ activeOrders }} currently in progress</small></article>
+    <article class="metric-card metric-students"><div class="metric-top"><span class="metric-icon">&#9787;</span><span class="metric-caption">ACTIVE STUDENTS</span></div><strong class="metric-value">{{ activeStudents }}</strong><small>{{ totalStudents }} registered accounts</small></article>
+    <a class="metric-card metric-pending" routerLink="/admin/orders" [queryParams]="{status:'pending'}"><div class="metric-top"><span class="metric-icon">&#9679;</span><span class="metric-caption">PENDING ORDERS</span></div><strong class="metric-value">{{ pendingOrders }}</strong><small>Open pending orders</small></a>
   </div>
-
-  <div class="stats-grid">
-    <div class="stat-card midnight-gradient">
-      <div class="stat-content">
-        <span class="stat-title">Total Students</span>
-        <h3 class="stat-value">{{ totalStudents }}</h3>
-      </div>
-      <div class="stat-icon-wrapper">
-        <span class="icon">🎓</span>
-      </div>
-      <div class="bg-glow"></div>
-    </div>
-
-    <div class="stat-card jade-gradient">
-      <div class="stat-content">
-        <span class="stat-title">Active Students</span>
-        <h3 class="stat-value">{{ activeStudents }}</h3>
-      </div>
-      <div class="stat-icon-wrapper">
-        <span class="icon">✅</span>
-      </div>
-      <div class="bg-glow"></div>
-    </div>
-
-    <div class="stat-card coral-gradient">
-      <div class="stat-content">
-        <span class="stat-title">Suspended Students</span>
-        <h3 class="stat-value">{{ suspendedStudents }}</h3>
-      </div>
-      <div class="stat-icon-wrapper">
-        <span class="icon">⛔</span>
-      </div>
-      <div class="bg-glow"></div>
-    </div>
+  <div class="dashboard-columns">
+    <section class="dashboard-panel chart-section"><div class="panel-heading"><div><p class="section-eyebrow">PERFORMANCE</p><h2>Revenue overview</h2><p>Revenue and incoming orders over the last 7 days.</p></div><span class="live-tag"><i></i>Live data</span></div><div class="chart-container"><canvas id="performanceChart" aria-label="Revenue and orders over the past seven days"></canvas></div></section>
+    <section class="dashboard-panel recent-panel"><div class="panel-heading"><div><p class="section-eyebrow">WORKSPACE</p><h2>Recent orders</h2><p>Latest requests from students.</p></div><a routerLink="/admin/orders" class="view-all">View all <span aria-hidden="true">&rarr;</span></a></div>
+      <div class="recent-list" *ngIf="recentOrders.length; else emptyOrders"><a class="recent-row" *ngFor="let order of recentOrders.slice(0,4)" [routerLink]="['/admin/order-details']" [queryParams]="{ search: order.id }"><span class="order-mark">&#9635;</span><span class="recent-main"><strong>#{{ shortOrderId(order.id) | uppercase }}</strong><small>{{ order.projectDetails?.submittedBy || 'Student' }} <i>&middot;</i> {{ order.projectDetails?.subject || order.fileType || 'Order' }}</small></span><span class="recent-status" [ngClass]="(order.status || 'Pending').toLowerCase()">{{ order.status || 'Pending' }}</span><strong class="recent-price">&#8377;{{ order.pricing?.totalAmount || 0 }}</strong></a></div>
+      <ng-template #emptyOrders><div class="empty-orders"><strong>No orders yet</strong><p>New requests will appear here.</p></div></ng-template>
+    </section>
   </div>
-
-  <div class="quick-info-grid">
-    <div class="chart-section glass-card fade-in">
-    <div class="chart-header">
-      <div class="title-wrap">
-        <h3>📈 FileCraf Performance Analytics</h3>
-        <p>Live snapshot of revenue and orders over the last 7 days.</p>
-      </div>
-      <div class="live-pulse">
-        <span class="dot"></span> Live Sync
-      </div>
-    </div>
-    
-    <div class="chart-container">
-      <canvas id="performanceChart"></canvas>
-    </div>
+  <div class="bottom-grid">
+    <section class="dashboard-panel quick-panel"><div class="panel-heading"><div><p class="section-eyebrow">SHORTCUTS</p><h2>Quick actions</h2></div></div><div class="quick-actions"><a routerLink="/admin/orders"><span class="action-symbol orders-symbol">+</span><strong>Manage<br>orders</strong></a><a routerLink="/admin/students"><span class="action-symbol student-symbol">&#9787;</span><strong>Students</strong></a><a routerLink="/admin/complaints"><span class="action-symbol support-symbol">?</span><strong>Support<br>desk</strong></a><a routerLink="/admin/delivery"><span class="action-symbol delivery-symbol">&#9638;</span><strong>Delivery</strong></a></div></section>
+    <section class="dashboard-panel activity-panel"><div class="panel-heading"><div><p class="section-eyebrow">LIVE UPDATES</p><h2>Recent activity</h2></div><a routerLink="/admin/orders" class="view-all">View all</a></div><div class="activity-list" *ngIf="recentOrders.length; else noActivity"><a *ngFor="let order of recentOrders.slice(0,4)" [routerLink]="['/admin/order-details']" [queryParams]="{search:order.id}"><span class="activity-dot"></span><span><strong>{{ order.status || 'Pending' }} order received</strong><small>#{{ shortOrderId(order.id) | uppercase }} &middot; {{ order.projectDetails?.submittedBy || 'Student' }}</small></span><time>{{ order.createdAt | date:'shortDate' }}</time></a></div><ng-template #noActivity><p class="muted-copy">No recent activity to show.</p></ng-template></section>
+    <section class="dashboard-panel support-panel"><div class="support-icon" aria-hidden="true">?</div><p class="section-eyebrow">HERE TO HELP</p><h2>Support desk</h2><p>Review student questions and resolve open tickets.</p><a class="support-button" routerLink="/admin/complaints">Open support desk <span aria-hidden="true">&rarr;</span></a></section>
   </div>
-  </div>
-
+</section>
+<div class="modal-backdrop" *ngIf="showCreateOrder" (click)="closeCreateOrder()">
+  <section class="create-modal" role="dialog" aria-modal="true" aria-labelledby="create-order-title" (click)="$event.stopPropagation()">
+    <button class="modal-close" type="button" (click)="closeCreateOrder()" aria-label="Close">&times;</button><p class="section-eyebrow">ADMIN WORKSPACE</p><h2 id="create-order-title">Create an order</h2><p class="modal-intro">Add a student order to the live order queue.</p>
+    <form (ngSubmit)="createOrder()" #orderForm="ngForm"><label>Registered student<select name="studentUid" [(ngModel)]="newOrder.studentUid" required><option value="" disabled>Select a student</option><ng-container *ngFor="let student of students"><option *ngIf="student.status === 'active'" [value]="student.uid">{{ student.fullName || student.name || student.email }} · {{ student.studentID || student.uid }}</option></ng-container></select></label><div class="form-row"><label>File type<select name="fileType" [(ngModel)]="newOrder.fileType" required><option value="assignment">Assignment</option><option value="project">Project</option><option value="practical">Practical file</option></select></label><label>Subject<input name="subject" [(ngModel)]="newOrder.subject" required maxlength="100" placeholder="e.g. Computer Science"></label></div><label>Topic<input name="topic" [(ngModel)]="newOrder.topic" maxlength="160" placeholder="Order topic"></label><label>Total amount (INR)<input name="amount" type="number" [(ngModel)]="newOrder.amount" required min="0" max="1000000"></label><p class="form-error" *ngIf="createError">{{ createError }}</p><div class="modal-actions"><button type="button" class="secondary-action" (click)="closeCreateOrder()">Cancel</button><button type="submit" class="primary-action" [disabled]="isCreating || orderForm.invalid">{{ isCreating ? 'Creating...' : 'Create order' }}</button></div></form>
+  </section>
 </div>

@@ -1,0 +1,51 @@
+<div class="login-support-page">
+  <div class="support-panel glass-card">
+    <div class="support-head">
+      <div>
+        <h1>Account Suspension Support</h1>
+        <p>If your login is blocked because your account was suspended, submit a reactivation request here.</p>
+      </div>
+      <button type="button" class="support-back" routerLink="/login">← Back to Login</button>
+    </div>
+
+    <div *ngIf="submissionComplete" class="support-success-card">
+      <h2>Support Request Submitted</h2>
+      <p>We have received your request and will review it as soon as possible. Please allow some time for admin action.</p>
+    </div>
+
+    <form [formGroup]="supportForm" (ngSubmit)="submitSupportRequest()" *ngIf="!submissionComplete">
+      <div class="field-row">
+        <label>Name</label>
+        <input type="text" formControlName="name" placeholder="Your name" />
+      </div>
+
+      <div class="field-row">
+        <label>Email</label>
+        <input type="email" formControlName="email" placeholder="Your email" />
+      </div>
+
+      <div class="field-row">
+        <label>Issue Type</label>
+        <select formControlName="issueType">
+          <option value="Account Suspension">Account Suspension</option>
+          <option value="Login Problem">Login Problem</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      <div class="field-row">
+        <label>Subject</label>
+        <input type="text" formControlName="subject" placeholder="Brief subject for your request" />
+      </div>
+
+      <div class="field-row">
+        <label>Message</label>
+        <textarea formControlName="message" rows="5" placeholder="Please explain why you think your account should be reinstated."></textarea>
+      </div>
+
+      <button type="submit" class="btn-primary" [disabled]="isSubmitting">
+        {{ isSubmitting ? 'Submitting...' : 'Send Support Request' }}
+      </button>
+    </form>
+  </div>
+</div>

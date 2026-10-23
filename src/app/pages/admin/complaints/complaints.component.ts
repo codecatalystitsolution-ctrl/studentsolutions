@@ -1,9 +1,10 @@
-import { Component, OnInit, inject, ChangeDetectorRef, NgZone } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef, NgZone } from '@angular/core';
 import { CommonModule, DatePipe, UpperCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Database, ref, onValue, update, remove } from '@angular/fire/database';
+import { Subscription } from 'rxjs';
 import { ConfirmService } from '../../../shared/confirmation/confirm.service';
 import { NotificationService } from '../../../shared/notification/notification.service';
+import { ComplaintsService } from './complaints.service'; // Import ComplaintsService
 
 @Component({
   selector: 'app-complaints',
@@ -12,17 +13,19 @@ import { NotificationService } from '../../../shared/notification/notification.s
   templateUrl: './complaints.component.html',
   styleUrls: ['./complaints.component.scss']
 })
-export class ComplaintsComponent implements OnInit {
-  private db = inject(Database);
+export class ComplaintsComponent implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
   private ngZone = inject(NgZone);
   private confirmService = inject(ConfirmService);
   private notificationService = inject(NotificationService);
+  private complaintsService = inject(ComplaintsService); // Inject ComplaintsService
 
   tickets: any[] = [];
   filteredTickets: any[] = [];
   searchTerm: string = '';
   isLoading: boolean = true;
+  private complaintSubscription: Subscription | null = null;
+  private replySubscriptions = new Map<string, () => void>();
 
   // Reply Modal Variables
   showReplyModal: boolean = false;
@@ -34,27 +37,34 @@ export class ComplaintsComponent implements OnInit {
   }
 
   fetchComplaints() {
-    const complaintsRef = ref(this.db, 'complaints');
-    
-    onValue(complaintsRef, (snapshot) => {
-      this.ngZone.run(() => {
-        this.tickets = [];
-        const data = snapshot.val();
-        
-        if (data) {
-          Object.keys(data).forEach(key => {
-            this.tickets.push({ id: key, ...data[key] });
-          });
-          
-          // Latest ticket sabse upar
-          this.tickets.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        }
-        
+    this.complaintSubscription?.unsubscribe();
+    this.complaintSubscription = this.complaintsService.getComplaints().subscribe({
+      next: (data) => {
+        this.tickets = data.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        for (const ticket of this.tickets) this.watchReplies(ticket);
         this.filterTickets();
         this.isLoading = false;
-      });
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error("Error fetching complaints:", error);
+        this.isLoading = false;
+        this.notificationService.show('error', 'Failed to fetch complaints.', 'Error');
+      }
+    });
+  }
+
+  private watchReplies(ticket: any): void {
+    if (this.replySubscriptions.has(ticket.id)) return;
+    const stop = this.complaintsService.watchReplies(ticket.id, replies => {
+      const current = this.tickets.find(item => item.id === ticket.id);
+      if (current) {
+        current.replyHistory = replies;
+        current.replyCount = Object.keys(replies).length;
+      }
       this.cdr.detectChanges();
     });
+    this.replySubscriptions.set(ticket.id, stop);
   }
 
   filterTickets() {
@@ -68,8 +78,9 @@ export class ComplaintsComponent implements OnInit {
       const studentId = (ticket.studentID || '').toLowerCase();
       const ticketId = (ticket.id || '').toLowerCase();
       const studentName = (ticket.name || '').toLowerCase();
-      
-      return studentId.includes(term) || ticketId.includes(term) || studentName.includes(term);
+      const ticketContent = [ticket.category, ticket.subject, ticket.message, ticket.status, ticket.email]
+        .filter(Boolean).join(' ').toLowerCase();
+      return studentId.includes(term) || ticketId.includes(term) || studentName.includes(term) || ticketContent.includes(term);
     });
   }
 
@@ -80,7 +91,7 @@ export class ComplaintsComponent implements OnInit {
 
   async updateTicketStatus(ticketId: string, newStatus: string) {
     try {
-      await update(ref(this.db, `complaints/${ticketId}`), { status: newStatus });
+      await this.complaintsService.updateComplaintStatus(ticketId, newStatus);
       this.notificationService.show('success', 'Ticket status updated.', 'Updated');
     } catch (error) {
       console.error("Status update error:", error);
@@ -91,8 +102,7 @@ export class ComplaintsComponent implements OnInit {
   // === REPLY MODAL FUNCTIONS ===
   openReplyModal(ticket: any) {
     this.selectedTicket = ticket;
-    // Agar pehle se koi reply hai toh usey load kar do
-    this.adminReplyText = ticket.adminReply || ''; 
+    this.adminReplyText = '';
     this.showReplyModal = true;
   }
 
@@ -103,20 +113,15 @@ export class ComplaintsComponent implements OnInit {
   }
 
   async sendReply() {
-    if (!this.adminReplyText.trim()) {
-      this.notificationService.show('warning', 'Please write a reply before sending.', 'Empty Reply');
+    if (!this.adminReplyText.trim() || this.adminReplyText.trim().length > 4000) {
+      this.notificationService.show('warning', 'Enter a reply between 1 and 4,000 characters.', 'Reply Required');
       return;
     }
 
     try {
-      const ticketRef = ref(this.db, `complaints/${this.selectedTicket.id}`);
-      await update(ticketRef, { 
-        adminReply: this.adminReplyText,
-        status: 'Resolved' // Reply karte hi auto-resolve ho jayega
-      });
-      
+      await this.complaintsService.sendReply(this.selectedTicket.id, this.adminReplyText);
+      this.notificationService.show('success', 'Reply sent successfully.', 'Sent');
       this.closeReplyModal();
-      // Optional toast/alert here
     } catch (error) {
       console.error("Reply error:", error);
       this.notificationService.show('error', 'Failed to send reply.', 'Send Failed');
@@ -133,11 +138,18 @@ export class ComplaintsComponent implements OnInit {
 
     if (!confirmed) return;
     try {
-      await remove(ref(this.db, `complaints/${ticketId}`));
+      await this.complaintsService.deleteComplaint(ticketId);
       this.notificationService.show('success', 'Ticket deleted.', 'Deleted');
+      this.fetchComplaints(); // Re-fetch to update UI
     } catch (error) {
       console.error("Delete error:", error);
       this.notificationService.show('error', 'Failed to delete ticket.', 'Delete Failed');
     }
+  }
+
+  ngOnDestroy(): void {
+    this.complaintSubscription?.unsubscribe();
+    this.replySubscriptions.forEach(unsubscribe => unsubscribe());
+    this.replySubscriptions.clear();
   }
 }

@@ -70,9 +70,7 @@
 
             <td class="action-cell">
               <div class="action-buttons">
-                <!-- <button class="btn-edit" (click)="openReplyModal(ticket)">
-                  {{ ticket.adminReply ? '✏️ Edit Reply' : '✉️ Reply' }}
-                </button> -->
+                <button class="btn-edit" type="button" (click)="openReplyModal(ticket)">Reply ({{ ticket.replyCount || 0 }})</button>
                 <button class="btn-cancel" (click)="deleteTicket(ticket.id)">
                   🗑️ Delete
                 </button>
@@ -104,14 +102,23 @@
         <p>{{ selectedTicket.message }}</p>
       </div>
 
+      <section class="reply-history" *ngIf="selectedTicket.replyHistory | keyvalue as replies">
+        <h4>Conversation history</h4>
+        <article *ngFor="let reply of replies" class="reply-history-item">
+          <strong>{{ reply.value.authorEmail }} · {{ reply.value.createdAt | date:'medium' }}</strong>
+          <p>{{ reply.value.message }}</p>
+        </article>
+        <p *ngIf="!replies.length">No replies have been sent yet.</p>
+      </section>
+
       <div class="reply-input-box">
-        <label>Your Official Reply:</label>
-        <textarea [(ngModel)]="adminReplyText" rows="4" placeholder="Type your resolution here..."></textarea>
+        <label>Add a support reply:</label>
+        <textarea [(ngModel)]="adminReplyText" rows="4" maxlength="4000" placeholder="Type your response here..."></textarea>
       </div>
 
       <div class="modal-footer">
         <button class="btn-secondary" (click)="closeReplyModal()">Cancel</button>
-        <button class="btn-primary" (click)="sendReply()">Send Reply & Resolve</button>
+        <button class="btn-primary" (click)="sendReply()">Add Reply & Resolve</button>
       </div>
     </div>
   </div>

@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "outDir": "./out-tsc/visual-test",
+    "paths": {
+      "@angular/fire/auth": ["src/testing/firebase-auth.mock.ts"],
+      "@angular/fire/database": ["src/testing/firebase-database.mock.ts"]
+    }
+  },
+  "include": ["src/main.visual-test.ts"],
+  "exclude": [
+    "src/**/*.spec.ts"
+  ]
+}

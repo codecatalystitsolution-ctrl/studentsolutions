@@ -1,0 +1,46 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && request.auth.token.email in ['admin@filecrafters.in', 'wmohd2514@outlook.com'];
+    }
+
+    function owns(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    match /student-uploads/{uid}/{orderId}/{fileName} {
+      allow read: if isAdmin() || owns(uid);
+      allow create: if owns(uid)
+        && resource == null
+        && request.resource.size > 0
+        && request.resource.size <= 1048576
+        && request.resource.contentType == 'application/pdf'
+        && request.resource.metadata.ownerUid == uid
+        && request.resource.metadata.orderId == orderId;
+      // Client deletion could remove a file after the order already references it.
+      // Orphan cleanup is an administrator-reviewed operation.
+      allow delete: if isAdmin();
+      allow update: if false;
+    }
+
+    match /project-deliverables/{uid}/{orderId}/{fileName} {
+      allow read: if isAdmin() || owns(uid);
+      allow create, update: if isAdmin()
+        && request.resource.size > 0
+        && request.resource.size <= 10485760
+        && (request.resource.contentType == 'application/pdf'
+          || request.resource.contentType == 'application/zip');
+      allow delete: if isAdmin();
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

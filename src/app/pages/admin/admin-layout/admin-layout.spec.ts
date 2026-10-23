@@ -1,17 +1,24 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+import { Auth } from '@angular/fire/auth';
+import { AuthService } from '../../../services/auth.service';
+import { AdminLayoutComponent } from './admin-layout';
 
-import { AdminLayout } from './admin-layout';
-
-describe('AdminLayout', () => {
-  let component: AdminLayout;
-  let fixture: ComponentFixture<AdminLayout>;
+describe('AdminLayoutComponent', () => {
+  let component: AdminLayoutComponent;
+  let fixture: ComponentFixture<AdminLayoutComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AdminLayout],
+      imports: [AdminLayoutComponent],
+      providers: [
+        provideRouter([]),
+        { provide: Auth, useValue: {} },
+        { provide: AuthService, useValue: { logout: vi.fn(async () => undefined) } },
+      ],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(AdminLayout);
+    fixture = TestBed.createComponent(AdminLayoutComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

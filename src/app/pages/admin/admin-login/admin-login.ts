@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Auth, signInWithEmailAndPassword, signOut } from '@angular/fire/auth';
+import { ThemeService } from '../../../services/theme.service';
 
 @Component({
   selector: 'app-admin-login',
@@ -14,11 +15,18 @@ import { Auth, signInWithEmailAndPassword, signOut } from '@angular/fire/auth';
 export class AdminLoginComponent {
   private auth = inject(Auth);
   private router = inject(Router);
+  private themeService = inject(ThemeService);
 
   email = '';
   password = '';
   errorMessage = '';
   isLoading = false;
+  theme = this.themeService.theme();
+
+  toggleTheme(): void {
+    this.themeService.toggleTheme();
+    this.theme = this.themeService.theme();
+  }
 
   // Yahan apne authorized admin emails dalein
   allowedAdmins = ['admin@filecrafters.in', 'wmohd2514@outlook.com']; 

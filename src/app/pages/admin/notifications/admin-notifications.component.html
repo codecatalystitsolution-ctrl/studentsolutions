@@ -1,0 +1,309 @@
+<div class="admin-notifications-page fade-in">
+  <div class="page-header premium-header">
+    <div class="heading-group">
+      <h1>Notification Management</h1>
+      <p>Compose targeted or broadcast alerts, review dispatch audit logs, and notify student workflows.</p>
+    </div>
+
+    <div class="header-actions-row">
+      <div class="summary-pill">
+        <div>
+          <span>Total Notifications Logged</span>
+          <strong>{{ notificationLogs.length }}</strong>
+        </div>
+        <div>
+          <span>Active Students</span>
+          <strong>{{ students.length }}</strong>
+        </div>
+        <div>
+          <span>Delivery Staff</span>
+          <strong>{{ deliveryStaff.length }}</strong>
+        </div>
+      </div>
+
+      <div class="action-buttons-group">
+        <button
+          type="button"
+          class="btn-admin-action"
+          (click)="refresh()"
+          [disabled]="isRefreshing"
+          title="Refresh notification history"
+        >
+          <span *ngIf="!isRefreshing">&#8635; Refresh</span>
+          <span *ngIf="isRefreshing">Refreshing...</span>
+        </button>
+
+        <button
+          type="button"
+          class="btn-admin-action export-btn"
+          (click)="exportCsv()"
+          [disabled]="filteredLogs.length === 0"
+          title="Download CSV"
+        >
+          &#8681; Download CSV
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Compose Notification Card (PRD Section 7.8) -->
+  <div class="compose-card glass-card">
+    <div class="card-header">
+      <h2>Compose New Notification</h2>
+      <p>Draft an audience-targeted system notification with direct in-app deep linking.</p>
+    </div>
+
+    <form (ngSubmit)="openPreview()" class="compose-form">
+      <div class="form-row">
+        <div class="form-group flex-2">
+          <label for="notifTitle">Notification Title * (Max 120 chars)</label>
+          <input
+            id="notifTitle"
+            type="text"
+            [(ngModel)]="composeModel.title"
+            name="title"
+            required
+            maxlength="120"
+            placeholder="e.g. Quotation Ready for Review"
+            class="form-input"
+          />
+        </div>
+
+        <div class="form-group flex-1">
+          <label for="notifType">Category / Type</label>
+          <select
+            id="notifType"
+            [(ngModel)]="composeModel.type"
+            name="type"
+            class="form-select"
+          >
+            <option value="system">System Announcement</option>
+            <option value="quotation">Quotation Update</option>
+            <option value="payment">Payment Verification</option>
+            <option value="delivery">Delivery Milestone</option>
+            <option value="support">Support Response</option>
+            <option value="commission">Teacher Referral</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group flex-1">
+          <label for="notifAudience">Target Audience *</label>
+          <select
+            id="notifAudience"
+            [(ngModel)]="composeModel.audience"
+            name="audience"
+            class="form-select"
+          >
+            <option value="all_students">All Active Students ({{ students.length }} users)</option>
+            <option value="specific_student">Specific Student</option>
+            <option value="delivery_staff">All Delivery Staff ({{ deliveryStaff.length }} users)</option>
+            <option value="teachers">All Teachers ({{ teachers.length }} users)</option>
+          </select>
+        </div>
+
+        <div class="form-group flex-1" *ngIf="composeModel.audience === 'specific_student'">
+          <label for="specificStudentSelect">Choose Student *</label>
+          <select
+            id="specificStudentSelect"
+            [(ngModel)]="composeModel.specificRecipientUid"
+            name="specificRecipientUid"
+            class="form-select"
+            required
+          >
+            <option value="">-- Select Registered Student --</option>
+            <option *ngFor="let s of students" [value]="s.uid">
+              {{ s.fullName }} ({{ s.email }})
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group flex-1">
+          <label for="targetRouteSelect">Deep-link Destination Route</label>
+          <select
+            id="targetRouteSelect"
+            [(ngModel)]="composeModel.route"
+            name="route"
+            class="form-select"
+          >
+            <option *ngFor="let r of allowedRoutes" [value]="r.value">
+              {{ r.label }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="notifMessage">Message Body * (Max 1,000 chars)</label>
+        <textarea
+          id="notifMessage"
+          [(ngModel)]="composeModel.message"
+          name="message"
+          required
+          rows="3"
+          maxlength="1000"
+          placeholder="Enter the notification message details..."
+          class="form-textarea"
+        ></textarea>
+      </div>
+
+      <div class="compose-actions">
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="isSending || !composeModel.title.trim() || !composeModel.message.trim()"
+        >
+          <span>Preview &amp; Send Broadcast &rarr;</span>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- History & Audit Table -->
+  <div class="table-card glass-card">
+    <div class="table-title-bar">
+      <div>
+        <h2>Notification Dispatch History</h2>
+        <p>Audit trail of all in-app notifications generated across student and staff accounts.</p>
+      </div>
+      <div class="history-filters">
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          (input)="filterLogs()"
+          placeholder="Filter by title or user UID..."
+          class="search-mini"
+        />
+        <select [(ngModel)]="typeFilter" (change)="filterLogs()" class="filter-mini">
+          <option value="">All Types</option>
+          <option value="system">System</option>
+          <option value="quotation">Quotation</option>
+          <option value="payment">Payment</option>
+          <option value="delivery">Delivery</option>
+          <option value="support">Support</option>
+        </select>
+      </div>
+    </div>
+
+    <div *ngIf="isLoading" class="loading-panel">
+      <div class="spinner"></div>
+      <span>Loading notification logs...</span>
+    </div>
+
+    <div class="table-responsive" *ngIf="!isLoading">
+      <table class="premium-table">
+        <thead>
+          <tr>
+            <th>Title &amp; Type</th>
+            <th>Recipient UID</th>
+            <th>Message Body</th>
+            <th>Destination Route</th>
+            <th>Read Status</th>
+            <th>Dispatched Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of paginatedLogs">
+            <td>
+              <strong class="log-title">{{ item.title }}</strong>
+              <span class="type-pill">{{ item.type | uppercase }}</span>
+            </td>
+            <td>
+              <span class="uid-tag">{{ item.recipientUid | slice: 0 : 12 }}...</span>
+            </td>
+            <td>
+              <p class="log-message">{{ item.message | slice: 0 : 80 }}...</p>
+            </td>
+            <td>
+              <code class="route-code">{{ item.route }}</code>
+            </td>
+            <td>
+              <span class="status-pill" [ngClass]="item.isRead ? 'read' : 'unread'">
+                {{ item.isRead ? 'READ' : 'UNREAD' }}
+              </span>
+            </td>
+            <td>
+              <span class="date-text">{{ item.createdAt | date: 'MMM d, y, h:mm a' }}</span>
+            </td>
+          </tr>
+
+          <tr *ngIf="filteredLogs.length === 0">
+            <td colspan="6" class="empty-state">No notification logs match your query.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination Controls (PRD 7.6) -->
+    <div class="pagination-footer" *ngIf="filteredLogs.length > 0">
+      <div class="pagination-info">
+        Showing
+        <strong>{{ (currentPage - 1) * pageSize + 1 }}</strong>
+        to
+        <strong>{{ (currentPage * pageSize > filteredLogs.length) ? filteredLogs.length : (currentPage * pageSize) }}</strong>
+        of
+        <strong>{{ filteredLogs.length }}</strong>
+        notifications
+      </div>
+
+      <div class="pagination-controls">
+        <button
+          type="button"
+          class="page-btn"
+          (click)="prevPage()"
+          [disabled]="currentPage === 1"
+        >
+          &larr; Previous
+        </button>
+        <span class="page-indicator">Page {{ currentPage }} of {{ totalPages }}</span>
+        <button
+          type="button"
+          class="page-btn"
+          (click)="nextPage()"
+          [disabled]="currentPage === totalPages"
+        >
+          Next &rarr;
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Preview Confirmation Modal (PRD Section 7.8) -->
+  <div class="modal-backdrop" *ngIf="showPreviewModal" (click)="closePreview()">
+    <div class="modal-dialog glass-panel" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Notification Preview</h3>
+        <button class="modal-close-btn" type="button" (click)="closePreview()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="preview-box">
+          <div class="preview-badge-row">
+            <span class="type-pill">{{ composeModel.type | uppercase }}</span>
+            <small class="route-preview">Target: {{ composeModel.route }}</small>
+          </div>
+          <h4 class="preview-title">{{ composeModel.title }}</h4>
+          <p class="preview-message">{{ composeModel.message }}</p>
+        </div>
+
+        <div class="preview-meta-row">
+          <span>Target Audience: <strong>{{ composeModel.audience | titlecase }}</strong></span>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" (click)="closePreview()">Back to Edit</button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="isSending"
+          (click)="confirmAndSend()"
+        >
+          <span *ngIf="!isSending">Confirm &amp; Send Now &rarr;</span>
+          <span *ngIf="isSending">Delivering...</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -99,7 +99,7 @@ async loadUserProfile() {
       // Update local view data
       this.userData = { ...this.userData, ...this.profileForm.value };
       this.isEditMode = false;
-      this.notificationService.show('success', 'Profile updated successfully! ✨', 'Profile Saved');
+      this.notificationService.show('success', 'Profile updated successfully.', 'Profile Saved');
     } catch (error) {
       console.error("Error updating profile", error);
       this.notificationService.show('error', 'Failed to update profile.', 'Update Failed');

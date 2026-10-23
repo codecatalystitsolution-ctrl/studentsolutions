@@ -1,4 +1,7 @@
 <div class="register-container">
+  <button class="auth-theme-toggle" type="button" (click)="toggleTheme()" [attr.aria-label]="theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'">
+    {{ theme === 'dark' ? '☀' : '☾' }}
+  </button>
   <div class="brand-panel">
     <div class="brand-content">
       <h1 class="logo-text">FileCrafters</h1>
@@ -12,72 +15,136 @@
       <h2>Create an Account</h2>
       <p class="subtitle">Fill in your academic details to get started.</p>
 
+      <!-- Staff Onboarding Notice -->
+      <div class="staff-onboarding-banner">
+        <span class="info-badge">Staff &amp; Partner Onboarding</span>
+        <p>Faculty and delivery personnel accounts are provisioned directly by administrators. If you are an academic mentor or delivery agent, please <a routerLink="/login-support">contact support</a> for onboarding.</p>
+      </div>
+
       <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+        <div class="input-group">
+          <label>Account Type</label>
+          <div class="custom-select">
+            <select formControlName="role">
+              <option value="Student">Student (Self-Registration)</option>
+            </select>
+            <span class="select-icon">▾</span>
+          </div>
+        </div>
+
         <div class="form-grid">
           <div class="input-group">
             <label>Full Name</label>
             <input type="text" formControlName="fullName" placeholder="John Doe" />
+            <small class="error-text" *ngIf="registerForm.get('fullName')?.invalid && registerForm.get('fullName')?.touched">
+              Full Name is required.
+            </small>
           </div>
 
           <div class="input-group">
             <label>Email Address</label>
-            <input type="email" formControlName="email" placeholder="student@college.edu" />
+            <input type="email" formControlName="email" placeholder="student@college.edu" maxlength="100" />
+            <small class="error-text" *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
+              <span *ngIf="registerForm.get('email')?.hasError('required')">Email is required.</span>
+              <span *ngIf="registerForm.get('email')?.hasError('email')">Enter a valid email address.</span>
+              <span *ngIf="registerForm.get('email')?.hasError('maxlength')">Email cannot exceed 100 characters.</span>
+            </small>
           </div>
 
           <div class="input-group">
             <label>Phone Number</label>
-            <input type="tel" formControlName="phone" placeholder="10-digit number" />
+            <input type="tel" formControlName="phone" placeholder="10-digit number" maxlength="10" />
+            <small class="error-text" *ngIf="registerForm.get('phone')?.invalid && registerForm.get('phone')?.touched">
+              <span *ngIf="registerForm.get('phone')?.hasError('required')">Phone number is required.</span>
+              <span *ngIf="registerForm.get('phone')?.hasError('pattern') || registerForm.get('phone')?.hasError('minlength') || registerForm.get('phone')?.hasError('maxlength')">Enter a valid 10-digit phone number.</span>
+            </small>
           </div>
 
           <div class="input-group">
             <label>WhatsApp Number (Optional)</label>
-            <input type="tel" formControlName="whatsapp" placeholder="For quick updates" />
+            <input type="tel" formControlName="whatsapp" placeholder="For quick updates" maxlength="10" />
+            <small class="error-text" *ngIf="registerForm.get('whatsapp')?.invalid && registerForm.get('whatsapp')?.touched">
+              <span *ngIf="registerForm.get('whatsapp')?.hasError('pattern')">Enter a valid 10-digit WhatsApp number.</span>
+            </small>
           </div>
+        </div>
 
+        <!-- Academic student fields -->
+        <div class="form-grid">
+          <div class="input-group grid-span-half">
+            <label>Teacher Referral Code (Optional)</label>
+            <input type="text" formControlName="referralCode" maxlength="30" placeholder="Enter a code from your teacher" autocomplete="off" />
+            <small class="helper-text">Referral attribution is saved once to your account and cannot be changed later.</small>
+          </div>
           <div class="input-group">
             <label>College Name</label>
             <input type="text" formControlName="collegeName" placeholder="E.g. XYZ Institute" />
+            <small class="error-text" *ngIf="registerForm.get('collegeName')?.invalid && registerForm.get('collegeName')?.touched">
+              College Name is required.
+            </small>
           </div>
 
           <div class="input-group grid-span-half">
             <label>Course</label>
             <input type="text" formControlName="courseName" placeholder="B.Tech, BCA, etc." />
+            <small class="error-text" *ngIf="registerForm.get('courseName')?.invalid && registerForm.get('courseName')?.touched">
+              Course is required.
+            </small>
           </div>
 
           <div class="input-group grid-span-half">
             <label>Branch/Specialization</label>
             <input type="text" formControlName="branch" placeholder="CSE, Mech, etc." />
+            <small class="error-text" *ngIf="registerForm.get('branch')?.invalid && registerForm.get('branch')?.touched">
+              Branch is required.
+            </small>
           </div>
 
           <div class="input-group">
             <label>Current Year</label>
-            <select formControlName="year">
-              <option value="" disabled selected>Select Year</option>
-              <option value="1st Year">1st Year</option>
-              <option value="2nd Year">2nd Year</option>
-              <option value="3rd Year">3rd Year</option>
-              <option value="4th Year">4th Year</option>
-            </select>
+            <div class="custom-select">
+              <select formControlName="year">
+                <option value="" disabled selected>Select Year</option>
+                <option value="1st Year">1st Year</option>
+                <option value="2nd Year">2nd Year</option>
+                <option value="3rd Year">3rd Year</option>
+                <option value="4th Year">4th Year</option>
+              </select>
+              <span class="select-icon">▾</span>
+            </div>
+            <small class="error-text" *ngIf="registerForm.get('year')?.invalid && registerForm.get('year')?.touched">
+              Please select a year.
+            </small>
           </div>
 
           <div class="input-group">
             <label>Semester</label>
-            <select formControlName="semester">
-              <option value="" disabled selected>Select Semester</option>
-              <option value="1st Sem">1st Sem</option>
-              <option value="2nd Sem">2nd Sem</option>
-              <option value="3rd Sem">3rd Sem</option>
-              <option value="4th Sem">4th Sem</option>
-              <option value="5th Sem">5th Sem</option>
-              <option value="6th Sem">6th Sem</option>
-              <option value="7th Sem">7th Sem</option>
-              <option value="8th Sem">8th Sem</option>
-            </select>
+            <div class="custom-select">
+              <select formControlName="semester">
+                <option value="" disabled selected>Select Semester</option>
+                <option value="1st Sem">1st Sem</option>
+                <option value="2nd Sem">2nd Sem</option>
+                <option value="3rd Sem">3rd Sem</option>
+                <option value="4th Sem">4th Sem</option>
+                <option value="5th Sem">5th Sem</option>
+                <option value="6th Sem">6th Sem</option>
+                <option value="7th Sem">7th Sem</option>
+                <option value="8th Sem">8th Sem</option>
+              </select>
+              <span class="select-icon">▾</span>
+            </div>
+            <small class="error-text" *ngIf="registerForm.get('semester')?.invalid && registerForm.get('semester')?.touched">
+              Please select a semester.
+            </small>
           </div>
 
           <div class="input-group grid-span-half">
             <label>Roll Number</label>
-            <input type="text" formControlName="rollNumber" placeholder="University Roll No" />
+            <input type="text" formControlName="rollNumber" placeholder="University Roll No" maxlength="12" />
+            <small class="error-text" *ngIf="registerForm.get('rollNumber')?.invalid && registerForm.get('rollNumber')?.touched">
+              <span *ngIf="registerForm.get('rollNumber')?.hasError('required')">Roll number is required.</span>
+              <span *ngIf="registerForm.get('rollNumber')?.hasError('pattern')">Enter a valid roll number (6 to 12 digits).</span>
+            </small>
           </div>
         </div>
 
@@ -88,34 +155,49 @@
             rows="2"
             placeholder="Full address for delivery"
           ></textarea>
+          <small class="error-text" *ngIf="registerForm.get('address')?.invalid && registerForm.get('address')?.touched">
+            Address is required.
+          </small>
         </div>
 
         <div class="form-grid">
           <div class="input-group">
             <label>Pincode</label>
             <input type="text" formControlName="pincode" placeholder="6-digit PIN" />
+            <small class="error-text" *ngIf="registerForm.get('pincode')?.invalid && registerForm.get('pincode')?.touched">
+              <span *ngIf="registerForm.get('pincode')?.hasError('required')">Pincode is required.</span>
+              <span *ngIf="registerForm.get('pincode')?.hasError('pattern')">
+                Enter a valid 6-digit pincode.
+              </span>
+            </small>
           </div>
         </div>
 
         <div class="form-grid">
           <div class="input-group">
             <label>Password</label>
-            <input type="password" formControlName="password" placeholder="••••••••" />
+            <input type="password" formControlName="password" placeholder="••••••••" maxlength="20" />
+            <small class="error-text" *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
+              <span *ngIf="registerForm.get('password')?.hasError('required')">Password is required.</span>
+              <span *ngIf="registerForm.get('password')?.hasError('minlength')">Password must be at least 8 characters.</span>
+              <span *ngIf="registerForm.get('password')?.hasError('maxlength')">Password cannot exceed 20 characters.</span>
+              <span *ngIf="registerForm.get('password')?.hasError('pattern')">Password must include uppercase, lowercase, and a digit.</span>
+            </small>
           </div>
 
           <div class="input-group">
             <label>Confirm Password</label>
             <input type="password" formControlName="confirmPassword" placeholder="••••••••" />
-            @if (
-              registerForm.hasError('mismatch') && registerForm.get('confirmPassword')?.touched
-            ) {
-              <small class="error-text"> Passwords do not match. </small>
-            }
+            <small class="error-text" *ngIf="(registerForm.get('confirmPassword')?.invalid && registerForm.get('confirmPassword')?.touched) || (registerForm.hasError('mismatch') && registerForm.get('confirmPassword')?.touched)">
+              <span *ngIf="registerForm.get('confirmPassword')?.hasError('required')">Confirm your password.</span>
+              <span *ngIf="registerForm.hasError('mismatch')">Passwords do not match.</span>
+            </small>
           </div>
         </div>
 
-        <button type="submit" class="btn-primary" [disabled]="registerForm.invalid">
-          Register
+        <button type="submit" class="btn-primary" [disabled]="registerForm.invalid || isLoading">
+          <span *ngIf="!isLoading">Register as Student</span>
+          <span *ngIf="isLoading">Registering...</span>
         </button>
       </form>
 

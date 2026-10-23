@@ -1,5 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { provideRouter } from '@angular/router';
+import { Auth } from '@angular/fire/auth';
+import { Database } from '@angular/fire/database';
+import { AuthService } from '../../services/auth.service';
 import { DashboardComponent } from './dashboard.component';
 
 describe('DashboardComponent', () => {
@@ -9,6 +12,12 @@ describe('DashboardComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [DashboardComponent],
+      providers: [
+        provideRouter([]),
+        { provide: Auth, useValue: {} },
+        { provide: Database, useValue: {} },
+        { provide: AuthService, useValue: { logout: vi.fn(async () => undefined) } },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(DashboardComponent);

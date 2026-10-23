@@ -12,9 +12,10 @@
   </div>
 
   <div class="empty-state" *ngIf="!isLoading && tickets.length === 0">
-    <span class="empty-icon">🎫</span>
+    <span class="empty-icon"></span>
     <h3>No Tickets Found</h3>
     <p>You haven't raised any support tickets yet.</p>
+    <button type="button" class="ticket-create-btn" (click)="createTicket()">Create a support ticket</button>
   </div>
 
   <div class="tickets-grid" *ngIf="!isLoading && tickets.length > 0">
@@ -23,7 +24,7 @@
       
       <div class="card-top">
         <span class="cat-label">{{ getCategoryLabel(ticket.category) }}</span>
-        <span class="status-badge" [ngClass]="(ticket.status || 'pending').toLowerCase()">
+        <span class="status-badge" [ngClass]="getStatusClass(ticket.status || 'pending')">
           {{ ticket.status || 'Pending' }}
         </span>
       </div>
@@ -40,14 +41,29 @@
 
       <div class="admin-reply-box" *ngIf="ticket.adminReply">
         <div class="reply-header">
-          <span class="admin-icon">🛠️</span>
-          <strong>Official Support Reply:</strong>
+          <span class="admin-icon"></span>
+          <strong>Earlier Support Reply:</strong>
         </div>
         <p class="reply-text">{{ ticket.adminReply }}</p>
       </div>
 
-      <div class="pending-footer" *ngIf="!ticket.adminReply">
-        <span>⏳ Our technical support team is reviewing your query.</span>
+      <section class="admin-reply-box support-reply-thread" *ngIf="ticket.replies | keyvalue as replies">
+        <div class="reply-header"><span class="admin-icon"></span><strong>Support conversation</strong></div>
+        <article class="support-reply-item" *ngFor="let reply of replies">
+          <div><strong>{{ reply.value.authorRole === 'Admin' ? 'Student Support' : reply.value.authorEmail }}</strong><time>{{ reply.value.createdAt | date:'medium' }}</time></div>
+          <p class="reply-text">{{ reply.value.message }}</p>
+        </article>
+        <p *ngIf="!replies.length" class="reply-text">Our support team is reviewing your query.</p>
+      </section>
+
+      <form class="support-reply-form" (ngSubmit)="sendReply(ticket.id)">
+        <label [for]="'ticket-reply-' + ticket.id">Add a follow-up</label>
+        <textarea [id]="'ticket-reply-' + ticket.id" [(ngModel)]="replyDrafts[ticket.id]" [name]="'ticket-reply-' + ticket.id" maxlength="4000" rows="3" placeholder="Add information for the support team"></textarea>
+        <button type="submit" [disabled]="!replyDrafts[ticket.id]?.trim()">Send follow-up</button>
+      </form>
+
+      <div class="pending-footer" *ngIf="!ticket.adminReply && !(ticket.replies | keyvalue)?.length">
+        <span> Our technical support team is reviewing your query.</span>
       </div>
 
     </div>

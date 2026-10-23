@@ -2,7 +2,7 @@
   <div class="history-header">
     <div class="badge-tag">Tracking Hub</div>
     <h1>My Order History</h1>
-    <p>Your old orders, live printing status aur delivery updates are available here.</p>
+    <p>Track your orders, follow progress, and view delivery updates.</p>
   </div>
 
   <div class="counter-grid">
@@ -11,21 +11,21 @@
         <h3>Total Orders</h3>
         <h2>{{ orders.length }}</h2>
       </div>
-      <span class="counter-icon">📦</span>
+      <span class="counter-icon" aria-hidden="true">01</span>
     </div>
     <div class="counter-card pending">
       <div class="counter-info">
         <h3>In Progress</h3>
-        <h2>{{ getCountByStatus('pending') + getCountByStatus('printing') }}</h2>
+        <h2>{{ getCountByStatus('pending') + getCountByStatus('printing') + getCountByStatus('in progress') }}</h2>
       </div>
-      <span class="counter-icon">⏳</span>
+      <span class="counter-icon" aria-hidden="true">02</span>
     </div>
     <div class="counter-card completed">
       <div class="counter-info">
         <h3>Delivered</h3>
         <h2>{{ getCountByStatus('delivered') }}</h2>
       </div>
-      <span class="counter-icon">✓</span>
+      <span class="counter-icon" aria-hidden="true">03</span>
     </div>
   </div>
 
@@ -38,10 +38,10 @@
     </div>
 
     <div class="empty-state" *ngIf="!isLoading && orders.length === 0">
-      <span class="empty-icon">📂</span>
+      <span class="empty-icon" aria-hidden="true">0</span>
       <h3>No orders found</h3>
       <p>You haven't placed any orders yet.</p>
-      <a routerLink="/dashboard/new-order" class="order-now-btn">Book New Order</a>
+      <a routerLink="/new-order" class="order-now-btn">Place a New Order</a>
     </div>
 
     <div class="orders-list" *ngIf="!isLoading && orders.length > 0">
@@ -55,38 +55,104 @@
               <th>Est. Pages</th>
               <th>Date</th>
               <th>Status</th>
+              <th>Quotation</th>
+              <th>Delivery</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let order of orders">
-              <td class="font-bold">#{{ order?.id | slice: 0 : 8 | uppercase }}</td>
+              <td class="font-bold" data-label="Order ID">#{{ order?.id | slice: 0 : 8 | uppercase }}</td>
 
-              <td class="text-capitalize">
-                {{ order?.fileType || order?.projectDetails?.fileType || 'N/A' | titlecase }}
+              <td class="text-capitalize" data-label="Type">
+                {{ (order?.fileType || order?.projectDetails?.fileType || 'N/A') | titlecase }}
               </td>
 
-              <td>{{ order?.projectDetails?.subject || order?.subject || 'N/A' }}</td>
+              <td data-label="Subject / Topic">{{ order?.projectDetails?.subject || order?.subject || 'N/A' }}</td>
 
-              <td>{{ order?.printSettings?.pagesLabel || order?.pagesLabel || 'N/A' }}</td>
+              <td data-label="Estimated pages">{{ order?.printSettings?.pagesLabel || order?.pagesLabel || 'N/A' }}</td>
 
-              <td class="text-muted">
+              <td class="text-muted" data-label="Date">
                 {{ order?.createdAt ? (order.createdAt | date: 'mediumDate') : 'N/A' }}
               </td>
 
-              <td>
-                <span class="status-badge" [ngClass]="(order?.status || 'pending').toLowerCase()">
+              <td data-label="Status">
+                <span class="status-badge" [ngClass]="(order?.status || 'pending').toLowerCase().replace(' ', '-')">
                   {{ order?.status || 'Pending' }}
                 </span>
               </td>
-              
-              <td class="action-cell">
+
+              <td data-label="Quotation">
+                <ng-container *ngIf="quotations[order.id] as quotationHistory; else noQuotation">
+                  <div *ngFor="let quoteEntry of (quotationHistory.versions | keyvalue)" class="quotation-history-row">
+                    <ng-container *ngIf="quoteEntry.value as quote">
+                      <strong>₹{{ quote.amount }}</strong>
+                      <small class="quote-version">Version {{ quote.version }} · {{ quote.createdAt | date:'mediumDate' }}</small>
+                      <p *ngIf="quote.terms">{{ quote.terms }}</p>
+                      <ng-container *ngIf="quotationDecisions[order.id]?.[quoteEntry.key] as decision">
+                        <span class="quote-decision">{{ decision.status | titlecase }} · {{ decision.createdAt | date:'mediumDate' }}</span>
+                        <ng-container *ngIf="decision.status === 'approved' && quotationHistory.currentVersionId === quoteEntry.key">
+                          <ng-container *ngIf="paymentForQuote(order.id, quoteEntry.key) as payment; else paymentEntry">
+                            <span class="quote-decision">Payment: {{ payment.status | titlecase }}</span>
+                            <small *ngFor="let event of (paymentHistoryByPayment[payment.id] | keyvalue)" class="quote-version">
+                              {{ event.value.type | titlecase }} · {{ event.value.actorRole }} · {{ event.value.createdAt | date:'mediumDate' }} · {{ event.value.message }}
+                            </small>
+                            <ng-container *ngIf="payment.status === 'verified'">
+                              <ng-container *ngIf="refundsByPayment[payment.id] as refund; else refundEntry">
+                                <span class="quote-decision">Refund request: {{ refund.status | titlecase }}</span>
+                                <small *ngFor="let event of (refundHistoryByPayment[payment.id] | keyvalue)" class="quote-version">
+                                  Refund {{ event.value.type | titlecase }} · {{ event.value.actorRole }} · {{ event.value.createdAt | date:'mediumDate' }} · {{ event.value.message }}
+                                </small>
+                                <span class="quote-decision" *ngIf="refundProcessingByPayment[payment.id] as processing">External refund: {{ processing.status | titlecase }} · {{ processing.reference || 'No reference provided' }}</span>
+                                <small *ngIf="refundProcessingByPayment[payment.id] as processing" class="quote-version">{{ processing.note }} · {{ processing.createdAt | date:'mediumDate' }}</small>
+                                <small *ngFor="let event of (refundProcessingHistoryByPayment[payment.id] | keyvalue)" class="quote-version">External refund {{ event.value.type | titlecase }} · {{ event.value.message }} · {{ event.value.createdAt | date:'mediumDate' }}</small>
+                              </ng-container>
+                              <ng-template #refundEntry>
+                                <label [for]="'refund-reason-' + payment.id">Refund reason</label>
+                                <input [id]="'refund-reason-' + payment.id" [(ngModel)]="refundReason[payment.id]" maxlength="1000" placeholder="Why are you requesting a refund?">
+                                <button type="button" (click)="requestPaymentRefund(payment)" [disabled]="!refundReason[payment.id]?.trim()">Request refund</button>
+                              </ng-template>
+                            </ng-container>
+                          </ng-container>
+                          <ng-template #paymentEntry>
+                            <label [for]="'payment-reference-' + order.id">Transaction reference</label>
+                            <input [id]="'payment-reference-' + order.id" [(ngModel)]="paymentReference[order.id]" maxlength="200" pattern="[A-Za-z0-9_-]{1,200}" title="Use letters, numbers, hyphens, or underscores" placeholder="Reference from your payment app">
+                            <label [for]="'payment-upi-' + order.id">UPI ID (optional)</label>
+                            <input [id]="'payment-upi-' + order.id" [(ngModel)]="paymentUpi[order.id]" maxlength="200" placeholder="name@bank">
+                            <button type="button" (click)="submitQuotedPayment(order.id, quoteEntry.key)" [disabled]="!paymentReference[order.id]?.trim()">Submit payment for review</button>
+                            <small class="quote-version">Payment details are reviewed manually; submission is not proof of payment.</small>
+                          </ng-template>
+                        </ng-container>
+                      </ng-container>
+                      <span *ngIf="quotationHistory.currentVersionId !== quoteEntry.key && !quotationDecisions[order.id]?.[quoteEntry.key]" class="quote-decision">Superseded</span>
+                      <div class="quote-actions" *ngIf="quotationHistory.currentVersionId === quoteEntry.key && !quotationDecisions[order.id]?.[quoteEntry.key]">
+                        <button type="button" (click)="decideQuotation(order.id, quoteEntry.key, 'approved')">Approve</button>
+                        <button type="button" (click)="decideQuotation(order.id, quoteEntry.key, 'rejected')">Reject</button>
+                      </div>
+                    </ng-container>
+                  </div>
+                </ng-container>
+                <ng-template #noQuotation>Not quoted</ng-template>
+              </td>
+
+              <td data-label="Delivery">
+                <ng-container *ngIf="deliveryAssignments[order.id] as delivery; else notAssigned">
+                  <strong>{{ delivery.status | titlecase }}</strong>
+                  <small class="quote-version">Agent assigned · {{ delivery.assignedAt | date:'mediumDate' }}</small>
+                  <div *ngFor="let event of (deliveryHistory[order.id] | keyvalue)" class="quote-version">
+                    {{ event.value.status | titlecase }} · {{ event.value.note }} · {{ event.value.createdAt | date:'mediumDate' }}
+                  </div>
+                </ng-container>
+                <ng-template #notAssigned>Not assigned</ng-template>
+              </td>
+
+              <td class="action-cell" data-label="Actions">
                 <div
                   class="action-buttons"
                   *ngIf="(order.status || 'Pending').toLowerCase() === 'pending'"
                 >
                   <button class="btn-cancel" (click)="cancelOrder(order.id)" title="Cancel Order">
-                    ✖ Cancel
+                    Cancel order
                   </button>
                 </div>
 
@@ -94,7 +160,7 @@
                   class="locked-status"
                   *ngIf="(order.status || 'Pending').toLowerCase() !== 'pending'"
                 >
-                  <span title="Order cannot be changed now">🔒 Locked</span>
+                  <span title="Order cannot be changed now"> Locked</span>
                 </div>
               </td>
             </tr>
