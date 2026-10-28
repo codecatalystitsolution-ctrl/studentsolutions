@@ -3,7 +3,14 @@
   <header class="public-navbar">
     <div class="nav-container">
       <a class="nav-brand" (click)="scrollToSection('hero')" href="javascript:void(0)">
-        <span class="brand-badge">FC</span>
+        <span class="brand-badge">
+          <img
+            src="assets/images/studentsolutions-emblem.png"
+            alt="StudentSolutions Logo"
+            class="header-brand-logo"
+            draggable="false"
+          />
+        </span>
         <div class="brand-text">
           <span class="brand-name">FileCrafters</span>
           <span class="brand-tagline">Academic Solutions</span>
@@ -34,8 +41,15 @@
         </button>
 
         <!-- Auth CTAs -->
-        <a routerLink="/login" class="btn btn-outline desktop-only">Sign In</a>
-        <a routerLink="/register" class="btn btn-primary">Get Started</a>
+        <ng-container *ngIf="!currentUser()">
+          <a routerLink="/login" class="btn btn-outline desktop-only">Sign In</a>
+          <a routerLink="/register" class="btn btn-primary">Get Started</a>
+        </ng-container>
+        <ng-container *ngIf="currentUser()">
+          <button type="button" class="btn btn-primary" (click)="goToDashboard()">
+            My Dashboard &rarr;
+          </button>
+        </ng-container>
 
         <!-- Mobile Menu Hamburger -->
         <button
@@ -66,8 +80,15 @@
         <a (click)="scrollToSection('faqs'); closeMobileMenu()" href="javascript:void(0)">FAQs</a>
         <a (click)="scrollToSection('contact'); closeMobileMenu()" href="javascript:void(0)">Contact & Support</a>
         <div class="mobile-auth-row">
-          <a routerLink="/login" class="btn btn-outline" (click)="closeMobileMenu()">Sign In</a>
-          <a routerLink="/register" class="btn btn-primary" (click)="closeMobileMenu()">Get Started</a>
+          <ng-container *ngIf="!currentUser()">
+            <a routerLink="/login" class="btn btn-outline" (click)="closeMobileMenu()">Sign In</a>
+            <a routerLink="/register" class="btn btn-primary" (click)="closeMobileMenu()">Get Started</a>
+          </ng-container>
+          <ng-container *ngIf="currentUser()">
+            <button type="button" class="btn btn-primary" (click)="goToDashboard()">
+              My Dashboard &rarr;
+            </button>
+          </ng-container>
         </div>
       </nav>
     </div>
@@ -90,9 +111,13 @@
           </p>
 
           <div class="hero-actions">
-            <a routerLink="/register" class="btn btn-primary btn-large">
-              <span>Get Started Free</span>
+            <button type="button" class="btn btn-primary btn-large" (click)="orderNow()">
+              <span>Book / Order Project</span>
               <span class="arrow-icon" aria-hidden="true">&rarr;</span>
+            </button>
+            <a routerLink="/welcome" class="btn btn-showcase btn-large">
+              <span class="sparkle-icon" aria-hidden="true">✨</span>
+              <span>Watch 3D File Crafting</span>
             </a>
             <button type="button" class="btn btn-outline btn-large" (click)="scrollToSection('portfolio')">
               <span>Explore Projects</span>
@@ -193,9 +218,9 @@
           <small class="stat-desc">Expedited review available</small>
         </div>
         <div class="stat-card highlight-card">
-          <span class="stat-number">{{ visitorCount() | number }}</span>
+          <span class="stat-number">{{ animatedVisitorCount() | number }}</span>
           <span class="stat-label">Unique Platform Visitors</span>
-          <small class="stat-desc">Verified community baseline · Administrator-maintained</small>
+          <small class="stat-desc">Single verified count per device/browser</small>
         </div>
       </div>
     </section>
@@ -734,7 +759,14 @@
     <div class="footer-container">
       <div class="footer-col brand-col">
         <div class="footer-brand">
-          <span class="brand-badge">FC</span>
+          <span class="brand-badge">
+            <img
+              src="assets/images/studentsolutions-emblem.png"
+              alt="StudentSolutions Logo"
+              class="footer-brand-logo"
+              draggable="false"
+            />
+          </span>
           <span class="brand-name">FileCrafters</span>
         </div>
         <p class="footer-desc">
@@ -841,10 +873,13 @@
 
       <div class="modal-footer">
         <button type="button" class="btn btn-outline" (click)="closeProjectDetails()">Close</button>
-        <a routerLink="/register" class="btn btn-primary" (click)="closeProjectDetails()">
+        <button type="button" class="btn btn-primary" (click)="orderNow(selectedProject())">
           Order Similar Project &rarr;
-        </a>
+        </button>
       </div>
     </div>
   </div>
+
+  <!-- 14. Floating Feedback Button & Essential Cookies Consent Banner -->
+  <app-feedback-and-cookies></app-feedback-and-cookies>
 </div>

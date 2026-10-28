@@ -1,0 +1,513 @@
+<div class="welcome-container" [attr.data-stage]="stage()">
+  <!-- Background Glow & Grid Canvas -->
+  <div class="ambient-canvas">
+    <div class="grid-overlay"></div>
+    <div class="glow-orb orb-primary"></div>
+    <div class="glow-orb orb-secondary"></div>
+    <div class="floating-particle particle-1"></div>
+    <div class="floating-particle particle-2"></div>
+  </div>
+
+  <!-- Studio Top Navigation -->
+  <header class="welcome-nav">
+    <div class="nav-brand">
+      <span class="brand-badge">
+        <img src="assets/images/studentsolutions-emblem.png" alt="Logo" class="header-brand-logo" />
+      </span>
+      <div class="brand-info">
+        <span class="brand-name">FileCrafters</span>
+        <span class="brand-sub">Academic Engineering Studio</span>
+      </div>
+    </div>
+
+    <!-- Interactive Stepper -->
+    <div class="nav-stepper" aria-label="Showcase Steps">
+      <div class="step-pill" [class.active]="stage() === 'crafting'" [class.done]="stage() === 'inspecting' || stage() === 'completed'">
+        <span class="step-icon">🏗️</span>
+        <span class="step-text">1. Crafting File</span>
+      </div>
+      <div class="step-connector" [class.active]="stage() === 'inspecting' || stage() === 'completed'"></div>
+      <div class="step-pill" [class.active]="stage() === 'inspecting'" [class.done]="stage() === 'completed'">
+        <span class="step-icon">📖</span>
+        <span class="step-text">2. Page-by-Page</span>
+      </div>
+      <div class="step-connector" [class.active]="stage() === 'completed'"></div>
+      <div class="step-pill" [class.active]="stage() === 'completed'">
+        <span class="step-icon">🚀</span>
+        <span class="step-text">3. Ready to Submit</span>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="nav-actions">
+      <button
+        *ngIf="stage() === 'crafting'"
+        type="button"
+        class="nav-skip-btn"
+        (click)="transitionToBookInspection()"
+      >
+        <span>Open Book Directly</span>
+        <span class="arrow">&rarr;</span>
+      </button>
+      <button
+        *ngIf="stage() === 'inspecting'"
+        type="button"
+        class="nav-skip-btn"
+        (click)="finishShowcase()"
+      >
+        <span>Skip to Platform</span>
+        <span class="arrow">&rarr;</span>
+      </button>
+      <button
+        type="button"
+        class="nav-exit-btn"
+        (click)="proceedToPlatform('/')"
+        title="Exit to Home"
+      >
+        &times;
+      </button>
+    </div>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- STAGE 1: PROJECT FILE CRAFTING ANIMATION ("Project File Banna")             -->
+  <!-- ========================================================================= -->
+  <section *ngIf="stage() === 'crafting'" class="stage-section crafting-stage" aria-label="File Crafting Animation">
+    <div class="stage-header">
+      <div class="live-indicator">
+        <span class="pulse-dot"></span>
+        <span>STUDIO FABRICATION IN PROGRESS</span>
+      </div>
+      <h1 class="stage-title">Watch Your Project File Come to Life</h1>
+      <p class="stage-desc">
+        Every document is synthesized using IEEE standards, laser-cut margins, and industrial hardcover binding.
+      </p>
+    </div>
+
+    <!-- 3D Isometric Workbench Area -->
+    <div class="crafting-workbench">
+      <div class="workbench-pedestal">
+        <div class="pedestal-surface"></div>
+        <div class="pedestal-grid"></div>
+
+        <!-- The 3D File Assembly Construct -->
+        <div class="file-assembly-dossier" [attr.data-step]="craftingStep()">
+          <!-- Paper Sheets Stacking -->
+          <div class="paper-stack">
+            <div class="sheet sheet-bottom"></div>
+            <div class="sheet sheet-middle"></div>
+            <div class="sheet sheet-top">
+              <div class="sheet-lines">
+                <span class="line line-title"></span>
+                <span class="line line-sub"></span>
+                <div class="line-row">
+                  <span class="line line-col"></span>
+                  <span class="line line-col"></span>
+                </div>
+                <span class="line line-body"></span>
+                <span class="line line-body short"></span>
+              </div>
+              <!-- Laser Scanning Beam -->
+              <div class="laser-scanner">
+                <div class="laser-beam"></div>
+                <div class="laser-glow"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mechanical Spine / Spiral Binding Elements -->
+          <div class="binding-spine-assembly" [class.clamped]="craftingStep() >= 3">
+            <div class="spine-base"></div>
+            <div class="spine-rings">
+              <div class="ring" *ngFor="let r of [1,2,3,4,5,6,7,8]">
+                <span class="ring-loop"></span>
+                <span class="ring-lock"></span>
+              </div>
+            </div>
+            <div class="spine-clamp"></div>
+          </div>
+
+          <!-- Heavy Hardcover with Foil Emboss -->
+          <div class="hardcover-jacket" [class.enclosed]="craftingStep() >= 4">
+            <div class="cover-exterior">
+              <div class="cover-texture"></div>
+              <div class="cover-border"></div>
+              <div class="cover-foil-content">
+                <div class="foil-emblem">
+                  <span class="emblem-star">&#10022;</span>
+                  <span class="emblem-crest">NIT</span>
+                  <span class="emblem-star">&#10022;</span>
+                </div>
+                <h2 class="foil-title">FILECRAFTERS</h2>
+                <span class="foil-subtitle">ACADEMIC PROJECT REPORT</span>
+                <div class="foil-divider"></div>
+                <p class="foil-subject">B.TECH FINAL YEAR DISSERTATION</p>
+                <div class="foil-gold-seal">
+                  <div class="seal-inner">
+                    <span>IEEE</span>
+                    <strong>VERIFIED</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Precision Brass Corner Guards -->
+          <div class="corner-protectors" [class.snapped]="craftingStep() >= 3">
+            <span class="corner top-left"></span>
+            <span class="corner top-right"></span>
+            <span class="corner bottom-left"></span>
+            <span class="corner bottom-right"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Crafting Status & Progress Bar -->
+    <div class="crafting-footer">
+      <div class="status-ticker">
+        <span class="ticker-badge" [ngSwitch]="craftingStep()">
+          <span *ngSwitchCase="1">STEP 1/4: LASER FEED</span>
+          <span *ngSwitchCase="2">STEP 2/4: MARGIN LOCK</span>
+          <span *ngSwitchCase="3">STEP 3/4: SPIRAL CLAMP</span>
+          <span *ngSwitchCase="4">STEP 4/4: GOLD EMBOSS</span>
+        </span>
+        <span class="ticker-message" [ngSwitch]="craftingStep()">
+          <span *ngSwitchCase="1">Feeding 80 GSM ultra-white archival sheets &amp; printing dual-column IEEE text...</span>
+          <span *ngSwitchCase="2">Aligning technical margins, headers, pagination, and anti-plagiarism verification...</span>
+          <span *ngSwitchCase="3">Clamping steel spiral comb &amp; mounting brass corner protectors...</span>
+          <span *ngSwitchCase="4">Applying thermal royal-blue hardcover with hot-foil gold embossing... Ready!</span>
+        </span>
+      </div>
+
+      <div class="crafting-progress-track">
+        <div class="progress-fill" [style.width.%]="craftingProgress()"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- STAGE 2: 3D PAGE-BY-PAGE FLIP OPEN ANIMATION ("Page by Page Open")         -->
+  <!-- ========================================================================= -->
+  <section *ngIf="stage() === 'inspecting'" class="stage-section inspecting-stage" aria-label="3D Project File Inspection">
+    <div class="stage-header compact">
+      <div class="inspect-badge-row">
+        <span class="feature-tag">3D INTERACTIVE FILE</span>
+        <span class="page-count-tag">Page {{ currentPageIndex() + 1 }} of {{ pages.length }}</span>
+      </div>
+      <h2 class="stage-title small">{{ pages[currentPageIndex()].title }}</h2>
+      <p class="stage-desc small">{{ pages[currentPageIndex()].subtitle }}</p>
+    </div>
+
+    <!-- 3D Open Book Perspective Container -->
+    <div class="book-viewport">
+      <div class="open-book-3d" [class.is-open]="isBookOpen()">
+        <!-- Center Book Spine & Depth -->
+        <div class="book-spine-depth"></div>
+
+        <!-- Dynamic 3D Flipping Leaf (Realistic Page Turn Effect) -->
+        <div class="flip-leaf-3d" [class.flipping]="isFlipping()" [class.flip-forward]="pageFlipDirection() === 'next'" [class.flip-backward]="pageFlipDirection() === 'prev'">
+          <div class="leaf-face leaf-front"></div>
+          <div class="leaf-face leaf-back"></div>
+        </div>
+
+        <!-- LEFT PAGE -->
+        <div class="book-page page-left">
+          <div class="page-paper">
+            <div class="page-header-bar">
+              <span class="doc-code">FC-DOC-2026/V1</span>
+              <span class="doc-badge">{{ pages[currentPageIndex()].badge }}</span>
+            </div>
+
+            <div class="page-content-scroll">
+              <h3 class="left-page-heading">{{ pages[currentPageIndex()].leftContent.heading }}</h3>
+              <p *ngIf="pages[currentPageIndex()].leftContent.subheading" class="left-page-sub">
+                {{ pages[currentPageIndex()].leftContent.subheading }}
+              </p>
+
+              <!-- Diagram / Visual based on page type -->
+              <div class="page-graphic-box" [ngSwitch]="pages[currentPageIndex()].leftContent.diagramType">
+                <!-- Seal Graphic -->
+                <div *ngSwitchCase="'seal'" class="graphic-seal">
+                  <div class="seal-ring outer"></div>
+                  <div class="seal-ring inner"></div>
+                  <div class="seal-core">
+                    <span class="seal-icon">🏛️</span>
+                    <strong>ACADEMIC</strong>
+                    <small>COUNCIL</small>
+                  </div>
+                </div>
+
+                <!-- Certificate Graphic -->
+                <div *ngSwitchCase="'certificate'" class="graphic-certificate">
+                  <div class="cert-ribbon">
+                    <span class="ribbon-star">&#10004;</span>
+                    <span>ORIGINAL REPORT</span>
+                  </div>
+                  <div class="cert-stamp">
+                    <span class="stamp-text">0.00% PLAGIARISM</span>
+                    <small>CERTIFIED BY TURNITIN AI</small>
+                  </div>
+                </div>
+
+                <!-- Architecture Graphic -->
+                <div *ngSwitchCase="'architecture'" class="graphic-architecture">
+                  <div class="arch-node node-client">
+                    <span>Client UI</span>
+                    <small>Angular 21</small>
+                  </div>
+                  <div class="arch-arrow">&rarr;</div>
+                  <div class="arch-node node-cloud">
+                    <span>Cloud Rules</span>
+                    <small>RBAC Verified</small>
+                  </div>
+                  <div class="arch-arrow">&rarr;</div>
+                  <div class="arch-node node-print">
+                    <span>Laser Engine</span>
+                    <small>80 GSM Print</small>
+                  </div>
+                </div>
+
+                <!-- Materials Graphic -->
+                <div *ngSwitchCase="'materials'" class="graphic-materials">
+                  <div class="material-chip"><span class="chip-dot"></span> 80 GSM Bond</div>
+                  <div class="material-chip"><span class="chip-dot"></span> Laser Waterproof</div>
+                  <div class="material-chip"><span class="chip-dot"></span> Stitched Spine</div>
+                  <div class="material-chip"><span class="chip-dot"></span> Gold Foil Stamp</div>
+                </div>
+              </div>
+
+              <!-- Key Items List -->
+              <ul *ngIf="pages[currentPageIndex()].leftContent.items" class="feature-bullets">
+                <li *ngFor="let item of pages[currentPageIndex()].leftContent.items">
+                  <span class="bullet-check">&#10003;</span>
+                  <span>{{ item }}</span>
+                </li>
+              </ul>
+
+              <!-- Specs Table for Page 4 -->
+              <div *ngIf="pages[currentPageIndex()].leftContent.specs" class="page-specs-table">
+                <div class="spec-row" *ngFor="let spec of pages[currentPageIndex()].leftContent.specs">
+                  <span class="spec-label">{{ spec.label }}:</span>
+                  <strong class="spec-val">{{ spec.value }}</strong>
+                </div>
+              </div>
+            </div>
+
+            <div class="page-footer-bar">
+              <span>FileCrafters Academic Engine</span>
+              <span>Page {{ (currentPageIndex() * 2) + 1 }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT PAGE -->
+        <div class="book-page page-right">
+          <div class="page-paper">
+            <div class="page-header-bar">
+              <span class="doc-section">SECTION 0{{ currentPageIndex() + 1 }}</span>
+              <span class="doc-status">VIVA READY</span>
+            </div>
+
+            <div class="page-content-scroll">
+              <h3 class="right-page-heading">{{ pages[currentPageIndex()].rightContent.heading }}</h3>
+              <p *ngIf="pages[currentPageIndex()].rightContent.subheading" class="right-page-sub">
+                {{ pages[currentPageIndex()].rightContent.subheading }}
+              </p>
+
+              <!-- Cover Specs -->
+              <div *ngIf="pages[currentPageIndex()].rightContent.specs" class="right-specs-grid">
+                <div class="right-spec-card" *ngFor="let spec of pages[currentPageIndex()].rightContent.specs">
+                  <span class="r-label">{{ spec.label }}</span>
+                  <strong class="r-val">{{ spec.value }}</strong>
+                </div>
+              </div>
+
+              <!-- Table of Contents for Page 2 -->
+              <div *ngIf="pages[currentPageIndex()].rightContent.tableOfContents" class="toc-table">
+                <div class="toc-row" *ngFor="let item of pages[currentPageIndex()].rightContent.tableOfContents">
+                  <span class="toc-title">{{ item.title }}</span>
+                  <span class="toc-leader"></span>
+                  <span class="toc-page">{{ item.page }}</span>
+                </div>
+              </div>
+
+              <!-- Code Snippet Box for Page 3 -->
+              <div *ngIf="pages[currentPageIndex()].rightContent.codeSnippet" class="code-preview-box">
+                <div class="code-header">
+                  <div class="window-dots">
+                    <span class="dot red"></span>
+                    <span class="dot yellow"></span>
+                    <span class="dot green"></span>
+                  </div>
+                  <span class="code-filename">academic-engine.ts</span>
+                </div>
+                <pre class="code-body"><code>{{ pages[currentPageIndex()].rightContent.codeSnippet }}</code></pre>
+              </div>
+
+              <!-- Delivery Roadmap for Page 4 -->
+              <div *ngIf="pages[currentPageIndex()].rightContent.deliverySteps" class="delivery-steps-grid">
+                <div class="delivery-step-item" *ngFor="let step of pages[currentPageIndex()].rightContent.deliverySteps">
+                  <div class="step-icon-bubble">{{ step.icon }}</div>
+                  <div class="step-copy">
+                    <strong>{{ step.title }}</strong>
+                    <small>{{ step.desc }}</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="page-footer-bar">
+              <span>Verified IEEE Format</span>
+              <span>Page {{ (currentPageIndex() * 2) + 2 }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Flipping Navigation Controls -->
+    <div class="book-controls">
+      <button
+        type="button"
+        class="flip-nav-btn prev"
+        (click)="prevPage()"
+        [disabled]="currentPageIndex() === 0"
+        title="Previous Page"
+      >
+        <span class="btn-arrow">&larr;</span>
+        <span>Previous</span>
+      </button>
+
+      <!-- Page Indicator Dots -->
+      <div class="page-dots-list">
+        <button
+          *ngFor="let p of pages; let i = index"
+          type="button"
+          class="page-dot-btn"
+          [class.active]="currentPageIndex() === i"
+          (click)="goToPage(i)"
+          [attr.aria-label]="'Go to page ' + (i + 1)"
+        >
+          <span class="dot-num">{{ i + 1 }}</span>
+          <span class="dot-tooltip">{{ p.title }}</span>
+        </button>
+      </div>
+
+      <button
+        type="button"
+        class="flip-nav-btn next"
+        (click)="nextPage()"
+        title="Next Page"
+      >
+        <span>{{ currentPageIndex() < pages.length - 1 ? 'Next Page' : 'Finish & Explore' }}</span>
+        <span class="btn-arrow">&rarr;</span>
+      </button>
+
+      <button
+        type="button"
+        class="autoplay-toggle-btn"
+        [class.paused]="!isAutoPlay()"
+        (click)="toggleAutoPlay()"
+        title="Toggle Auto Flip"
+      >
+        <span class="toggle-icon">{{ isAutoPlay() ? '⏸' : '▶' }}</span>
+        <span>{{ isAutoPlay() ? 'Auto-Turn ON' : 'Paused' }}</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- STAGE 3: LOGIC REVEAL & SMART REDIRECTION ("Phir Baad Mai Redirect Kro")  -->
+  <!-- ========================================================================= -->
+  <section *ngIf="stage() === 'completed'" class="stage-section completed-stage" aria-label="Showcase Completed">
+    <div class="completion-card">
+      <div class="celebration-badge">
+        <span class="sparkle-icon">✨</span>
+        <span>PROJECT DOSSIER READY FOR SUBMISSION</span>
+      </div>
+
+      <h1 class="completion-title">
+        That is the Power of <span class="gradient-text">FileCrafters</span>
+      </h1>
+      <p class="completion-subtitle">
+        You've just witnessed how our automated engine transforms requirements into university-compliant,
+        professionally bound, IEEE-formatted project files ready for your final viva defense.
+      </p>
+
+      <!-- 4-Pillar Website Logic Cards -->
+      <div class="logic-pillars-grid">
+        <div class="pillar-card">
+          <div class="pillar-icon">📄</div>
+          <h3>1. Smart Upload</h3>
+          <p>Instant PDF parsing with zero plagiarism and automated margin structuring.</p>
+        </div>
+
+        <div class="pillar-card">
+          <div class="pillar-icon">💰</div>
+          <h3>2. Instant Quotation</h3>
+          <p>Transparent real-time rates for pages, color prints, and custom binding options.</p>
+        </div>
+
+        <div class="pillar-card">
+          <div class="pillar-icon">🖨️</div>
+          <h3>3. Precision Print</h3>
+          <p>High-resolution 80 GSM bond sheets with laser printing and gold foil stamping.</p>
+        </div>
+
+        <div class="pillar-card">
+          <div class="pillar-icon">🚚</div>
+          <h3>4. Campus Delivery</h3>
+          <p>Fast doorstep delivery directly to your college, hostel, or residential address.</p>
+        </div>
+      </div>
+
+      <!-- Redirection Countdown & CTAs -->
+      <div class="completion-actions-panel">
+        <div class="countdown-strip">
+          <div class="countdown-copy">
+            <span class="spinner-icon" [class.paused]="isCountdownPaused()">⏳</span>
+            <span>
+              Redirecting to platform in <strong>{{ countdownSeconds() }} seconds</strong>...
+            </span>
+          </div>
+          <button
+            type="button"
+            class="pause-countdown-btn"
+            (click)="toggleCountdownPause()"
+          >
+            {{ isCountdownPaused() ? 'Resume Auto-Redirect' : 'Pause Countdown' }}
+          </button>
+        </div>
+
+        <div class="cta-buttons-row">
+          <button
+            type="button"
+            class="btn btn-primary btn-large"
+            (click)="proceedToPlatform('/')"
+          >
+            <span>Enter FileCrafters Platform</span>
+            <span class="arrow">&rarr;</span>
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-secondary btn-large"
+            (click)="skipToOrder()"
+          >
+            <span>Place New Order Now</span>
+            <span class="arrow">&rarr;</span>
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-outline"
+            (click)="replayAnimation()"
+          >
+            <span>↺ Replay 3D Animation</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

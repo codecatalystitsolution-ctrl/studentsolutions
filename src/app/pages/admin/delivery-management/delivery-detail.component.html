@@ -20,52 +20,279 @@
     <button class="back-button" type="button" (click)="goBack()">Back to Delivery Staff</button>
   </div>
 
-  <div *ngIf="!isLoading && delivery" class="profile-grid glass-card">
-    <section class="profile-summary">
-      <div class="profile-badge">D</div>
-      <h2>{{ delivery.fullName || 'N/A' }}</h2>
-      <p>{{ delivery.email || 'No email provided' }}</p>
-      <div class="status-row">
-        <span class="status-label">Status</span>
-        <span [ngClass]="{ 'badge-active': delivery.status !== 'suspended', 'badge-suspended': delivery.status === 'suspended' }">
-          {{ (delivery.status || 'active') | titlecase }}
-        </span>
+  <div *ngIf="!isLoading && delivery">
+    <!-- Verification Status Callout Banner -->
+    <div class="verification-callout-banner pending" *ngIf="delivery.status === 'pending_approval'">
+      <span class="banner-icon">⏳</span>
+      <div class="banner-content">
+        <h4>Delivery Partner Application Pending Verification</h4>
+        <p>This courier applicant registered on {{ (delivery.appliedAt || delivery.createdAt) | date:'mediumDate' }} and requires document verification before portal access is granted.</p>
+        <div class="banner-meta">
+          <span>Service Area: {{ delivery.serviceArea || delivery.address || 'Unassigned' }}</span>
+          <span>Vehicle: {{ delivery.vehicleType || 'Standard' }} ({{ delivery.vehicleNumber || 'N/A' }})</span>
+        </div>
+      </div>
+      <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+        <button type="button" class="btn-approve-action" (click)="openApproveModal()">✓ Approve Application</button>
+        <button type="button" class="btn-reject-action" (click)="openRejectModal()">✕ Reject</button>
+      </div>
+    </div>
+
+    <div class="verification-callout-banner rejected" *ngIf="delivery.status === 'rejected'">
+      <span class="banner-icon">❌</span>
+      <div class="banner-content">
+        <h4>Application Rejected</h4>
+        <p><strong>Reason:</strong> {{ delivery.rejectionReason || 'Verification requirements not satisfied.' }}</p>
+        <div class="banner-meta" *ngIf="delivery.rejectedAt">
+          <span>Decision recorded on {{ delivery.rejectedAt | date:'medium' }}</span>
+        </div>
+      </div>
+      <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <button type="button" class="btn-approve-action" (click)="openApproveModal()">Re-evaluate &amp; Approve</button>
+      </div>
+    </div>
+
+    <div class="verification-callout-banner active" *ngIf="delivery.status === 'active'">
+      <span class="banner-icon">✅</span>
+      <div class="banner-content">
+        <h4>Verified Delivery Partner</h4>
+        <p>This partner is active and authorized to receive order delivery dispatches and payouts.</p>
+        <div class="banner-meta" *ngIf="delivery.approvedAt">
+          <span>Approved on {{ delivery.approvedAt | date:'mediumDate' }}</span>
+        </div>
+      </div>
+      <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <button type="button" class="btn-reject-action" (click)="openRejectModal()" style="font-size: 0.8rem; padding: 0.45rem 0.85rem;">Revoke Approval</button>
+      </div>
+    </div>
+
+    <div class="profile-grid glass-card">
+      <section class="profile-summary">
+        <div class="profile-badge">D</div>
+        <h2>{{ delivery.fullName || 'N/A' }}</h2>
+        <p>{{ delivery.email || 'No email provided' }}</p>
+        <div class="status-row">
+          <span class="status-label">Status</span>
+          <span class="badge-status" [class.badge-active]="delivery.status === 'active'" [class.badge-pending]="delivery.status === 'pending_approval'" [class.badge-rejected]="delivery.status === 'rejected'" [class.badge-suspended]="delivery.status === 'suspended'">
+            {{ delivery.status === 'pending_approval' ? 'Pending Review' : (delivery.status || 'active' | titlecase) }}
+          </span>
+        </div>
+      </section>
+
+      <section class="profile-details">
+        <div class="detail-card">
+          <span class="label">Delivery ID</span>
+          <strong>{{ delivery.deliveryID || 'N/A' }}</strong>
+        </div>
+        <div class="detail-card">
+          <span class="label">Phone</span>
+          <strong>{{ delivery.phone || 'N/A' }}</strong>
+        </div>
+        <div class="detail-card">
+          <span class="label">WhatsApp</span>
+          <strong>{{ delivery.whatsapp || 'N/A' }}</strong>
+        </div>
+        <div class="detail-card">
+          <span class="label">Vehicle Category</span>
+          <strong>{{ delivery.vehicleType || 'Two-Wheeler / Bike' }}</strong>
+        </div>
+        <div class="detail-card">
+          <span class="label">Vehicle Registration</span>
+          <strong>{{ delivery.vehicleNumber || 'N/A' }}</strong>
+        </div>
+        <div class="detail-card">
+          <span class="label">Driving License / Gov ID</span>
+          <strong>{{ delivery.drivingLicense || 'Submitted at registration' }}</strong>
+        </div>
+        <div class="detail-card">
+          <span class="label">Primary Service Area</span>
+          <strong>{{ delivery.serviceArea || delivery.address || 'Campus Wide' }}</strong>
+        </div>
+        <div class="detail-card">
+          <span class="label">Pincode</span>
+          <strong>{{ delivery.pincode || 'N/A' }}</strong>
+        </div>
+        <div class="detail-card full-width">
+          <span class="label">Base Operating Address</span>
+          <strong>{{ delivery.address || 'N/A' }}</strong>
+        </div>
+        <div class="detail-card full-width">
+          <span class="label">Registration Date</span>
+          <strong>{{ (delivery.appliedAt || delivery.createdAt) ? ((delivery.appliedAt || delivery.createdAt) | date:'medium') : 'N/A' }}</strong>
+        </div>
+      </section>
+    </div>
+
+    <!-- Email & Decision Audit Trail Section -->
+    <section class="glass-card" style="margin-top: 1.5rem; padding: 1.5rem;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+        <div>
+          <h2 style="margin: 0; font-size: 1.15rem; font-weight: 700;">📨 Notification &amp; Dispatch History</h2>
+          <p style="margin: 0.25rem 0 0; font-size: 0.85rem; color: var(--text-muted);">
+            Permanent audit record of official onboarding emails dispatched to this delivery courier.
+          </p>
+        </div>
+        <span class="badge-status badge-active" *ngIf="emailDispatchHistory.length">{{ emailDispatchHistory.length }} Dispatched</span>
+      </div>
+
+      <div *ngIf="emailDispatchHistory.length === 0" style="padding: 1.5rem; text-align: center; color: var(--text-muted); font-size: 0.88rem;">
+        No onboarding decision emails have been dispatched for this courier account yet.
+      </div>
+
+      <div *ngIf="emailDispatchHistory.length > 0" style="display: flex; flex-direction: column; gap: 0.75rem;">
+        <div *ngFor="let item of emailDispatchHistory" style="background: var(--bg-surface); border: 1px solid var(--glass-border); border-radius: 12px; padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: 0.5rem;">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.6rem;">
+              <span class="badge-status" [ngClass]="item.decision === 'approved' ? 'badge-active' : 'badge-rejected'">
+                {{ item.decision === 'approved' ? '✓ Approved' : '✕ Rejected' }}
+              </span>
+              <strong style="font-size: 0.92rem; color: var(--text-primary);">{{ item.subject }}</strong>
+            </div>
+            <span style="font-size: 0.78rem; color: var(--text-muted);">{{ item.dispatchedAt | date:'medium' }}</span>
+          </div>
+
+          <div *ngIf="item.rejectionReason" style="font-size: 0.82rem; color: #ef4444; background: rgba(239, 68, 68, 0.1); padding: 0.4rem 0.65rem; border-radius: 6px;">
+            <strong>Reason specified:</strong> {{ item.rejectionReason }}
+          </div>
+
+          <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.78rem; color: var(--text-muted); border-top: 1px solid var(--glass-border); padding-top: 0.5rem; margin-top: 0.25rem;">
+            <span>Dispatched by Admin ({{ item.actorEmail || 'System' }}) to {{ item.recipientEmail }}</span>
+            <button type="button" (click)="resendEmail(item)" style="background: none; border: 1px solid var(--glass-border); color: var(--text-secondary); padding: 0.2rem 0.55rem; border-radius: 6px; cursor: pointer; font-size: 0.75rem;">
+              ↻ Open in Mail Client
+            </button>
+          </div>
+        </div>
       </div>
     </section>
+  </div>
 
-    <section class="profile-details">
-        <div class="detail-card">
-            <span class="label">Delivery ID</span>
-            <strong>{{ delivery.deliveryID || 'N/A' }}</strong>
+  <!-- Approve Delivery Application Modal -->
+  <div class="verification-modal-backdrop" *ngIf="showApproveModal">
+    <div class="verification-modal-card">
+      <div class="modal-head">
+        <div class="modal-title-wrap">
+          <span class="head-icon">🎉</span>
+          <h3>Approve Delivery Partner Application</h3>
         </div>
-        <div class="detail-card">
-            <span class="label">Phone</span>
-            <strong>{{ delivery.phone || 'N/A' }}</strong>
+        <button type="button" class="modal-close-btn" (click)="closeModals()" aria-label="Close modal">×</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="applicant-summary-card">
+          <div class="summary-item">
+            <span class="label">Courier Partner</span>
+            <span class="value">{{ delivery?.fullName }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Vehicle</span>
+            <span class="value">{{ delivery?.vehicleType || 'Bike' }} ({{ delivery?.vehicleNumber || 'N/A' }})</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Service Area</span>
+            <span class="value">{{ delivery?.serviceArea || delivery?.address || 'N/A' }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Target Email</span>
+            <span class="value">{{ delivery?.email }}</span>
+          </div>
         </div>
-        <div class="detail-card">
-            <span class="label">WhatsApp</span>
-            <strong>{{ delivery.whatsapp || 'N/A' }}</strong>
+
+        <div class="reason-select-group">
+          <label>Admin Verification Note (Optional)</label>
+          <input type="text" [(ngModel)]="approvalNotes" placeholder="e.g. License and vehicle credentials verified." />
         </div>
-        <div class="detail-card">
-            <span class="label">Vehicle Number</span>
-            <strong>{{ delivery.vehicleNumber || 'N/A' }}</strong>
+
+        <div class="email-preview-box" *ngIf="emailPreview">
+          <div class="preview-header">
+            <span>OFFICIAL APPROVAL EMAIL PREVIEW</span>
+            <button type="button" class="btn-copy-preview" (click)="copyEmailPreview()">
+              {{ emailCopied ? '✓ Copied' : '📋 Copy Email Text' }}
+            </button>
+          </div>
+          <div class="preview-meta">
+            <div><strong>To:</strong> {{ emailPreview.to }}</div>
+            <div><strong>Subject:</strong> {{ emailPreview.subject }}</div>
+          </div>
+          <div class="preview-body">{{ emailPreview.bodyText }}</div>
         </div>
-        <div class="detail-card full-width">
-            <span class="label">Address</span>
-            <strong>{{ delivery.address || 'N/A' }}</strong>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" (click)="closeModals()" [disabled]="isProcessingAction">Cancel</button>
+        <button type="button" class="btn-approve-action" (click)="confirmApproval()" [disabled]="isProcessingAction">
+          <span *ngIf="!isProcessingAction">✓ Confirm Approval &amp; Dispatch Email</span>
+          <span *ngIf="isProcessingAction">Approving &amp; Dispatching...</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reject Delivery Application Modal -->
+  <div class="verification-modal-backdrop" *ngIf="showRejectModal">
+    <div class="verification-modal-card">
+      <div class="modal-head">
+        <div class="modal-title-wrap">
+          <span class="head-icon">❌</span>
+          <h3>Reject Delivery Partner Application</h3>
         </div>
-        <div class="detail-card full-width">
-            <span class="label">Registered On</span>
-            <strong>{{ delivery.createdAt ? (delivery.createdAt | date:'medium') : 'N/A' }}</strong>
+        <button type="button" class="modal-close-btn" (click)="closeModals()" aria-label="Close modal">×</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="applicant-summary-card">
+          <div class="summary-item">
+            <span class="label">Partner Name</span>
+            <span class="value">{{ delivery?.fullName }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Target Email</span>
+            <span class="value">{{ delivery?.email }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Service Area</span>
+            <span class="value">{{ delivery?.serviceArea || 'N/A' }}</span>
+          </div>
         </div>
-        <div class="detail-card full-width">
-            <span class="label">Last Updated</span>
-            <strong>{{ delivery.updatedAt ? (delivery.updatedAt | date:'medium') : 'N/A' }}</strong>
+
+        <div class="reason-select-group">
+          <label>Select Rejection Reason</label>
+          <select [(ngModel)]="selectedRejectionReason" (change)="onRejectionReasonChange()">
+            <option *ngFor="let reason of predefinedDeliveryReasons" [value]="reason">{{ reason }}</option>
+          </select>
         </div>
-        <div class="detail-card full-width">
-            <span class="label">UID</span>
-            <strong>{{ delivery.uid }}</strong>
+
+        <div class="reason-select-group" *ngIf="selectedRejectionReason === 'Other (enter specific reason below)'">
+          <label>Specify Custom Rejection Reason</label>
+          <textarea
+            rows="2"
+            [(ngModel)]="customRejectionReason"
+            (input)="onRejectionReasonChange()"
+            placeholder="Provide a clear explanation for the applicant..."
+          ></textarea>
         </div>
-    </section>
+
+        <div class="email-preview-box" *ngIf="emailPreview">
+          <div class="preview-header">
+            <span>OFFICIAL REJECTION EMAIL PREVIEW</span>
+            <button type="button" class="btn-copy-preview" (click)="copyEmailPreview()">
+              {{ emailCopied ? '✓ Copied' : '📋 Copy Email Text' }}
+            </button>
+          </div>
+          <div class="preview-meta">
+            <div><strong>To:</strong> {{ emailPreview.to }}</div>
+            <div><strong>Subject:</strong> {{ emailPreview.subject }}</div>
+          </div>
+          <div class="preview-body">{{ emailPreview.bodyText }}</div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" (click)="closeModals()" [disabled]="isProcessingAction">Cancel</button>
+        <button type="button" class="btn-reject-action" (click)="confirmRejection()" [disabled]="isProcessingAction">
+          <span *ngIf="!isProcessingAction">✕ Confirm Rejection &amp; Dispatch Email</span>
+          <span *ngIf="isProcessingAction">Rejecting &amp; Dispatching...</span>
+        </button>
+      </div>
+    </div>
   </div>
 </div>

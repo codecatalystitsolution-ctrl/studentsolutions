@@ -18,6 +18,11 @@ export interface ReferralAttribution {
   studentUid: string;
   teacherUid: string;
   referralCode: string;
+  studentName?: string;
+  studentEmail?: string;
+  studentID?: string;
+  collegeName?: string;
+  courseBranch?: string;
   createdAt: number;
 }
 
@@ -64,7 +69,12 @@ export class ReferralCommissionService {
 
   async createReferralCode(teacherUid: string): Promise<string> {
     const actor = this.auth.currentUser;
-    if (!actor?.email || !adminEmails.has(actor.email.toLowerCase()) || !teacherUid) throw new Error('An administrator and a teacher account are required.');
+    if (!actor?.uid || !teacherUid) throw new Error('An authenticated user and a teacher account are required.');
+    const isAdmin = actor.email && adminEmails.has(actor.email.toLowerCase());
+    const isTeacher = actor.uid === teacherUid;
+    if (!isAdmin && !isTeacher) {
+      throw new Error('Only an administrator or the teacher account can create a referral code.');
+    }
     const profileSnap = await get(ref(this.db, `users/${teacherUid}`));
     const profile = profileSnap.val();
     if (profile?.role !== 'Teacher' || profile?.status !== 'active') throw new Error('Referral codes can only be created for active teachers.');
@@ -73,10 +83,31 @@ export class ReferralCommissionService {
     const code = `FC-${suffix}`;
     const codeRef = ref(this.db, `referralCodes/${code}`);
     const existing = await get(codeRef);
-    if (existing.exists()) throw new Error('This referral code already exists. Ask an administrator to review the existing record.');
-    await set(codeRef, { code, teacherUid, active: true, createdBy: actor.uid, createdAt: serverTimestamp() });
-    void this.audit.recordAdmin('teacher_referral_code_created', 'teacher', teacherUid, `Created referral code ${code}.`);
+    if (existing.exists()) {
+      if (existing.val().teacherUid === teacherUid) {
+        return code;
+      }
+      throw new Error('This referral code already exists. Ask an administrator to review the existing record.');
+    }
+    await set(codeRef, { code, teacherUid, active: true, createdBy: actor.uid, createdAt: Date.now() });
+    if (isAdmin) {
+      void this.audit.recordAdmin('teacher_referral_code_created', 'teacher', teacherUid, `Created referral code ${code}.`);
+    }
     return code;
+  }
+
+  async toggleCodeActive(code: string, active: boolean): Promise<void> {
+    const actor = this.auth.currentUser;
+    if (!actor?.uid) throw new Error('Authentication is required to toggle referral code status.');
+    const codeRef = ref(this.db, `referralCodes/${code}`);
+    const snap = await get(codeRef);
+    if (!snap.exists()) throw new Error('Referral code not found.');
+    const record = snap.val() as ReferralCode;
+    const isAdmin = actor.email && adminEmails.has(actor.email.toLowerCase());
+    if (!isAdmin && record.teacherUid !== actor.uid) {
+      throw new Error('You can only toggle your own referral code.');
+    }
+    await update(codeRef, { active });
   }
 
   watchCodesForTeacher(teacherUid: string, next: (codes: ReferralCode[]) => void): Unsubscribe {

@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef, effect } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef, effect } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -48,13 +48,18 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   totalTeachers: number = 0;
   activeTeachers: number = 0;
   suspendedTeachers: number = 0;
+  pendingTeachers: number = 0;
   teachers: Array<any> = [];
 
   // Delivery Staff Stats
   totalDelivery: number = 0;
   activeDelivery: number = 0;
   suspendedDelivery: number = 0;
+  pendingDelivery: number = 0;
   deliveryStaff: Array<any> = [];
+
+  // Unified Verification Queue
+  pendingApplications: Array<any> = [];
 
   // Chart Variable
   public liveChart: any;
@@ -139,31 +144,68 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       this.totalTeachers = 0;
       this.activeTeachers = 0;
       this.suspendedTeachers = 0;
+      this.pendingTeachers = 0;
 
       this.deliveryStaff = [];
       this.totalDelivery = 0;
       this.activeDelivery = 0;
       this.suspendedDelivery = 0;
+      this.pendingDelivery = 0;
+      this.pendingApplications = [];
 
       if (usersData) {
         Object.keys(usersData).forEach(uid => {
           const user = usersData[uid];
           const role = (user.role || 'student').toLowerCase();
+          const status = (user.status || 'active').toLowerCase();
+
           if (role === 'student') {
             this.totalStudents += 1;
-            if (user.status === 'suspended') { this.suspendedStudents += 1; } else { this.activeStudents += 1; }
+            if (status === 'suspended') { this.suspendedStudents += 1; } else { this.activeStudents += 1; }
             this.students.push({ uid, ...user });
           } else if (role === 'teacher') {
             this.totalTeachers += 1;
-            if (user.status === 'suspended') { this.suspendedTeachers += 1; } else { this.activeTeachers += 1; }
+            if (status === 'pending_approval') {
+              this.pendingTeachers += 1;
+              this.pendingApplications.push({
+                uid,
+                ...user,
+                role: 'Teacher',
+                roleLabel: 'Faculty Mentor',
+                referenceId: user.employeeID || `TEA-${uid.slice(0, 6).toUpperCase()}`,
+                detailLink: ['/admin/teachers', uid],
+                serviceInfo: user.collegeName ? `${user.collegeName} (${user.department || 'General'})` : (user.department || 'Academic')
+              });
+            } else if (status === 'suspended' || status === 'rejected') {
+              this.suspendedTeachers += 1;
+            } else {
+              this.activeTeachers += 1;
+            }
             this.teachers.push({ uid, ...user });
           } else if (role === 'delivery' || role === 'deliveryboy' || role === 'delivery-boy') {
             this.totalDelivery += 1;
-            if (user.status === 'suspended') { this.suspendedDelivery += 1; } else { this.activeDelivery += 1; }
+            if (status === 'pending_approval') {
+              this.pendingDelivery += 1;
+              this.pendingApplications.push({
+                uid,
+                ...user,
+                role: 'Delivery',
+                roleLabel: 'Delivery Partner',
+                referenceId: user.deliveryID || `DEL-${uid.slice(0, 6).toUpperCase()}`,
+                detailLink: ['/admin/delivery', uid],
+                serviceInfo: user.serviceArea || user.address || (user.vehicleNumber ? `Vehicle: ${user.vehicleNumber}` : 'Campus Courier')
+              });
+            } else if (status === 'suspended' || status === 'rejected') {
+              this.suspendedDelivery += 1;
+            } else {
+              this.activeDelivery += 1;
+            }
             this.deliveryStaff.push({ uid, ...user });
           }
         });
       }
+
+      this.pendingApplications.sort((a, b) => (Date.parse(b.appliedAt || b.createdAt) || 0) - (Date.parse(a.appliedAt || a.createdAt) || 0));
 
       this.students.sort((a, b) => (a.fullName || '').localeCompare(b.fullName || ''));
       this.isStudentLoading = false;

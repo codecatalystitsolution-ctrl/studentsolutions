@@ -23,13 +23,58 @@
   </div>
 
   <div *ngIf="!isLoading && teacher" class="profile-card glass-card">
+
+    <!-- Verification Lifecycle Callout Banner -->
+    <div class="verification-callout-banner pending" *ngIf="teacher.status === 'pending_approval'">
+      <span class="banner-icon">⏳</span>
+      <div class="banner-content">
+        <h4>Faculty Application Pending Verification</h4>
+        <p>This educator registered on {{ (teacher.appliedAt || teacher.createdAt) | date:'mediumDate' }} and is awaiting admin approval before dashboard access is activated.</p>
+        <div class="banner-meta">
+          <span>Institution: {{ teacher.collegeName }} ({{ teacher.department }})</span>
+        </div>
+      </div>
+      <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+        <button type="button" class="btn-approve-action" (click)="openApproveModal()">✓ Approve Application</button>
+        <button type="button" class="btn-reject-action" (click)="openRejectModal()">✕ Reject</button>
+      </div>
+    </div>
+
+    <div class="verification-callout-banner rejected" *ngIf="teacher.status === 'rejected'">
+      <span class="banner-icon">❌</span>
+      <div class="banner-content">
+        <h4>Application Rejected</h4>
+        <p><strong>Reason:</strong> {{ teacher.rejectionReason || 'Verification requirements not satisfied.' }}</p>
+        <div class="banner-meta" *ngIf="teacher.rejectedAt">
+          <span>Decision recorded on {{ teacher.rejectedAt | date:'medium' }}</span>
+        </div>
+      </div>
+      <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <button type="button" class="btn-approve-action" (click)="openApproveModal()">Re-evaluate &amp; Approve</button>
+      </div>
+    </div>
+
+    <div class="verification-callout-banner active" *ngIf="teacher.status === 'active'">
+      <span class="banner-icon">✅</span>
+      <div class="banner-content">
+        <h4>Verified Faculty Member</h4>
+        <p>This instructor is verified and has full portal access for student referral generation and commission payouts.</p>
+        <div class="banner-meta" *ngIf="teacher.approvedAt">
+          <span>Approved on {{ teacher.approvedAt | date:'mediumDate' }}</span>
+        </div>
+      </div>
+      <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <button type="button" class="btn-reject-action" (click)="openRejectModal()" style="font-size: 0.8rem; padding: 0.45rem 0.85rem;">Revoke Approval</button>
+      </div>
+    </div>
+
     <div class="profile-header">
       <div class="profile-info">
         <h2>{{ teacher.fullName }}</h2>
         <p class="email">{{ teacher.email }}</p>
       </div>
-      <span class="badge" [class.badge-suspended]="teacher.status === 'suspended'" [class.badge-active]="teacher.status !== 'suspended'">
-        {{ teacher.status || 'active' }}
+      <span class="badge" [class.badge-suspended]="teacher.status === 'suspended'" [class.badge-active]="teacher.status === 'active'" [class.badge-pending]="teacher.status === 'pending_approval'">
+        {{ teacher.status === 'pending_approval' ? 'Pending Review' : (teacher.status || 'active') }}
       </span>
     </div>
 
@@ -37,23 +82,31 @@
       <div class="detail-grid">
         <div class="detail-item">
           <label>Employee ID</label>
-          <span>{{ teacher.employeeID }}</span>
+          <span>{{ teacher.employeeID || 'N/A' }}</span>
         </div>
         <div class="detail-item">
-          <label>College</label>
-          <span>{{ teacher.collegeName }}</span>
+          <label>College / Institution</label>
+          <span>{{ teacher.collegeName || 'N/A' }}</span>
         </div>
         <div class="detail-item">
           <label>Department</label>
-          <span>{{ teacher.department }}</span>
+          <span>{{ teacher.department || 'N/A' }}</span>
         </div>
         <div class="detail-item">
-          <label>Qualification</label>
-          <span>{{ teacher.qualification }}</span>
+          <label>Faculty / Staff ID Card</label>
+          <span>{{ teacher.facultyIdProof || 'Submitted via registration' }}</span>
         </div>
         <div class="detail-item">
-          <label>Member Since</label>
-          <span>{{ teacher.createdAt | date:'longDate' }}</span>
+          <label>Qualification / Rank</label>
+          <span>{{ teacher.qualification || 'Faculty Member' }}</span>
+        </div>
+        <div class="detail-item">
+          <label>Contact Phone</label>
+          <span>{{ teacher.phone || 'N/A' }}</span>
+        </div>
+        <div class="detail-item">
+          <label>Registration Date</label>
+          <span>{{ (teacher.appliedAt || teacher.createdAt) | date:'longDate' }}</span>
         </div>
       </div>
     </div>
@@ -75,4 +128,210 @@
       {{ isCreatingCode ? 'Creating…' : referralCodes.length ? 'Code already created' : 'Create referral code' }}
     </button>
   </section>
+
+  <section *ngIf="!isLoading && teacher" class="commission-setting-card glass-card">
+    <div class="card-header-row">
+      <div>
+        <h2>Admin Commission Setting</h2>
+        <p>Decide and set the commission rate for this teacher. When referred students complete orders, commission will be calculated based on this admin-approved rate.</p>
+      </div>
+      <span class="rate-badge">{{ teacher.commissionRate || 10 }}% Rate</span>
+    </div>
+
+    <div class="rate-control-row">
+      <div class="rate-input-box">
+        <label for="admin-commission-rate">Approved Commission Rate (%)</label>
+        <input
+          id="admin-commission-rate"
+          type="number"
+          min="1"
+          max="50"
+          step="0.5"
+          [(ngModel)]="adminCommissionRate"
+          placeholder="e.g. 10"
+        />
+      </div>
+      <button
+        type="button"
+        class="save-rate-button action-btn"
+        (click)="saveCommissionRate()"
+        [disabled]="isSavingRate"
+      >
+        {{ isSavingRate ? 'Saving…' : 'Save Commission Rate' }}
+      </button>
+    </div>
+  </section>
+
+  <!-- Email & Decision Audit Trail Section -->
+  <section *ngIf="!isLoading && teacher" class="glass-card" style="margin-top: 1.5rem; padding: 1.5rem;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+      <div>
+        <h2 style="margin: 0; font-size: 1.15rem; font-weight: 700;">📨 Notification &amp; Dispatch History</h2>
+        <p style="margin: 0.25rem 0 0; font-size: 0.85rem; color: var(--text-muted);">
+          Permanent audit log of official approval &amp; rejection emails sent to this applicant.
+        </p>
+      </div>
+      <span class="badge-status badge-active" *ngIf="emailDispatchHistory.length">{{ emailDispatchHistory.length }} Dispatched</span>
+    </div>
+
+    <div *ngIf="emailDispatchHistory.length === 0" style="padding: 1.5rem; text-align: center; color: var(--text-muted); font-size: 0.88rem;">
+      No verification emails have been dispatched for this account yet.
+    </div>
+
+    <div *ngIf="emailDispatchHistory.length > 0" style="display: flex; flex-direction: column; gap: 0.75rem;">
+      <div *ngFor="let item of emailDispatchHistory" style="background: var(--bg-surface); border: 1px solid var(--glass-border); border-radius: 12px; padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: 0.5rem;">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+          <div style="display: flex; align-items: center; gap: 0.6rem;">
+            <span class="badge-status" [ngClass]="item.decision === 'approved' ? 'badge-active' : 'badge-rejected'">
+              {{ item.decision === 'approved' ? '✓ Approved' : '✕ Rejected' }}
+            </span>
+            <strong style="font-size: 0.92rem; color: var(--text-primary);">{{ item.subject }}</strong>
+          </div>
+          <span style="font-size: 0.78rem; color: var(--text-muted);">{{ item.dispatchedAt | date:'medium' }}</span>
+        </div>
+
+        <div *ngIf="item.rejectionReason" style="font-size: 0.82rem; color: #ef4444; background: rgba(239, 68, 68, 0.1); padding: 0.4rem 0.65rem; border-radius: 6px;">
+          <strong>Reason specified:</strong> {{ item.rejectionReason }}
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.78rem; color: var(--text-muted); border-top: 1px solid var(--glass-border); padding-top: 0.5rem; margin-top: 0.25rem;">
+          <span>Dispatched by Admin ({{ item.actorEmail || 'System' }}) to {{ item.recipientEmail }}</span>
+          <button type="button" (click)="resendEmail(item)" style="background: none; border: 1px solid var(--glass-border); color: var(--text-secondary); padding: 0.2rem 0.55rem; border-radius: 6px; cursor: pointer; font-size: 0.75rem;">
+            ↻ Open in Mail Client
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Approve Application Modal -->
+  <div class="verification-modal-backdrop" *ngIf="showApproveModal">
+    <div class="verification-modal-card">
+      <div class="modal-head">
+        <div class="modal-title-wrap">
+          <span class="head-icon">🎉</span>
+          <h3>Approve Faculty Application</h3>
+        </div>
+        <button type="button" class="modal-close-btn" (click)="closeModals()" aria-label="Close modal">×</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="applicant-summary-card">
+          <div class="summary-item">
+            <span class="label">Faculty Member</span>
+            <span class="value">{{ teacher?.fullName }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Institution</span>
+            <span class="value">{{ teacher?.collegeName }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Department</span>
+            <span class="value">{{ teacher?.department }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Target Email</span>
+            <span class="value">{{ teacher?.email }}</span>
+          </div>
+        </div>
+
+        <div class="reason-select-group">
+          <label>Admin Verification Note (Optional)</label>
+          <input type="text" [(ngModel)]="approvalNotes" placeholder="e.g. Faculty ID card verified with college registrar." />
+        </div>
+
+        <div class="email-preview-box" *ngIf="emailPreview">
+          <div class="preview-header">
+            <span>OFFICIAL APPROVAL EMAIL PREVIEW</span>
+            <button type="button" class="btn-copy-preview" (click)="copyEmailPreview()">
+              {{ emailCopied ? '✓ Copied' : '📋 Copy Email Text' }}
+            </button>
+          </div>
+          <div class="preview-meta">
+            <div><strong>To:</strong> {{ emailPreview.to }}</div>
+            <div><strong>Subject:</strong> {{ emailPreview.subject }}</div>
+          </div>
+          <div class="preview-body">{{ emailPreview.bodyText }}</div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" (click)="closeModals()" [disabled]="isProcessingAction">Cancel</button>
+        <button type="button" class="btn-approve-action" (click)="confirmApproval()" [disabled]="isProcessingAction">
+          <span *ngIf="!isProcessingAction">✓ Confirm Approval &amp; Dispatch Email</span>
+          <span *ngIf="isProcessingAction">Approving &amp; Dispatching...</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reject Application Modal -->
+  <div class="verification-modal-backdrop" *ngIf="showRejectModal">
+    <div class="verification-modal-card">
+      <div class="modal-head">
+        <div class="modal-title-wrap">
+          <span class="head-icon">❌</span>
+          <h3>Reject Faculty Application</h3>
+        </div>
+        <button type="button" class="modal-close-btn" (click)="closeModals()" aria-label="Close modal">×</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="applicant-summary-card">
+          <div class="summary-item">
+            <span class="label">Faculty Member</span>
+            <span class="value">{{ teacher?.fullName }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Target Email</span>
+            <span class="value">{{ teacher?.email }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Institution</span>
+            <span class="value">{{ teacher?.collegeName }}</span>
+          </div>
+        </div>
+
+        <div class="reason-select-group">
+          <label>Select Rejection Reason</label>
+          <select [(ngModel)]="selectedRejectionReason" (change)="onRejectionReasonChange()">
+            <option *ngFor="let reason of predefinedTeacherReasons" [value]="reason">{{ reason }}</option>
+          </select>
+        </div>
+
+        <div class="reason-select-group" *ngIf="selectedRejectionReason === 'Other (enter specific reason below)'">
+          <label>Specify Custom Rejection Reason</label>
+          <textarea
+            rows="2"
+            [(ngModel)]="customRejectionReason"
+            (input)="onRejectionReasonChange()"
+            placeholder="Provide a clear, helpful reason that will be sent directly to the applicant's email..."
+          ></textarea>
+        </div>
+
+        <div class="email-preview-box" *ngIf="emailPreview">
+          <div class="preview-header">
+            <span>OFFICIAL REJECTION EMAIL PREVIEW</span>
+            <button type="button" class="btn-copy-preview" (click)="copyEmailPreview()">
+              {{ emailCopied ? '✓ Copied' : '📋 Copy Email Text' }}
+            </button>
+          </div>
+          <div class="preview-meta">
+            <div><strong>To:</strong> {{ emailPreview.to }}</div>
+            <div><strong>Subject:</strong> {{ emailPreview.subject }}</div>
+          </div>
+          <div class="preview-body">{{ emailPreview.bodyText }}</div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" (click)="closeModals()" [disabled]="isProcessingAction">Cancel</button>
+        <button type="button" class="btn-reject-action" (click)="confirmRejection()" [disabled]="isProcessingAction">
+          <span *ngIf="!isProcessingAction">✕ Confirm Rejection &amp; Dispatch Email</span>
+          <span *ngIf="isProcessingAction">Rejecting &amp; Dispatching...</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
 </div>

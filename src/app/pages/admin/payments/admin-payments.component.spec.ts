@@ -6,13 +6,19 @@ import { PaymentLedgerService } from '../../../services/payment-ledger.service';
 import { NotificationService } from '../../../shared/notification/notification.service';
 import { CsvExportService } from '../../../services/csv-export.service';
 import { ConfirmService } from '../../../shared/confirmation/confirm.service';
+import { AuthService } from '../../../services/auth.service';
 import { describe, beforeEach, it, expect, vi } from 'vitest';
 
 describe('AdminPaymentsComponent', () => {
   let component: AdminPaymentsComponent;
   let fixture: ComponentFixture<AdminPaymentsComponent>;
+  let authServiceMock: any;
 
   beforeEach(async () => {
+    authServiceMock = {
+      updatePayoutRequestStatus: vi.fn().mockResolvedValue(undefined)
+    };
+
     await TestBed.configureTestingModule({
       imports: [AdminPaymentsComponent],
       providers: [
@@ -35,6 +41,10 @@ describe('AdminPaymentsComponent', () => {
         {
           provide: ConfirmService,
           useValue: { confirm: vi.fn().mockResolvedValue(true) }
+        },
+        {
+          provide: AuthService,
+          useValue: authServiceMock
         }
       ]
     }).compileComponents();
@@ -63,5 +73,72 @@ describe('AdminPaymentsComponent', () => {
     component.filterPayments();
     expect(component.filteredPayments.length).toBe(1);
     expect(component.filteredPayments[0].amount).toBe(3000);
+  });
+
+  it('filters partner payouts by role, status, and search query', () => {
+    component.payouts = [
+      {
+        id: 'PR-1001',
+        uid: 'u-teacher',
+        applicantName: 'Prof. Sharma',
+        applicantEmail: 'sharma@college.edu',
+        role: 'Teacher',
+        amount: 850,
+        method: 'upi',
+        details: { upiId: 'sharma@okhdfcbank' },
+        status: 'pending',
+        createdAt: '2026-10-22T08:00:00Z'
+      },
+      {
+        id: 'PR-1002',
+        uid: 'u-driver',
+        applicantName: 'Ravi Kumar',
+        applicantEmail: 'ravi@courier.in',
+        role: 'Delivery',
+        amount: 400,
+        method: 'bank',
+        details: { bankName: 'SBI', accountNumber: '9928381928' },
+        status: 'disbursed',
+        createdAt: '2026-10-21T10:00:00Z',
+        transactionRef: 'UTR998822'
+      }
+    ];
+
+    component.payoutRoleFilter = 'Teacher';
+    component.filterPayouts();
+    expect(component.filteredPayouts.length).toBe(1);
+    expect(component.filteredPayouts[0].applicantName).toBe('Prof. Sharma');
+
+    component.payoutRoleFilter = '';
+    component.payoutStatusFilter = 'disbursed';
+    component.filterPayouts();
+    expect(component.filteredPayouts.length).toBe(1);
+    expect(component.filteredPayouts[0].id).toBe('PR-1002');
+  });
+
+  it('submits a disbursement decision with transaction reference', async () => {
+    component.selectedPayout = {
+      id: 'PR-1001',
+      uid: 'u-teacher',
+      applicantName: 'Prof. Sharma',
+      applicantEmail: 'sharma@college.edu',
+      role: 'Teacher',
+      amount: 850,
+      method: 'upi',
+      details: { upiId: 'sharma@okhdfcbank' },
+      status: 'pending',
+      createdAt: '2026-10-22T08:00:00Z'
+    };
+    component.payoutAction = 'disburse';
+    component.payoutTxnRef = 'UPI/2026/883921';
+    component.payoutAdminNote = 'Batch 1 disbursed';
+
+    await component.submitPayoutDecision();
+    expect(authServiceMock.updatePayoutRequestStatus).toHaveBeenCalledWith(
+      'PR-1001',
+      'u-teacher',
+      'disbursed',
+      { transactionRef: 'UPI/2026/883921', note: 'Batch 1 disbursed' }
+    );
   });
 });

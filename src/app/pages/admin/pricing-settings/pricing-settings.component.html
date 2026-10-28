@@ -1,0 +1,363 @@
+<div class="pricing-page">
+  <!-- Top Header Row -->
+  <div class="page-header-row">
+    <div>
+      <div class="breadcrumbs">
+        <a routerLink="/admin/dashboard">Admin</a>
+        <span>/</span>
+        <span class="active">Pricing & Commissions</span>
+      </div>
+      <h1 class="page-title">Pricing & Commission Settings</h1>
+      <p class="page-subtitle">Configure system print slab rates, binding charges, courier fees, and partner commission percentages.</p>
+    </div>
+    <div class="header-actions">
+      <button type="button" class="btn btn-outline" (click)="resetToDefaults()" [disabled]="isSaving || isLoading">
+        <span>&#8634;</span> Reset Factory Defaults
+      </button>
+      <button type="button" class="btn btn-primary" (click)="saveChanges()" [disabled]="isSaving || isLoading">
+        <span *ngIf="isSaving" class="spinner-sm"></span>
+        <span *ngIf="!isSaving">&#10003;</span>
+        {{ isSaving ? 'Saving Changes...' : 'Save All Pricing' }}
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="loading-spinner"></div>
+    <p>Loading active system pricing configuration from database...</p>
+  </div>
+
+  <div *ngIf="!isLoading" class="pricing-content">
+    <!-- Highlight Metrics -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <span class="kpi-label">Teacher Commission Rate</span>
+        <div class="kpi-value-row">
+          <span class="kpi-val">{{ config.defaultTeacherCommissionPercent }}%</span>
+          <span class="kpi-badge purple">Referral</span>
+        </div>
+        <small class="kpi-hint">Applied to verified student orders</small>
+      </div>
+
+      <div class="kpi-card">
+        <span class="kpi-label">Self-Upload Discount</span>
+        <div class="kpi-value-row">
+          <span class="kpi-val">&#8377;{{ config.selfUploadDiscount }}</span>
+          <span class="kpi-badge emerald">Savings</span>
+        </div>
+        <small class="kpi-hint">Deducted when student uploads own PDF</small>
+      </div>
+
+      <div class="kpi-card">
+        <span class="kpi-label">Delivery Courier Fee</span>
+        <div class="kpi-value-row">
+          <span class="kpi-val">&#8377;{{ config.deliveryCourierFee }}</span>
+          <span class="kpi-badge blue">Logistics</span>
+        </div>
+        <small class="kpi-hint">Standard doorstep shipping rate</small>
+      </div>
+
+      <div class="kpi-card">
+        <span class="kpi-label">Driver Pay Per Order</span>
+        <div class="kpi-value-row">
+          <span class="kpi-val">&#8377;{{ config.deliveryPartnerPay }}</span>
+          <span class="kpi-badge amber">Partner Pay</span>
+        </div>
+        <small class="kpi-hint">Credited to courier on successful delivery</small>
+      </div>
+    </div>
+
+    <!-- Main Grid: Slabs on left, Binding & Rates on right -->
+    <div class="settings-grid">
+      <!-- Section 1: Print Slabs -->
+      <div class="panel-card slabs-panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Print Pricing Slabs</h2>
+            <p class="panel-subtitle">Define page range brackets and base printing rates for each project category.</p>
+          </div>
+          <button type="button" class="btn btn-sm btn-outline-primary" (click)="addSlab(activeSlabCategory)">
+            + Add Slab
+          </button>
+        </div>
+
+        <!-- Slabs Tab Navigation -->
+        <div class="tabs-nav">
+          <button
+            type="button"
+            class="tab-btn"
+            [class.active]="activeSlabCategory === 'assignment'"
+            (click)="setSlabCategory('assignment')">
+            Assignments ({{ config.slabs.assignment.length }})
+          </button>
+          <button
+            type="button"
+            class="tab-btn"
+            [class.active]="activeSlabCategory === 'practical'"
+            (click)="setSlabCategory('practical')">
+            Practicals ({{ config.slabs.practical.length }})
+          </button>
+          <button
+            type="button"
+            class="tab-btn"
+            [class.active]="activeSlabCategory === 'project'"
+            (click)="setSlabCategory('project')">
+            Final Projects ({{ config.slabs.project.length }})
+          </button>
+        </div>
+
+        <!-- Slabs List Table / Rows -->
+        <div class="slabs-table">
+          <div class="slab-row-header">
+            <span class="col-idx">#</span>
+            <span class="col-label">Display Label (Student View)</span>
+            <span class="col-price">Base Price (&#8377;)</span>
+            <span class="col-actions">Action</span>
+          </div>
+
+          <div
+            *ngFor="let slab of config.slabs[activeSlabCategory]; let i = index"
+            class="slab-row">
+            <span class="col-idx">{{ i + 1 }}</span>
+            <div class="col-label">
+              <input
+                type="text"
+                class="form-control"
+                [(ngModel)]="slab.label"
+                placeholder="e.g. Up to 20 pages (&#8377;100)" />
+            </div>
+            <div class="col-price">
+              <div class="input-prefix">
+                <span class="prefix">&#8377;</span>
+                <input
+                  type="number"
+                  min="1"
+                  class="form-control"
+                  [(ngModel)]="slab.price" />
+              </div>
+            </div>
+            <div class="col-actions">
+              <button
+                type="button"
+                class="btn-icon danger"
+                (click)="removeSlab(activeSlabCategory, i)"
+                title="Remove this slab"
+                aria-label="Remove slab">
+                &times;
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Binding, Fees, Commission -->
+      <div class="sidebar-panels">
+        <!-- Binding Options -->
+        <div class="panel-card">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Binding Costs</h2>
+              <p class="panel-subtitle">Custom binding rates added to Project orders.</p>
+            </div>
+          </div>
+
+          <div class="form-fields-stack">
+            <div class="field-item">
+              <label for="spiralBinding">Spiral Binding Cost</label>
+              <div class="input-prefix">
+                <span class="prefix">&#8377;</span>
+                <input
+                  id="spiralBinding"
+                  type="number"
+                  min="0"
+                  class="form-control"
+                  [(ngModel)]="config.binding.spiral" />
+              </div>
+              <small class="field-hint">Standard transparent cover + spiral coil</small>
+            </div>
+
+            <div class="field-item">
+              <label for="hardboundBinding">Hardbound Binding Cost</label>
+              <div class="input-prefix">
+                <span class="prefix">&#8377;</span>
+                <input
+                  id="hardboundBinding"
+                  type="number"
+                  min="0"
+                  class="form-control"
+                  [(ngModel)]="config.binding.hardbound" />
+              </div>
+              <small class="field-hint">Golden embossed hard cover binding</small>
+            </div>
+
+            <div class="field-item">
+              <label for="stickBinding">Stick / Soft File Binding</label>
+              <div class="input-prefix">
+                <span class="prefix">&#8377;</span>
+                <input
+                  id="stickBinding"
+                  type="number"
+                  min="0"
+                  class="form-control"
+                  [(ngModel)]="config.binding.stick" />
+              </div>
+              <small class="field-hint">Plastic clip / stick folder format</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Commissions & Partner Payout Rates -->
+        <div class="panel-card">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Partner Commissions & Rates</h2>
+              <p class="panel-subtitle">Control revenue distribution for teachers and delivery drivers.</p>
+            </div>
+          </div>
+
+          <div class="form-fields-stack">
+            <div class="field-item">
+              <label for="teacherCommission">Default Teacher Referral Commission (%)</label>
+              <div class="input-prefix">
+                <span class="prefix">%</span>
+                <input
+                  id="teacherCommission"
+                  type="number"
+                  min="1"
+                  max="100"
+                  class="form-control"
+                  [(ngModel)]="config.defaultTeacherCommissionPercent" />
+              </div>
+              <small class="field-hint">Calculated on verified student order payments</small>
+            </div>
+
+            <div class="field-item">
+              <label for="driverPay">Delivery Partner Pay Per Order</label>
+              <div class="input-prefix">
+                <span class="prefix">&#8377;</span>
+                <input
+                  id="driverPay"
+                  type="number"
+                  min="0"
+                  class="form-control"
+                  [(ngModel)]="config.deliveryPartnerPay" />
+              </div>
+              <small class="field-hint">Fixed amount credited to courier driver per delivered parcel</small>
+            </div>
+
+            <div class="field-item">
+              <label for="courierFee">Student Doorstep Delivery Fee</label>
+              <div class="input-prefix">
+                <span class="prefix">&#8377;</span>
+                <input
+                  id="courierFee"
+                  type="number"
+                  min="0"
+                  class="form-control"
+                  [(ngModel)]="config.deliveryCourierFee" />
+              </div>
+              <small class="field-hint">Shipping fee charged on student checkout</small>
+            </div>
+
+            <div class="field-item">
+              <label for="selfUploadDiscount">Self-Upload PDF Discount</label>
+              <div class="input-prefix">
+                <span class="prefix">&#8377;</span>
+                <input
+                  id="selfUploadDiscount"
+                  type="number"
+                  min="0"
+                  class="form-control"
+                  [(ngModel)]="config.selfUploadDiscount" />
+              </div>
+              <small class="field-hint">Deducted when student uploads print-ready PDF</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 3: Interactive Rate Simulator -->
+    <div class="panel-card simulator-panel">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-title">Live Pricing & Commission Simulator</h2>
+          <p class="panel-subtitle">Test how these rates calculate student order totals and partner earnings in real time.</p>
+        </div>
+      </div>
+
+      <div class="simulator-body">
+        <div class="sim-inputs">
+          <div class="sim-field">
+            <label>Project Type</label>
+            <select class="form-control" [(ngModel)]="simFileType" (change)="simSlabIndex = 0">
+              <option value="assignment">Assignment</option>
+              <option value="practical">Practical</option>
+              <option value="project">Final Project</option>
+            </select>
+          </div>
+
+          <div class="sim-field">
+            <label>Page Slab</label>
+            <select class="form-control" [(ngModel)]="simSlabIndex">
+              <option
+                *ngFor="let s of config.slabs[simFileType]; let idx = index"
+                [value]="idx">
+                {{ s.label }}
+              </option>
+            </select>
+          </div>
+
+          <div class="sim-field" *ngIf="simFileType === 'project'">
+            <label>Binding Option</label>
+            <select class="form-control" [(ngModel)]="simBinding">
+              <option value="spiral">Spiral (&#8377;{{ config.binding.spiral }})</option>
+              <option value="hardbound">Hardbound (&#8377;{{ config.binding.hardbound }})</option>
+              <option value="stick">Stick / Soft (&#8377;{{ config.binding.stick }})</option>
+              <option value="none">None (&#8377;0)</option>
+            </select>
+          </div>
+
+          <div class="sim-field checkbox-field">
+            <label class="checkbox-label">
+              <input type="checkbox" [(ngModel)]="simSelfUpload" />
+              <span>Student uploads own PDF (Apply &#8377;{{ config.selfUploadDiscount }} discount)</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="sim-output-card">
+          <h3 class="sim-output-title">Calculation Breakdown</h3>
+          <div class="breakdown-rows">
+            <div class="breakdown-row">
+              <span>Base Print Cost:</span>
+              <strong>&#8377;{{ simPrintCost }}</strong>
+            </div>
+            <div class="breakdown-row" *ngIf="simFileType === 'project'">
+              <span>Binding Cost:</span>
+              <strong>+ &#8377;{{ simBindingCost }}</strong>
+            </div>
+            <div class="breakdown-row" *ngIf="simDiscount > 0">
+              <span>Self-Upload Discount:</span>
+              <strong class="text-emerald">- &#8377;{{ simDiscount }}</strong>
+            </div>
+            <div class="breakdown-divider"></div>
+            <div class="breakdown-row total-row">
+              <span>Student Estimated Total:</span>
+              <strong class="text-primary">&#8377;{{ simFinalEstimatedPrice }}</strong>
+            </div>
+            <div class="breakdown-divider"></div>
+            <div class="breakdown-row partner-row">
+              <span>Teacher Referral Commission ({{ config.defaultTeacherCommissionPercent }}%):</span>
+              <strong class="text-purple">&#8377;{{ simTeacherCommissionEarned }}</strong>
+            </div>
+            <div class="breakdown-row partner-row">
+              <span>Delivery Driver Earnings:</span>
+              <strong class="text-amber">&#8377;{{ simDriverEarnings }}</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

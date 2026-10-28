@@ -15,6 +15,18 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/public-preview/public-preview.component').then(m => m.PublicPreviewComponent)
   },
   {
+    path: 'home',
+    loadComponent: () => import('./pages/public-preview/public-preview.component').then(m => m.PublicPreviewComponent)
+  },
+  {
+    path: 'welcome',
+    loadComponent: () => import('./pages/welcome/welcome.component').then(m => m.WelcomeComponent)
+  },
+  {
+    path: 'splash',
+    loadComponent: () => import('./pages/splash-screen/splash-screen.component').then(m => m.SplashScreenComponent)
+  },
+  {
     // Login Route (Lazy Loaded)
     path: 'login',
     loadComponent: () => import('./pages/login/login.component').then(m => m.LoginComponent)
@@ -165,6 +177,15 @@ export const routes: Routes = [
       {
         path: 'complaints',
         loadComponent: () => import('./pages/admin/complaints/complaints.component').then(m => m.ComplaintsComponent)
+      },
+      {
+        path: 'pricing',
+        loadComponent: () => import('./pages/admin/pricing-settings/pricing-settings.component').then(m => m.PricingSettingsComponent)
+      },
+      {
+        path: 'pricing-settings',
+        redirectTo: 'pricing',
+        pathMatch: 'full'
       },
       {
         path: 'audit',

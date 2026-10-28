@@ -42,7 +42,9 @@ export class NotificationInboxService {
     const normalizedMessage = message.trim().slice(0, 1000);
     if (!recipientUid || !normalizedTitle || !normalizedMessage || !allowedRoutes.has(route)) throw new Error('The notification recipient or content is invalid.');
     const recipientSnapshot = await get(ref(this.db, `users/${recipientUid}`));
-    if (!recipientSnapshot.exists() || recipientSnapshot.val().status !== 'active') throw new Error('The notification recipient is not an active account.');
+    if (!recipientSnapshot.exists() || !['active', 'rejected', 'pending_approval'].includes(recipientSnapshot.val().status)) {
+      throw new Error('The notification recipient is not a valid account.');
+    }
 
     const notificationRef = push(ref(this.db, `notifications/${recipientUid}`));
     if (!notificationRef.key) throw new Error('Could not create a notification record.');

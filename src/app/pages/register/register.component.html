@@ -5,7 +5,7 @@
   <div class="brand-panel">
     <div class="brand-content">
       <h1 class="logo-text">FileCrafters</h1>
-      <p class="tagline">Join us and never worry about project submissions again. <br> </p>
+      <p class="tagline">Join our multi-role academic ecosystem and streamline engineering submissions. <br> </p>
       <img src="assets/images/Studentlogo.png" alt="3D Visual Placeholder" class="visual-3d-placeholder">
     </div>
   </div>
@@ -13,29 +13,45 @@
   <div class="form-panel">
     <div class="glass-card wide-card">
       <h2>Create an Account</h2>
-      <p class="subtitle">Fill in your academic details to get started.</p>
+      <p class="subtitle">Select your account profile and fill in your details to get started.</p>
 
-      <!-- Staff Onboarding Notice -->
+      <!-- Role-based Onboarding Info Banner -->
       <div class="staff-onboarding-banner">
-        <span class="info-badge">Staff &amp; Partner Onboarding</span>
-        <p>Faculty and delivery personnel accounts are provisioned directly by administrators. If you are an academic mentor or delivery agent, please <a routerLink="/login-support">contact support</a> for onboarding.</p>
+        <span class="info-badge">{{ selectedRole }} Profile</span>
+        <p *ngIf="selectedRole === 'Student'">
+          Register as a student to order custom engineering projects, download lab files, and track live project milestones.
+        </p>
+        <p *ngIf="selectedRole === 'Teacher'">
+          Register as an academic mentor or faculty member to generate student referral codes and track project commissions.
+        </p>
+        <p *ngIf="selectedRole === 'Delivery'">
+          Register as a delivery partner to dispatch printed reports, spiral files, and campus courier assignments.
+        </p>
+        <div class="verification-notice-pill" *ngIf="selectedRole !== 'Student'" style="margin-top: 0.65rem; padding: 0.5rem 0.8rem; border-radius: 8px; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.35); font-size: 0.82rem; color: #fbbf24; display: flex; align-items: center; gap: 0.5rem;">
+          <span>🛡️</span>
+          <span><strong>Admin Verification Required:</strong> New {{ selectedRole }} accounts are verified by Admin before dashboard access is activated. You will receive an email once approved.</span>
+        </div>
       </div>
 
       <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+        <!-- 1. Profile / Role Selection -->
         <div class="input-group">
-          <label>Account Type</label>
+          <label>Account Type / Profile</label>
           <div class="custom-select">
             <select formControlName="role">
-              <option value="Student">Student (Self-Registration)</option>
+              <option value="Student">Student (Academic Projects &amp; Lab Files)</option>
+              <option value="Teacher">Teacher / Faculty (Referral &amp; Mentorship)</option>
+              <option value="Delivery">Delivery Partner (Campus &amp; Doorstep Courier)</option>
             </select>
             <span class="select-icon">▾</span>
           </div>
         </div>
 
+        <!-- 2. Personal Contact Fields (All Profiles) -->
         <div class="form-grid">
           <div class="input-group">
             <label>Full Name</label>
-            <input type="text" formControlName="fullName" placeholder="John Doe" />
+            <input type="text" formControlName="fullName" placeholder="e.g. Rahul Sharma" />
             <small class="error-text" *ngIf="registerForm.get('fullName')?.invalid && registerForm.get('fullName')?.touched">
               Full Name is required.
             </small>
@@ -43,7 +59,7 @@
 
           <div class="input-group">
             <label>Email Address</label>
-            <input type="email" formControlName="email" placeholder="student@college.edu" maxlength="100" />
+            <input type="email" formControlName="email" placeholder="name@domain.edu" maxlength="100" />
             <small class="error-text" *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
               <span *ngIf="registerForm.get('email')?.hasError('required')">Email is required.</span>
               <span *ngIf="registerForm.get('email')?.hasError('email')">Enter a valid email address.</span>
@@ -56,45 +72,49 @@
             <input type="tel" formControlName="phone" placeholder="10-digit number" maxlength="10" />
             <small class="error-text" *ngIf="registerForm.get('phone')?.invalid && registerForm.get('phone')?.touched">
               <span *ngIf="registerForm.get('phone')?.hasError('required')">Phone number is required.</span>
-              <span *ngIf="registerForm.get('phone')?.hasError('pattern') || registerForm.get('phone')?.hasError('minlength') || registerForm.get('phone')?.hasError('maxlength')">Enter a valid 10-digit phone number.</span>
+              <span *ngIf="registerForm.get('phone')?.hasError('pattern')">Enter a valid 10-digit phone number.</span>
             </small>
           </div>
 
           <div class="input-group">
             <label>WhatsApp Number (Optional)</label>
-            <input type="tel" formControlName="whatsapp" placeholder="For quick updates" maxlength="10" />
+            <input type="tel" formControlName="whatsapp" placeholder="For instant updates" maxlength="10" />
             <small class="error-text" *ngIf="registerForm.get('whatsapp')?.invalid && registerForm.get('whatsapp')?.touched">
               <span *ngIf="registerForm.get('whatsapp')?.hasError('pattern')">Enter a valid 10-digit WhatsApp number.</span>
             </small>
           </div>
         </div>
 
-        <!-- Academic student fields -->
-        <div class="form-grid">
-          <div class="input-group grid-span-half">
-            <label>Teacher Referral Code (Optional)</label>
-            <input type="text" formControlName="referralCode" maxlength="30" placeholder="Enter a code from your teacher" autocomplete="off" />
-            <small class="helper-text">Referral attribution is saved once to your account and cannot be changed later.</small>
+        <!-- 3A. Academic Fields: STUDENT ONLY -->
+        <div class="form-grid" *ngIf="selectedRole === 'Student'">
+          <div class="input-group grid-span-half referral-group">
+            <div class="field-label-row">
+              <label>Teacher Referral Code (Optional)</label>
+              <span class="badge-code-applied" *ngIf="registerForm.get('referralCode')?.value">✓ Code Linked</span>
+            </div>
+            <input type="text" formControlName="referralCode" maxlength="30" placeholder="e.g. FC-PROF7729" autocomplete="off" />
+            <small class="helper-text">Enter your faculty mentor's code to link your account to your college partner.</small>
           </div>
+
           <div class="input-group">
-            <label>College Name</label>
-            <input type="text" formControlName="collegeName" placeholder="E.g. XYZ Institute" />
+            <label>College / University Name</label>
+            <input type="text" formControlName="collegeName" placeholder="E.g. National Institute of Tech" />
             <small class="error-text" *ngIf="registerForm.get('collegeName')?.invalid && registerForm.get('collegeName')?.touched">
               College Name is required.
             </small>
           </div>
 
           <div class="input-group grid-span-half">
-            <label>Course</label>
-            <input type="text" formControlName="courseName" placeholder="B.Tech, BCA, etc." />
+            <label>Course Degree</label>
+            <input type="text" formControlName="courseName" placeholder="B.Tech, BCA, MCA, M.Tech" />
             <small class="error-text" *ngIf="registerForm.get('courseName')?.invalid && registerForm.get('courseName')?.touched">
               Course is required.
             </small>
           </div>
 
           <div class="input-group grid-span-half">
-            <label>Branch/Specialization</label>
-            <input type="text" formControlName="branch" placeholder="CSE, Mech, etc." />
+            <label>Branch / Specialization</label>
+            <input type="text" formControlName="branch" placeholder="CSE, IT, ECE, Mechanical" />
             <small class="error-text" *ngIf="registerForm.get('branch')?.invalid && registerForm.get('branch')?.touched">
               Branch is required.
             </small>
@@ -113,7 +133,7 @@
               <span class="select-icon">▾</span>
             </div>
             <small class="error-text" *ngIf="registerForm.get('year')?.invalid && registerForm.get('year')?.touched">
-              Please select a year.
+              Please select your year.
             </small>
           </div>
 
@@ -134,26 +154,95 @@
               <span class="select-icon">▾</span>
             </div>
             <small class="error-text" *ngIf="registerForm.get('semester')?.invalid && registerForm.get('semester')?.touched">
-              Please select a semester.
+              Please select your semester.
             </small>
           </div>
 
           <div class="input-group grid-span-half">
-            <label>Roll Number</label>
-            <input type="text" formControlName="rollNumber" placeholder="University Roll No" maxlength="12" />
+            <label>University Roll Number</label>
+            <input type="text" formControlName="rollNumber" placeholder="6-12 digit roll number" maxlength="12" />
             <small class="error-text" *ngIf="registerForm.get('rollNumber')?.invalid && registerForm.get('rollNumber')?.touched">
               <span *ngIf="registerForm.get('rollNumber')?.hasError('required')">Roll number is required.</span>
-              <span *ngIf="registerForm.get('rollNumber')?.hasError('pattern')">Enter a valid roll number (6 to 12 digits).</span>
+              <span *ngIf="registerForm.get('rollNumber')?.hasError('pattern')">Enter a valid 6 to 12 digit roll number.</span>
             </small>
           </div>
         </div>
 
+        <!-- 3B. Academic Fields: TEACHER / FACULTY ONLY -->
+        <div class="form-grid" *ngIf="selectedRole === 'Teacher'">
+          <div class="input-group">
+            <label>College / University Name</label>
+            <input type="text" formControlName="collegeName" placeholder="E.g. Delhi Technical University" />
+            <small class="error-text" *ngIf="registerForm.get('collegeName')?.invalid && registerForm.get('collegeName')?.touched">
+              College or Institution Name is required.
+            </small>
+          </div>
+
+          <div class="input-group">
+            <label>Department / Faculty Domain</label>
+            <input type="text" formControlName="department" placeholder="E.g. Computer Science &amp; Engineering" />
+            <small class="error-text" *ngIf="registerForm.get('department')?.invalid && registerForm.get('department')?.touched">
+              Department is required.
+            </small>
+          </div>
+
+          <div class="input-group">
+            <label>Designation &amp; Qualification</label>
+            <input type="text" formControlName="qualification" placeholder="E.g. Asst. Professor, Ph.D / M.Tech" />
+          </div>
+
+          <div class="input-group">
+            <label>Faculty / Staff ID Number</label>
+            <input type="text" formControlName="facultyIdProof" placeholder="E.g. DTU-FAC-8812" />
+          </div>
+        </div>
+
+        <!-- 3C. Fleet & Hub Fields: DELIVERY PARTNER ONLY -->
+        <div class="form-grid" *ngIf="selectedRole === 'Delivery'">
+          <div class="input-group">
+            <label>Vehicle Category</label>
+            <div class="custom-select">
+              <select formControlName="vehicleType">
+                <option value="Two-Wheeler / Bike">Two-Wheeler / Bike</option>
+                <option value="Electric Scooter">Electric Scooter</option>
+                <option value="Bicycle">Bicycle / Cycle</option>
+                <option value="Other / Auto">Other / Campus Auto</option>
+              </select>
+              <span class="select-icon">▾</span>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label>Vehicle Registration Number</label>
+            <input type="text" formControlName="vehicleNumber" placeholder="E.g. DL-01-AB-1234" />
+            <small class="error-text" *ngIf="registerForm.get('vehicleNumber')?.invalid && registerForm.get('vehicleNumber')?.touched">
+              Vehicle information is required for courier assignments.
+            </small>
+          </div>
+
+          <div class="input-group">
+            <label>Primary Service Area / Delivery Campus Hub</label>
+            <input type="text" formControlName="serviceArea" placeholder="E.g. North Campus / Sector 62 Hub" />
+            <small class="error-text" *ngIf="registerForm.get('serviceArea')?.invalid && registerForm.get('serviceArea')?.touched">
+              Delivery service area is required.
+            </small>
+          </div>
+
+          <div class="input-group">
+            <label>Driving License / ID Card Number</label>
+            <input type="text" formControlName="drivingLicense" placeholder="E.g. DL-0420110098765" />
+          </div>
+        </div>
+
+        <!-- 4. Address & Pincode (All Profiles) -->
         <div class="input-group">
-          <label>Delivery Address</label>
+          <label>
+            {{ selectedRole === 'Delivery' ? 'Base Operating Address' : 'Address / Hostel' }}
+          </label>
           <textarea
             formControlName="address"
             rows="2"
-            placeholder="Full address for delivery"
+            placeholder="Complete street address or campus hostel details"
           ></textarea>
           <small class="error-text" *ngIf="registerForm.get('address')?.invalid && registerForm.get('address')?.touched">
             Address is required.
@@ -163,16 +252,15 @@
         <div class="form-grid">
           <div class="input-group">
             <label>Pincode</label>
-            <input type="text" formControlName="pincode" placeholder="6-digit PIN" />
+            <input type="text" formControlName="pincode" placeholder="6-digit PIN" maxlength="6" />
             <small class="error-text" *ngIf="registerForm.get('pincode')?.invalid && registerForm.get('pincode')?.touched">
               <span *ngIf="registerForm.get('pincode')?.hasError('required')">Pincode is required.</span>
-              <span *ngIf="registerForm.get('pincode')?.hasError('pattern')">
-                Enter a valid 6-digit pincode.
-              </span>
+              <span *ngIf="registerForm.get('pincode')?.hasError('pattern')">Enter a valid 6-digit pincode.</span>
             </small>
           </div>
         </div>
 
+        <!-- 5. Credentials (All Profiles) -->
         <div class="form-grid">
           <div class="input-group">
             <label>Password</label>
@@ -181,7 +269,7 @@
               <span *ngIf="registerForm.get('password')?.hasError('required')">Password is required.</span>
               <span *ngIf="registerForm.get('password')?.hasError('minlength')">Password must be at least 8 characters.</span>
               <span *ngIf="registerForm.get('password')?.hasError('maxlength')">Password cannot exceed 20 characters.</span>
-              <span *ngIf="registerForm.get('password')?.hasError('pattern')">Password must include uppercase, lowercase, and a digit.</span>
+              <span *ngIf="registerForm.get('password')?.hasError('pattern')">Must include uppercase, lowercase, and a digit.</span>
             </small>
           </div>
 
@@ -195,13 +283,66 @@
           </div>
         </div>
 
+        <!-- 6. Submit Button with Dynamic Label -->
         <button type="submit" class="btn-primary" [disabled]="registerForm.invalid || isLoading">
-          <span *ngIf="!isLoading">Register as Student</span>
-          <span *ngIf="isLoading">Registering...</span>
+          <span *ngIf="!isLoading">
+            {{ selectedRole === 'Teacher' ? 'Register as Teacher / Mentor' : selectedRole === 'Delivery' ? 'Register as Delivery Partner' : 'Register as Student' }}
+          </span>
+          <span *ngIf="isLoading">Creating account...</span>
         </button>
       </form>
 
       <p class="login-prompt">Already have an account? <a routerLink="/login">Sign In</a></p>
+    </div>
+  </div>
+
+  <!-- Application Submitted Modal -->
+  <div class="verification-modal-backdrop" *ngIf="showSubmissionModal">
+    <div class="verification-modal-card">
+      <div class="modal-head">
+        <div class="modal-title-wrap">
+          <span class="head-icon">⏳</span>
+          <h3>Application Submitted for Verification</h3>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="applicant-summary-card">
+          <div class="summary-item">
+            <span class="label">Applicant Name</span>
+            <span class="value">{{ registeredApplicant?.fullName }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Profile Role</span>
+            <span class="value">{{ registeredApplicant?.role === 'Teacher' ? 'Teacher / Faculty Mentor' : 'Delivery Partner' }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Reference ID</span>
+            <span class="value">{{ registeredApplicant?.id }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Registered Email</span>
+            <span class="value">{{ registeredApplicant?.email }}</span>
+          </div>
+        </div>
+
+        <div class="verification-callout-banner pending">
+          <span class="banner-icon">📋</span>
+          <div class="banner-content">
+            <h4>Under Administrative Review</h4>
+            <p>
+              Your credentials and details have been forwarded to the FileCrafters Admin team. Once verified and approved, you will receive an official notification email at <strong>{{ registeredApplicant?.email }}</strong> confirming your account activation.
+            </p>
+          </div>
+        </div>
+
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0; line-height: 1.5;">
+          Direct dashboard access is disabled until administrative verification is complete. You can sign in anytime to check your live review status.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" (click)="goToHome()">Return to Home</button>
+        <button type="button" class="btn-approve-action" (click)="goToLogin()">Go to Sign In</button>
+      </div>
     </div>
   </div>
 </div>

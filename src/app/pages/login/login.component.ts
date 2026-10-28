@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Auth, sendPasswordResetEmail } from '@angular/fire/auth';
 import { CommonModule } from '@angular/common';
 import { NotificationService } from '../../shared/notification/notification.service';
@@ -21,6 +21,7 @@ export class LoginComponent implements OnInit {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private auth = inject(Auth);
   private notificationService = inject(NotificationService);
   private themeService = inject(ThemeService);
@@ -29,6 +30,10 @@ export class LoginComponent implements OnInit {
   isForgotPasswordMode: boolean = false; 
   resetEmail: string = '';
   isResetting: boolean = false;
+  showPendingModal: boolean = false;
+  pendingApplicant: any = null;
+  showRejectedModal: boolean = false;
+  rejectedApplicant: any = null;
   theme = this.themeService.theme();
 
   toggleTheme(): void {
@@ -57,8 +62,47 @@ if (this.loginForm.valid) {
         return;
       }
 
+      if (userProfile?.status === 'pending_approval') {
+        await this.authService.logout();
+        this.pendingApplicant = {
+          fullName: userProfile.fullName || 'Applicant',
+          email: userProfile.email || email,
+          role: userProfile.role || 'Partner',
+          id: userProfile.employeeID || userProfile.deliveryID || userProfile.studentID || 'FC-PENDING',
+          appliedAt: userProfile.appliedAt || userProfile.createdAt
+        };
+        this.showPendingModal = true;
+        this.notificationService.show(
+          'info',
+          'Your account application is currently under verification by FileCrafters Admin. You will receive an email once approved.',
+          'Application Under Review'
+        );
+        return;
+      }
+
+      if (userProfile?.status === 'rejected') {
+        await this.authService.logout();
+        this.rejectedApplicant = {
+          fullName: userProfile.fullName || 'Applicant',
+          email: userProfile.email || email,
+          role: userProfile.role || 'Partner',
+          id: userProfile.employeeID || userProfile.deliveryID || userProfile.studentID || 'FC-REJECTED',
+          reason: userProfile.rejectionReason || 'Submitted verification credentials could not be approved.',
+          rejectedAt: userProfile.rejectedAt
+        };
+        this.showRejectedModal = true;
+        this.notificationService.show(
+          'error',
+          `Your application was rejected by Admin. Reason: ${this.rejectedApplicant.reason}`,
+          'Application Rejected'
+        );
+        return;
+      }
+
       // Admin emails ki list (Yahan apne actual admin emails zarur rakhein)
       const adminEmails = ['admin@filecrafters.in', 'wmohd2514@outlook.com'];
+
+      const returnUrl = this.route.snapshot.queryParams['returnUrl'];
 
       // Smart Routing Logic: Admin ko Admin page, Student ko Student page
       if (adminEmails.includes((user.email || email).toLowerCase())) {
@@ -69,7 +113,11 @@ if (this.loginForm.valid) {
       } else if (userProfile?.role === 'Delivery' && userProfile?.status === 'active') {
         this.router.navigate(['/delivery-portal']);
       } else if (userProfile?.role === 'Student' && userProfile?.status === 'active') {
-        this.router.navigate(['/dashboard/home']);
+        if (returnUrl && returnUrl.startsWith('/new-order')) {
+          this.router.navigateByUrl(returnUrl);
+        } else {
+          this.router.navigate(['/dashboard/home']);
+        }
       } else {
         await this.authService.logout();
         this.notificationService.show('error', 'This account does not have an active student, teacher, delivery, or administrator role.', 'Account Not Active');
@@ -122,6 +170,21 @@ if (this.loginForm.valid) {
       }
     } finally {
       this.isResetting = false;
+    }
+  }
+
+  closeStatusModals(): void {
+    this.showPendingModal = false;
+    this.showRejectedModal = false;
+  }
+
+  contactSupport(): void {
+    const role = this.rejectedApplicant?.role || this.pendingApplicant?.role || 'Partner';
+    const email = this.rejectedApplicant?.email || this.pendingApplicant?.email || '';
+    const subject = encodeURIComponent(`FileCrafters Application Inquiry - ${role} (${email})`);
+    const mailto = `mailto:support@filecrafters.com?subject=${subject}`;
+    if (typeof window !== 'undefined') {
+      window.open(mailto, '_blank');
     }
   }
 }

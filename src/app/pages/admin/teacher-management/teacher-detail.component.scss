@@ -206,3 +206,13 @@
 .referral-code-list{display:grid;gap:8px;margin:14px 0}.referral-code-row{display:flex;justify-content:space-between;gap:12px;padding:12px;border:1px solid var(--glass-border);border-radius:12px;background:var(--bg-panel-soft)}
 .referral-code-row span{color:var(--success);font-weight:700}.referral-code-row .inactive{color:var(--danger)}
 .create-code-button{border:0;border-radius:10px;padding:10px 14px;color:#fff;background:linear-gradient(135deg,var(--primary),var(--primary-strong));font-weight:700;cursor:pointer}.create-code-button:disabled{opacity:.55;cursor:not-allowed}
+.commission-setting-card{margin-top:18px;padding:22px;border:1px solid var(--glass-border);border-radius:18px;background:var(--bg-panel);color:var(--text-primary)}
+.commission-setting-card h2{margin:0 0 6px}.commission-setting-card p{color:var(--text-secondary);font-size:.88rem;margin:0}
+.card-header-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px}
+.rate-badge{padding:4px 10px;border-radius:999px;background:rgba(14,165,233,.15);color:var(--primary,#0ea5e9);font-weight:800;font-size:.82rem}
+.rate-control-row{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap}
+.rate-input-box{display:flex;flex-direction:column;gap:6px}
+.rate-input-box label{font-size:.78rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase}
+.rate-input-box input{padding:10px 14px;border-radius:10px;border:1px solid var(--glass-border);background:var(--bg-panel-soft);color:var(--text-primary);font-size:.95rem;width:140px;outline:none}
+.save-rate-button{padding:10px 18px;border-radius:10px;border:0;background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-weight:700;font-size:.88rem;cursor:pointer}
+.save-rate-button:disabled{opacity:.55;cursor:not-allowed}

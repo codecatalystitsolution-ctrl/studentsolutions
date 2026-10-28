@@ -1,45 +1,854 @@
-<main class="delivery-page">
-  <header class="delivery-header">
-    <div>
-      <p class="eyebrow">DELIVERY WORKSPACE</p>
-      <h1>My assigned deliveries</h1>
-      <p>Update only the orders assigned to your account. Students can see your tracking updates.</p>
+<div class="delivery-dashboard-layout" [class.theme-light]="theme() === 'light'">
+  <!-- Mobile Sidebar Backdrop -->
+  <div class="sidebar-backdrop" *ngIf="isSidebarOpen()" (click)="closeSidebar()"></div>
+
+  <!-- 1. LEFT SIDEBAR -->
+  <aside class="delivery-sidebar" [class.open]="isSidebarOpen()">
+    <div class="brand-block">
+      <div class="brand-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/>
+          <path d="M15 18H9"/>
+          <path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/>
+          <circle cx="17" cy="18" r="2"/>
+          <circle cx="7" cy="18" r="2"/>
+        </svg>
+      </div>
+      <div class="brand-copy">
+        <span class="brand-kicker">FILECRAFTERS</span>
+        <strong>COURIER FLEET</strong>
+      </div>
     </div>
-    <div class="portal-actions"><a routerLink="/notifications">Notifications</a><span class="assignment-count">{{ assignments.length }} active / recent</span></div>
-  </header>
 
-  <div class="delivery-state" *ngIf="loading" role="status">Loading your assignments…</div>
-  <div class="delivery-state" *ngIf="!loading && !assignments.length">
-    <h2>No assigned deliveries</h2>
-    <p>New delivery assignments will appear here.</p>
-  </div>
-
-  <section class="assignment-list" *ngIf="!loading && assignments.length">
-    <article class="assignment-card" *ngFor="let assignment of assignments">
-      <div class="assignment-top">
-        <div><span class="order-id">Order #{{ assignment.orderId | slice:0:8 | uppercase }}</span><h2>{{ assignment.subject }}</h2></div>
-        <span class="delivery-status" [attr.data-status]="assignment.status">{{ statusLabel(assignment.status) }}</span>
+    <!-- Agent Profile Card -->
+    <div class="agent-profile-box" *ngIf="agentProfile() as agent">
+      <div class="agent-avatar">{{ (agent.fullName || 'Delivery Partner').charAt(0).toUpperCase() }}</div>
+      <div class="agent-info">
+        <h4 class="agent-name">{{ agent.fullName || 'Delivery Partner' }}</h4>
+        <span class="agent-id-tag">{{ agent.deliveryID || 'DEL-FLEET' }}</span>
       </div>
-      <div class="delivery-details">
-        <p><strong>Student</strong>{{ assignment.studentName }}</p>
-        <p><strong>Phone</strong><a [href]="'tel:' + assignment.phone">{{ assignment.phone || 'Not provided' }}</a></p>
-        <p class="address"><strong>Delivery address</strong>{{ assignment.address || 'Not provided' }} {{ assignment.pincode }}</p>
-        <p><strong>Assigned</strong>{{ assignment.assignedAt | date:'medium' }}</p>
+      <div class="agent-meta-row">
+        <span class="meta-badge" title="Vehicle Details">
+          &#128663; {{ agent.vehicleNumber || 'Bike Courier' }}
+        </span>
+        <span class="meta-badge" title="Campus Delivery Hub">
+          &#128205; {{ agent.serviceArea || 'Main Hub' }}
+        </span>
       </div>
+      <div class="duty-status-pill">
+        <span class="pulse-dot"></span>
+        <span>Fleet Online &amp; GPS Active</span>
+      </div>
+    </div>
 
-      <div class="timeline" *ngIf="history[assignment.orderId] as events">
-        <h3>Tracking history</h3>
-        <div class="timeline-entry" *ngFor="let event of (events | keyvalue)">
-          <span class="timeline-dot"></span>
-          <div><strong>{{ statusLabel(event.value.status) }}</strong><p>{{ event.value.note }}</p><small>{{ event.value.createdAt | date:'medium' }}</small></div>
+    <!-- Navigation Menu -->
+    <nav class="sidebar-nav" aria-label="Delivery Portal Navigation">
+      <button
+        type="button"
+        class="nav-item"
+        [class.active]="activeView() === 'deliveries'"
+        (click)="setView('deliveries'); closeSidebar()"
+      >
+        <span class="nav-icon">&#128230;</span>
+        <span class="nav-label">Dispatch Orders</span>
+        <span class="nav-count">{{ totalAssigned }}</span>
+      </button>
+
+      <button
+        type="button"
+        class="nav-item"
+        [class.active]="activeView() === 'revenue'"
+        (click)="setView('revenue'); closeSidebar()"
+      >
+        <span class="nav-icon">&#128176;</span>
+        <span class="nav-label">Earnings &amp; Payouts</span>
+        <span class="nav-count badge-success">₹{{ availableBalance | number:'1.0-0' }}</span>
+      </button>
+
+      <div class="nav-divider"></div>
+
+      <ng-container *ngIf="activeView() === 'deliveries'">
+        <button
+          type="button"
+          class="nav-item sub-nav-item"
+          [class.active]="currentFilter() === 'all'"
+          (click)="setFilter('all'); closeSidebar()"
+        >
+          <span class="nav-icon">&#128203;</span>
+          <span class="nav-label">All Deliveries</span>
+          <span class="nav-count">{{ totalAssigned }}</span>
+        </button>
+
+        <button
+          type="button"
+          class="nav-item sub-nav-item"
+          [class.active]="currentFilter() === 'assigned'"
+          (click)="setFilter('assigned'); closeSidebar()"
+        >
+          <span class="nav-icon">&#9203;</span>
+          <span class="nav-label">Pending Pickup</span>
+          <span class="nav-count badge-warning">{{ pendingPickupCount }}</span>
+        </button>
+
+        <button
+          type="button"
+          class="nav-item sub-nav-item"
+          [class.active]="currentFilter() === 'in_transit'"
+          (click)="setFilter('in_transit'); closeSidebar()"
+        >
+          <span class="nav-icon">&#128666;</span>
+          <span class="nav-label">Out for Delivery</span>
+          <span class="nav-count badge-info">{{ inTransitCount }}</span>
+        </button>
+
+        <button
+          type="button"
+          class="nav-item sub-nav-item"
+          [class.active]="currentFilter() === 'delivered'"
+          (click)="setFilter('delivered'); closeSidebar()"
+        >
+          <span class="nav-icon">&#9989;</span>
+          <span class="nav-label">Delivered &amp; Done</span>
+          <span class="nav-count badge-success">{{ deliveredCount }}</span>
+        </button>
+
+        <div class="nav-divider"></div>
+      </ng-container>
+
+      <a routerLink="/notifications" class="nav-item" (click)="closeSidebar()">
+        <span class="nav-icon">&#128276;</span>
+        <span class="nav-label">Notifications</span>
+      </a>
+
+      <button type="button" class="nav-item" (click)="createSampleDispatch()">
+        <span class="nav-icon">&#10024;</span>
+        <span class="nav-label">Simulate Dispatch</span>
+      </button>
+    </nav>
+
+    <!-- Sidebar Footer -->
+    <div class="sidebar-footer">
+      <button class="logout-btn" type="button" (click)="logout()">
+        <span class="logout-icon">&#9211;</span>
+        <span>Log Out</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- 2. MAIN WORKSPACE PANEL -->
+  <main class="delivery-main-panel">
+    <!-- Top Bar -->
+    <header class="top-nav-bar">
+      <div class="top-left">
+        <button
+          type="button"
+          class="hamburger-btn mobile-only"
+          (click)="toggleSidebar()"
+          aria-label="Toggle navigation menu"
+        >
+          <span></span><span></span><span></span>
+        </button>
+        <div class="header-titles">
+          <p class="eyebrow">{{ activeView() === 'revenue' ? 'DELIVERY FLEET REVENUE' : 'DELIVERY WORKSPACE' }}</p>
+          <h1 class="main-title">{{ activeView() === 'revenue' ? 'Earnings & Payment Settlements' : 'My assigned deliveries' }}</h1>
+          <p class="subtitle">
+            {{ activeView() === 'revenue' 
+                ? 'Manage payout destinations, request fee withdrawals, and review campus delivery settlements.' 
+                : 'Live dispatch console. Update handovers, log student notes, and navigate route destinations.' }}
+          </p>
         </div>
       </div>
 
-      <form class="update-form" *ngIf="nextStatus(assignment.status) as next" (ngSubmit)="update(assignment)">
-        <label [for]="'delivery-note-' + assignment.orderId">Delivery note</label>
-        <textarea [id]="'delivery-note-' + assignment.orderId" [(ngModel)]="notes[assignment.orderId]" name="note-{{assignment.orderId}}" maxlength="1000" rows="2" placeholder="Optional: record a useful delivery update"></textarea>
-        <button type="submit">Mark {{ statusLabel(next) }}</button>
-      </form>
-    </article>
-  </section>
-</main>
+      <div class="top-actions">
+        <!-- Quick Search -->
+        <div class="search-box">
+          <span class="search-icon" aria-hidden="true">&#128269;</span>
+          <input
+            type="text"
+            class="search-input"
+            placeholder="Search order ID, student, pin..."
+            [(ngModel)]="searchQuery"
+          />
+        </div>
+
+        <!-- Notifications -->
+        <a routerLink="/notifications" class="icon-btn" title="View Notifications" aria-label="Notifications">
+          <span>&#128276;</span>
+        </a>
+
+        <!-- Theme Toggle -->
+        <button
+          type="button"
+          class="theme-toggle-btn"
+          (click)="toggleTheme()"
+          [attr.aria-label]="theme() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
+        >
+          {{ theme() === 'dark' ? '☀' : '☾' }}
+        </button>
+
+        <!-- Quick Log Out -->
+        <button type="button" class="quick-logout-btn desktop-only" (click)="logout()" title="Log Out">
+          Sign Out
+        </button>
+      </div>
+    </header>
+
+    <!-- 2B. FLOATING TOAST FEEDBACK -->
+    <div class="toast-feedback" *ngIf="payoutFeedback">
+      ✓ {{ payoutFeedback }}
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- VIEW A: DELIVERIES CONSOLE -->
+    <!-- ========================================================================= -->
+    <ng-container *ngIf="activeView() === 'deliveries'">
+      <!-- 3. KPI ANALYTICS ROW -->
+      <section class="kpi-grid">
+      <div class="kpi-card glass-panel" (click)="setFilter('all')">
+        <div class="kpi-icon-wrap icon-primary">&#128230;</div>
+        <div class="kpi-content">
+          <span class="kpi-label">Total Assigned</span>
+          <h3 class="kpi-number">{{ totalAssigned }}</h3>
+          <span class="kpi-desc">Total route packages</span>
+        </div>
+      </div>
+
+      <div class="kpi-card glass-panel" (click)="setFilter('assigned')">
+        <div class="kpi-icon-wrap icon-amber">&#9203;</div>
+        <div class="kpi-content">
+          <span class="kpi-label">Pending Pickup</span>
+          <h3 class="kpi-number">{{ pendingPickupCount }}</h3>
+          <span class="kpi-desc">At central print lab</span>
+        </div>
+      </div>
+
+      <div class="kpi-card glass-panel" (click)="setFilter('in_transit')">
+        <div class="kpi-icon-wrap icon-purple">&#128666;</div>
+        <div class="kpi-content">
+          <span class="kpi-label">Out for Delivery</span>
+          <h3 class="kpi-number">{{ inTransitCount }}</h3>
+          <span class="kpi-desc">In transit to campus</span>
+        </div>
+      </div>
+
+      <div class="kpi-card glass-panel" (click)="setFilter('delivered')">
+        <div class="kpi-icon-wrap icon-emerald">&#9989;</div>
+        <div class="kpi-content">
+          <span class="kpi-label">Delivered Today</span>
+          <h3 class="kpi-number">{{ deliveredCount }}</h3>
+          <span class="kpi-desc">Completed handovers</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. FILTER TABS & SEARCH CONTROLS -->
+    <div class="filter-bar">
+      <div class="filter-pills">
+        <button
+          type="button"
+          class="pill-btn"
+          [class.active]="currentFilter() === 'all'"
+          (click)="setFilter('all')"
+        >
+          All ({{ totalAssigned }})
+        </button>
+        <button
+          type="button"
+          class="pill-btn"
+          [class.active]="currentFilter() === 'assigned'"
+          (click)="setFilter('assigned')"
+        >
+          Needs Pickup ({{ pendingPickupCount }})
+        </button>
+        <button
+          type="button"
+          class="pill-btn"
+          [class.active]="currentFilter() === 'in_transit'"
+          (click)="setFilter('in_transit')"
+        >
+          In Transit ({{ inTransitCount }})
+        </button>
+        <button
+          type="button"
+          class="pill-btn"
+          [class.active]="currentFilter() === 'delivered'"
+          (click)="setFilter('delivered')"
+        >
+          Delivered ({{ deliveredCount }})
+        </button>
+      </div>
+
+      <div class="filter-summary">
+        <span class="assignment-count">{{ filteredAssignments.length }} deliveries displayed</span>
+      </div>
+    </div>
+
+    <!-- 5. LOADING STATE -->
+    <div class="delivery-state glass-panel" *ngIf="loading" role="status">
+      <div class="spinner"></div>
+      <h3>Loading your assignments…</h3>
+      <p>Synchronizing real-time dispatch routes and tracking events.</p>
+    </div>
+
+    <!-- 6. EMPTY STATE (When no assignments) -->
+    <div class="delivery-state glass-panel empty-card" *ngIf="!loading && !filteredAssignments.length">
+      <div class="empty-icon-wrap">&#128666;</div>
+      <h2>No assigned deliveries</h2>
+      <p *ngIf="!searchQuery()">
+        New delivery assignments will appear here as soon as the print desk dispatches an order to your route.
+      </p>
+      <p *ngIf="searchQuery()">
+        No deliveries matched your search for "{{ searchQuery() }}". Try clearing the filter.
+      </p>
+
+      <div class="empty-actions">
+        <button
+          type="button"
+          class="btn-primary"
+          (click)="createSampleDispatch()"
+        >
+          &#10024; Generate Sample Dispatch (Demo Mode)
+        </button>
+        <button
+          type="button"
+          class="btn-secondary"
+          *ngIf="searchQuery()"
+          (click)="searchQuery.set('')"
+        >
+          Clear Search
+        </button>
+      </div>
+    </div>
+
+    <!-- 7. ASSIGNMENT CARDS LIST -->
+    <section class="assignment-list" *ngIf="!loading && filteredAssignments.length">
+      <article
+        class="assignment-card glass-panel"
+        *ngFor="let assignment of filteredAssignments"
+        [class.card-delivered]="assignment.status === 'delivered'"
+      >
+        <!-- Card Top Bar -->
+        <div class="assignment-top">
+          <div class="order-headline">
+            <span class="order-id">ORDER #{{ assignment.orderId | slice:0:8 | uppercase }}</span>
+            <h2 class="order-subject">{{ assignment.subject }}</h2>
+          </div>
+          <!-- Exact .delivery-status element preserved for e2e test compatibility -->
+          <span
+            class="delivery-status"
+            [attr.data-status]="assignment.status"
+            [class.status-assigned]="assignment.status === 'assigned'"
+            [class.status-picked_up]="assignment.status === 'picked_up'"
+            [class.status-in_transit]="assignment.status === 'in_transit'"
+            [class.status-delivered]="assignment.status === 'delivered'"
+            [class.status-failed]="assignment.status === 'failed_delivery'"
+          >
+            {{ statusLabel(assignment.status) }}
+          </span>
+        </div>
+
+        <!-- Parcel Payment Status & Earning Pill -->
+        <div class="parcel-payment-strip">
+          <span class="pay-tag-pill prepaid">
+            <span>💳</span>
+            <span>Prepaid Online (Verified — ₹0 to collect)</span>
+          </span>
+          <span class="pay-fee-pill">
+            <span>💰</span>
+            <span>₹50 Courier Fee on Delivery</span>
+          </span>
+        </div>
+
+        <!-- Stepper Progress Bar -->
+        <div class="stepper-bar">
+          <div
+            class="step"
+            [class.completed]="assignment.status !== 'assigned'"
+            [class.active]="assignment.status === 'assigned'"
+          >
+            <span class="step-dot">1</span>
+            <span class="step-text">Assigned</span>
+          </div>
+          <div class="step-line" [class.filled]="assignment.status === 'picked_up' || assignment.status === 'in_transit' || assignment.status === 'delivered'"></div>
+          <div
+            class="step"
+            [class.completed]="assignment.status === 'in_transit' || assignment.status === 'delivered'"
+            [class.active]="assignment.status === 'picked_up'"
+          >
+            <span class="step-dot">2</span>
+            <span class="step-text">Picked Up</span>
+          </div>
+          <div class="step-line" [class.filled]="assignment.status === 'in_transit' || assignment.status === 'delivered'"></div>
+          <div
+            class="step"
+            [class.completed]="assignment.status === 'delivered'"
+            [class.active]="assignment.status === 'in_transit'"
+          >
+            <span class="step-dot">3</span>
+            <span class="step-text">In Transit</span>
+          </div>
+          <div class="step-line" [class.filled]="assignment.status === 'delivered'"></div>
+          <div
+            class="step"
+            [class.completed]="assignment.status === 'delivered'"
+            [class.active]="assignment.status === 'delivered'"
+          >
+            <span class="step-dot">4</span>
+            <span class="step-text">Delivered</span>
+          </div>
+        </div>
+
+        <!-- Student & Destination Details -->
+        <div class="delivery-details">
+          <div class="detail-cell">
+            <strong>Student Recipient</strong>
+            <span class="cell-val">{{ assignment.studentName || 'Student' }}</span>
+          </div>
+
+          <div class="detail-cell">
+            <strong>Assigned Time</strong>
+            <span class="cell-val">{{ assignment.assignedAt | date:'medium' }}</span>
+          </div>
+
+          <!-- Contact Actions: Phone + WhatsApp -->
+          <div class="detail-cell full-width">
+            <strong>Student Contact &amp; Chat</strong>
+            <div class="contact-actions-row">
+              <a [href]="'tel:' + assignment.phone" class="contact-pill call-pill">
+                <span class="pill-icon">&#128222;</span>
+                <span>Call {{ assignment.phone || 'N/A' }}</span>
+              </a>
+
+              <a
+                [href]="getWhatsAppUrl(assignment.phone, assignment.studentName, assignment.orderId)"
+                target="_blank"
+                rel="noopener"
+                class="contact-pill whatsapp-pill"
+              >
+                <span class="pill-icon">&#128172;</span>
+                <span>WhatsApp Student</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Destination Address + Google Maps Navigation -->
+          <div class="detail-cell full-width address-cell">
+            <div class="address-header">
+              <strong>Doorstep Delivery Address</strong>
+              <a
+                [href]="getGoogleMapsUrl(assignment.address, assignment.pincode)"
+                target="_blank"
+                rel="noopener"
+                class="maps-btn"
+                title="Open location in Google Maps"
+              >
+                &#128506; Navigate in Google Maps &rarr;
+              </a>
+            </div>
+            <p class="address-text">
+              {{ assignment.address || 'Campus Department' }}
+              <span class="pincode-badge">PIN: {{ assignment.pincode || 'N/A' }}</span>
+            </p>
+          </div>
+        </div>
+
+        <!-- Tracking Timeline History -->
+        <div class="timeline" *ngIf="history[assignment.orderId] as events">
+          <div class="timeline-header">
+            <h3>Tracking &amp; Status Logs</h3>
+            <small>{{ (events | keyvalue).length }} recorded milestones</small>
+          </div>
+          <div class="timeline-list">
+            <div class="timeline-entry" *ngFor="let event of (events | keyvalue)">
+              <span class="timeline-dot" [attr.data-status]="event.value.status"></span>
+              <div class="timeline-body">
+                <div class="entry-meta">
+                  <strong>{{ statusLabel(event.value.status) }}</strong>
+                  <small>{{ event.value.createdAt | date:'shortTime' }} &bull; {{ event.value.createdAt | date:'mediumDate' }}</small>
+                </div>
+                <p class="entry-note" *ngIf="event.value.note">{{ event.value.note }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Status Update Form -->
+        <form
+          class="update-form"
+          *ngIf="nextStatus(assignment.status) as next"
+          (ngSubmit)="update(assignment)"
+        >
+          <!-- Exact label preserved for e2e test compatibility: page.getByLabel('Delivery note') -->
+          <div class="form-header-row">
+            <label [for]="'delivery-note-' + assignment.orderId">Delivery note</label>
+            <span class="optional-tag">(Optional)</span>
+          </div>
+
+          <textarea
+            [id]="'delivery-note-' + assignment.orderId"
+            [(ngModel)]="notes[assignment.orderId]"
+            name="note-{{ assignment.orderId }}"
+            maxlength="1000"
+            rows="2"
+            class="note-textarea"
+            placeholder="Add a delivery note (e.g. arrived at university gate, handed to student)..."
+          ></textarea>
+
+          <!-- Quick Chip Suggestions -->
+          <div class="quick-notes-row">
+            <button
+              type="button"
+              class="quick-note-chip"
+              *ngFor="let qn of quickNotes"
+              (click)="applyPresetNote(assignment.orderId, qn)"
+            >
+              + {{ qn }}
+            </button>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="action-buttons-row">
+            <!-- Exact button text matched for e2e test: page.getByRole('button', { name: /Mark Picked Up/ }) -->
+            <button
+              type="submit"
+              class="btn-status-primary"
+              [disabled]="isUpdating()"
+            >
+              <span class="btn-icon">&#10148;</span>
+              <span>{{ nextStatusButtonText(assignment.status) }}</span>
+            </button>
+
+            <!-- Issue button if in_transit -->
+            <button
+              type="button"
+              class="btn-status-danger"
+              *ngIf="assignment.status === 'in_transit'"
+              (click)="markDeliveryIssue(assignment)"
+              [disabled]="isUpdating()"
+              title="Report issue if student is unavailable or gate is closed"
+            >
+              &#9888; Report Delivery Delay / Issue
+            </button>
+          </div>
+        </form>
+
+        <!-- Completed Badge if already delivered -->
+        <div class="delivered-banner" *ngIf="assignment.status === 'delivered'">
+          <span class="check-icon">&#10004;</span>
+          <span>Order successfully delivered and closed. Student has received the files.</span>
+        </div>
+      </article>
+    </section>
+    </ng-container>
+
+    <!-- ========================================================================= -->
+    <!-- VIEW B: REVENUE & PAYMENTS CONSOLE VIEW -->
+    <!-- ========================================================================= -->
+    <ng-container *ngIf="activeView() === 'revenue'">
+      <!-- Revenue KPI Analytics Grid -->
+      <section class="kpi-grid">
+        <div class="kpi-card glass-panel">
+          <div class="kpi-icon-wrap icon-emerald">&#128176;</div>
+          <div class="kpi-content">
+            <span class="kpi-label">Total Earned Revenue</span>
+            <h3 class="kpi-number">₹{{ totalEarnedRevenue | number:'1.2-2' }}</h3>
+            <span class="kpi-desc">₹{{ feePerDelivery }} × {{ deliveredCount }} Completed Runs</span>
+          </div>
+        </div>
+
+        <div class="kpi-card glass-panel">
+          <div class="kpi-icon-wrap icon-primary">&#9889;</div>
+          <div class="kpi-content">
+            <span class="kpi-label">Available for Payout</span>
+            <h3 class="kpi-number">₹{{ availableBalance | number:'1.2-2' }}</h3>
+            <span class="kpi-desc">Ready for withdrawal</span>
+          </div>
+        </div>
+
+        <div class="kpi-card glass-panel">
+          <div class="kpi-icon-wrap icon-purple">&#127974;</div>
+          <div class="kpi-content">
+            <span class="kpi-label">Disbursed to Bank/UPI</span>
+            <h3 class="kpi-number">₹{{ totalDisbursed | number:'1.2-2' }}</h3>
+            <span class="kpi-desc">Settled &amp; transferred</span>
+          </div>
+        </div>
+
+        <div class="kpi-card glass-panel">
+          <div class="kpi-icon-wrap icon-amber">&#9203;</div>
+          <div class="kpi-content">
+            <span class="kpi-label">Pending Admin Approval</span>
+            <h3 class="kpi-number">₹{{ pendingPayoutRequestsTotal | number:'1.2-2' }}</h3>
+            <span class="kpi-desc">Withdrawal in review</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Revenue Management 2-Column Grid -->
+      <div class="revenue-layout-grid">
+        <!-- Column 1: Payout Account & Withdrawal Request -->
+        <div class="revenue-col-left">
+          <!-- 1A: Linked Payout Destination Account -->
+          <section class="revenue-card glass-panel">
+            <div class="card-heading-row">
+              <div>
+                <h2>Payout Receiving Method</h2>
+                <p>Configure where FileCrafters transfers your delivery earnings.</p>
+              </div>
+              <span class="secure-badge">&#128274; Verified</span>
+            </div>
+
+            <!-- Method Switcher -->
+            <div class="payout-type-selector">
+              <button
+                type="button"
+                class="selector-btn"
+                [class.active]="payoutDetails.method === 'upi'"
+                (click)="payoutDetails.method = 'upi'"
+              >
+                <span>&#128241;</span>
+                <span>UPI ID (Instant)</span>
+              </button>
+              <button
+                type="button"
+                class="selector-btn"
+                [class.active]="payoutDetails.method === 'bank'"
+                (click)="payoutDetails.method = 'bank'"
+              >
+                <span>&#127974;</span>
+                <span>Bank Account (NEFT/IMPS)</span>
+              </button>
+            </div>
+
+            <!-- Form: UPI -->
+            <form (ngSubmit)="savePayoutDetails()" class="payout-form">
+              <div *ngIf="payoutDetails.method === 'upi'" class="form-fields-group">
+                <div class="form-field">
+                  <label for="dp-upi-id">UPI ID (VPA)</label>
+                  <input
+                    type="text"
+                    id="dp-upi-id"
+                    [(ngModel)]="payoutDetails.upiId"
+                    name="upiId"
+                    placeholder="e.g. driver@okaxis or 9876543210@paytm"
+                    class="portal-input"
+                    required
+                  />
+                  <small class="field-hint">Supports Google Pay, PhonePe, Paytm, BHIM.</small>
+                </div>
+
+                <div class="form-field">
+                  <label for="dp-upi-phone">Registered Phone</label>
+                  <input
+                    type="tel"
+                    id="dp-upi-phone"
+                    [(ngModel)]="payoutDetails.phone"
+                    name="phone"
+                    placeholder="10-digit mobile number"
+                    class="portal-input"
+                  />
+                </div>
+              </div>
+
+              <!-- Form: Bank -->
+              <div *ngIf="payoutDetails.method === 'bank'" class="form-fields-group">
+                <div class="form-field">
+                  <label for="dp-acc-holder">Account Holder Name</label>
+                  <input
+                    type="text"
+                    id="dp-acc-holder"
+                    [(ngModel)]="payoutDetails.accountHolder"
+                    name="accountHolder"
+                    placeholder="Name as in passbook"
+                    class="portal-input"
+                    required
+                  />
+                </div>
+
+                <div class="form-field">
+                  <label for="dp-bank-name">Bank Name</label>
+                  <input
+                    type="text"
+                    id="dp-bank-name"
+                    [(ngModel)]="payoutDetails.bankName"
+                    name="bankName"
+                    placeholder="e.g. State Bank of India, HDFC"
+                    class="portal-input"
+                    required
+                  />
+                </div>
+
+                <div class="form-field">
+                  <label for="dp-acc-num">Bank Account Number</label>
+                  <input
+                    type="password"
+                    id="dp-acc-num"
+                    [(ngModel)]="payoutDetails.accountNumber"
+                    name="accountNumber"
+                    placeholder="Enter bank account number"
+                    class="portal-input"
+                    required
+                  />
+                </div>
+
+                <div class="form-field">
+                  <label for="dp-ifsc">IFSC Code</label>
+                  <input
+                    type="text"
+                    id="dp-ifsc"
+                    [(ngModel)]="payoutDetails.ifsc"
+                    name="ifsc"
+                    placeholder="e.g. SBIN0001234"
+                    class="portal-input"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="form-actions-row">
+                <button type="submit" class="btn-save-payout" [disabled]="isSavingPayout">
+                  {{ isSavingPayout ? 'Saving…' : '💾 Save Payout Method' }}
+                </button>
+              </div>
+            </form>
+          </section>
+
+          <!-- 1B: Withdrawal Request Card -->
+          <section class="revenue-card glass-panel withdraw-card">
+            <div class="card-heading-row">
+              <div>
+                <h2>Request Payout Withdrawal</h2>
+                <p>Transfer available delivery fees to your verified payout method.</p>
+              </div>
+              <span class="balance-tag">Available: ₹{{ availableBalance | number:'1.2-2' }}</span>
+            </div>
+
+            <div class="withdraw-box">
+              <div class="withdraw-input-row">
+                <div class="input-prefix">₹</div>
+                <input
+                  type="number"
+                  [(ngModel)]="withdrawInputAmount"
+                  name="withdrawAmount"
+                  placeholder="{{ availableBalance > 0 ? availableBalance : '0.00' }}"
+                  min="1"
+                  [max]="availableBalance"
+                  class="withdraw-amount-input"
+                />
+                <button
+                  type="button"
+                  class="btn-max"
+                  (click)="withdrawInputAmount = availableBalance"
+                  [disabled]="availableBalance <= 0"
+                >
+                  All (₹{{ availableBalance | number:'1.0-0' }})
+                </button>
+              </div>
+
+              <button
+                type="button"
+                class="btn-request-payout"
+                (click)="requestPayout()"
+                [disabled]="isRequestingPayout || availableBalance <= 0"
+              >
+                {{ isRequestingPayout ? 'Submitting…' : '⚡ Request Payout (₹' + (withdrawInputAmount > 0 ? withdrawInputAmount : availableBalance) + ')' }}
+              </button>
+
+              <small class="withdraw-note">
+                &#9432; Payouts are verified by Admin billing and disbursed directly to your {{ payoutDetails.method === 'upi' ? 'UPI ID' : 'Bank Account' }}.
+              </small>
+            </div>
+          </section>
+        </div>
+
+        <!-- Column 2: Settlements & Earnings Ledger -->
+        <div class="revenue-col-right">
+          <!-- 2A: Settlement & Payout Requests -->
+          <section class="revenue-card glass-panel">
+            <div class="card-heading-row">
+              <div>
+                <h2>Payout Requests &amp; Disbursements</h2>
+                <p>Track settlement status from FileCrafters accounts desk.</p>
+              </div>
+              <button type="button" class="btn-export-csv" (click)="exportRevenueCsv()">
+                📥 Export CSV
+              </button>
+            </div>
+
+            <div class="payout-requests-list" *ngIf="payoutRequests.length">
+              <article *ngFor="let req of payoutRequests" class="payout-req-item">
+                <div class="req-main">
+                  <div class="req-headline">
+                    <strong class="req-id">#{{ req.id }}</strong>
+                    <span class="req-method-tag">{{ req.method | uppercase }}</span>
+                    <span class="req-status-pill" [attr.data-status]="req.status">
+                      {{ req.status | uppercase }}
+                    </span>
+                  </div>
+                  <small class="req-date">Requested on {{ req.createdAt | date:'medium' }}</small>
+                  <p class="req-notes" *ngIf="req.notes">{{ req.notes }}</p>
+                </div>
+                <div class="req-amount">
+                  ₹{{ req.amount | number:'1.2-2' }}
+                </div>
+              </article>
+            </div>
+
+            <div class="empty-mini-state" *ngIf="!payoutRequests.length">
+              <span>&#128179;</span>
+              <p>No payout requests yet. Once you complete deliveries, request withdrawals here.</p>
+            </div>
+          </section>
+
+          <!-- 2B: Completed Delivery Order Earnings Breakdown -->
+          <section class="revenue-card glass-panel">
+            <div class="card-heading-row">
+              <div>
+                <h2>Delivery Earnings Breakdown</h2>
+                <p>₹{{ feePerDelivery }} standard driver fee per completed doorstep handover.</p>
+              </div>
+              <span class="count-tag">{{ deliveredCount }} Delivered</span>
+            </div>
+
+            <div class="delivered-earnings-table-wrap">
+              <table class="earnings-table">
+                <thead>
+                  <tr>
+                    <th>Order ID</th>
+                    <th>Student Recipient</th>
+                    <th>Fee Earned</th>
+                    <th>Collection Mode</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let d of (assignments.length ? assignments : [])">
+                    <td class="order-id-cell">#{{ d.orderId | slice:0:8 | uppercase }}</td>
+                    <td>{{ d.studentName || 'Student' }}</td>
+                    <td class="fee-cell">
+                      <strong class="fee-text" *ngIf="d.status === 'delivered'">+₹{{ feePerDelivery }}.00</strong>
+                      <span class="fee-pending" *ngIf="d.status !== 'delivered'">₹{{ feePerDelivery }} (On Handover)</span>
+                    </td>
+                    <td>
+                      <span class="pay-chip prepaid">Prepaid Online</span>
+                    </td>
+                    <td>
+                      <span class="status-cell-pill" [attr.data-status]="d.status">
+                        {{ statusLabel(d.status) }}
+                      </span>
+                    </td>
+                  </tr>
+                  <tr *ngIf="!assignments.length">
+                    <td colspan="5" class="table-empty-cell">
+                      No deliveries yet. Use "Simulate Dispatch" to test runs and earnings.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </div>
+    </ng-container>
+  </main>
+</div>

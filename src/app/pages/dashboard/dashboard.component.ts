@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, HostListener, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, HostListener, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, Router, RouterOutlet, RouterLinkActive, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
@@ -6,6 +6,7 @@ import { Auth, authState } from '@angular/fire/auth';
 import { Database, ref, onValue } from '@angular/fire/database';
 import { AuthService } from '../../services/auth.service';
 import { ThemeService } from '../../services/theme.service';
+import { SplashScreenService } from '../../services/splash-screen.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -21,6 +22,7 @@ export class DashboardComponent implements OnInit {
   private authService = inject(AuthService);
   private cdr = inject(ChangeDetectorRef);
   private themeService = inject(ThemeService);
+  protected splashService = inject(SplashScreenService);
 
   userName = 'Loading...';
   userEmail = '';
@@ -51,6 +53,11 @@ export class DashboardComponent implements OnInit {
       if (user) {
         this.currentUserId = user.uid;
         this.fetchHeaderData(user.uid);
+
+        const hasSeenSplash = this.splashService.hasSeenSplash();
+        if (!hasSeenSplash) {
+          this.splashService.triggerSplash('/dashboard');
+        }
 
         const hasSeenWelcome = localStorage.getItem(`welcome_seen_${user.uid}`);
         if (!hasSeenWelcome) {

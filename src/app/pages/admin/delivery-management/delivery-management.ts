@@ -1,7 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { RouterLink, ActivatedRoute } from '@angular/router';
 import { Database, ref, onValue, update, get } from '@angular/fire/database';
 import { ConfirmService } from '../../../shared/confirmation/confirm.service';
 import { NotificationService } from '../../../shared/notification/notification.service';
@@ -19,6 +19,7 @@ export class DeliveryManagementComponent implements OnInit {
   private confirmService = inject(ConfirmService);
   private notificationService = inject(NotificationService);
   private csvExportService = inject(CsvExportService);
+  private route = inject(ActivatedRoute, { optional: true });
 
   deliveryStaff: any[] = [];
   filteredDelivery: any[] = [];
@@ -29,12 +30,28 @@ export class DeliveryManagementComponent implements OnInit {
   totalDelivery = 0;
   activeDelivery = 0;
   suspendedDelivery = 0;
+  pendingDelivery = 0;
+  rejectedDelivery = 0;
+  currentFilter: 'all' | 'pending' | 'active' | 'suspended_rejected' = 'all';
 
   // Pagination (Default: 15 per page)
   currentPage = 1;
   readonly pageSize = 15;
 
   ngOnInit() {
+    this.route?.queryParams.subscribe(params => {
+      const filterParam = params['filter'] || params['status'];
+      if (filterParam === 'pending' || filterParam === 'pending_approval') {
+        this.currentFilter = 'pending';
+      } else if (filterParam === 'active') {
+        this.currentFilter = 'active';
+      } else if (filterParam === 'suspended' || filterParam === 'rejected') {
+        this.currentFilter = 'suspended_rejected';
+      }
+      if (this.deliveryStaff.length > 0) {
+        this.filterDelivery();
+      }
+    });
     this.loadDeliveryStaff();
   }
 
@@ -67,6 +84,8 @@ export class DeliveryManagementComponent implements OnInit {
     this.totalDelivery = 0;
     this.activeDelivery = 0;
     this.suspendedDelivery = 0;
+    this.pendingDelivery = 0;
+    this.rejectedDelivery = 0;
 
     if (users) {
       Object.keys(users).forEach(uid => {
@@ -74,7 +93,12 @@ export class DeliveryManagementComponent implements OnInit {
         const role = user.role?.toLowerCase();
         if (role === 'delivery' || role === 'deliveryboy' || role === 'delivery-boy') {
           this.totalDelivery += 1;
-          if (user.status === 'suspended') {
+          const status = (user.status || 'active').toLowerCase();
+          if (status === 'pending_approval') {
+            this.pendingDelivery += 1;
+          } else if (status === 'rejected') {
+            this.rejectedDelivery += 1;
+          } else if (status === 'suspended') {
             this.suspendedDelivery += 1;
           } else {
             this.activeDelivery += 1;
@@ -88,12 +112,29 @@ export class DeliveryManagementComponent implements OnInit {
     this.filterDelivery();
   }
 
+  setFilter(filter: 'all' | 'pending' | 'active' | 'suspended_rejected'): void {
+    this.currentFilter = filter;
+    this.filterDelivery();
+  }
+
   filterDelivery() {
     const query = this.searchTerm.trim().toLowerCase();
-    if (!query) {
-      this.filteredDelivery = [...this.deliveryStaff];
-    } else {
-      this.filteredDelivery = this.deliveryStaff.filter(d => {
+    let result = [...this.deliveryStaff];
+
+    // Status Filter Tab
+    if (this.currentFilter === 'pending') {
+      result = result.filter(d => (d.status || '').toLowerCase() === 'pending_approval');
+    } else if (this.currentFilter === 'active') {
+      result = result.filter(d => (d.status || 'active').toLowerCase() === 'active');
+    } else if (this.currentFilter === 'suspended_rejected') {
+      result = result.filter(d => {
+        const s = (d.status || '').toLowerCase();
+        return s === 'suspended' || s === 'rejected';
+      });
+    }
+
+    if (query) {
+      result = result.filter(d => {
         const email = (d.email || '').toLowerCase();
         const name = (d.fullName || '').toLowerCase();
         const vehicle = (d.vehicleNumber || '').toLowerCase();
@@ -110,6 +151,7 @@ export class DeliveryManagementComponent implements OnInit {
         );
       });
     }
+    this.filteredDelivery = result;
     this.currentPage = 1;
   }
 
@@ -189,6 +231,18 @@ export class DeliveryManagementComponent implements OnInit {
   }
 
   statusBadgeClass(status: string) {
-    return status === 'suspended' ? 'badge-suspended' : 'badge-active';
+    const s = (status || 'active').toLowerCase();
+    if (s === 'pending_approval') return 'badge-pending';
+    if (s === 'rejected') return 'badge-rejected';
+    if (s === 'suspended') return 'badge-suspended';
+    return 'badge-active';
+  }
+
+  statusLabel(status: string) {
+    const s = (status || 'active').toLowerCase();
+    if (s === 'pending_approval') return '⏳ Pending Review';
+    if (s === 'rejected') return '✕ Rejected';
+    if (s === 'suspended') return '⛔ Suspended';
+    return '✓ Active';
   }
 }

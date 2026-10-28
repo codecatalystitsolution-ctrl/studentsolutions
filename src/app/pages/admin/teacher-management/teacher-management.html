@@ -11,6 +11,10 @@
           <span>Total Teachers</span>
           <strong>{{ totalTeachers }}</strong>
         </div>
+        <div *ngIf="pendingTeachers > 0">
+          <span style="color: #fbbf24;">Pending Review</span>
+          <strong style="color: #fbbf24;">{{ pendingTeachers }}</strong>
+        </div>
         <div>
           <span>Active</span>
           <strong>{{ activeTeachers }}</strong>
@@ -33,6 +37,23 @@
           <span *ngIf="isRefreshing">Refreshing...</span>
         </button>
 
+        <a
+          routerLink="/admin/pricing"
+          class="btn-admin-action"
+          title="Configure referral commission rates"
+          style="text-decoration:none;"
+        >
+          &#8377; Commission Rates
+        </a>
+        <a
+          routerLink="/admin/payments"
+          [queryParams]="{tab:'payouts'}"
+          class="btn-admin-action"
+          title="Review teacher payout withdrawal requests"
+          style="text-decoration:none;"
+        >
+          &#128179; Payout Requests
+        </a>
         <button
           type="button"
           class="btn-admin-action export-btn"
@@ -56,6 +77,22 @@
       />
       <button type="button" *ngIf="searchTerm" (click)="searchTerm=''; filterTeachers();">Clear</button>
     </div>
+  </div>
+
+  <!-- Verification Status Filter Tabs -->
+  <div class="admin-filter-bar">
+    <button type="button" class="filter-pill-btn" [class.active]="currentFilter === 'all'" (click)="setFilter('all')">
+      All Faculty <span class="pill-counter">{{ totalTeachers }}</span>
+    </button>
+    <button type="button" class="filter-pill-btn tab-pending" [class.has-pending]="pendingTeachers > 0" [class.active]="currentFilter === 'pending'" (click)="setFilter('pending')">
+      ⏳ Pending Review <span class="pill-counter">{{ pendingTeachers }}</span>
+    </button>
+    <button type="button" class="filter-pill-btn" [class.active]="currentFilter === 'active'" (click)="setFilter('active')">
+      ✓ Active <span class="pill-counter">{{ activeTeachers }}</span>
+    </button>
+    <button type="button" class="filter-pill-btn" [class.active]="currentFilter === 'suspended_rejected'" (click)="setFilter('suspended_rejected')">
+      Suspended / Rejected <span class="pill-counter">{{ suspendedTeachers + rejectedTeachers }}</span>
+    </button>
   </div>
 
   <div class="table-section glass-card">
@@ -94,10 +131,13 @@
           <td>{{ teacher.collegeName || 'N/A' }}</td>
           <td>{{ teacher.department || 'N/A' }}</td>
           <td>
-            <span [ngClass]="statusBadgeClass(teacher.status)">{{ teacher.status || 'active' | titlecase }}</span>
+            <span class="badge-status" [ngClass]="statusBadgeClass(teacher.status)">{{ statusLabel(teacher.status) }}</span>
           </td>
           <td>
-            <button class="action-button" (click)="toggleTeacherStatus(teacher)">
+            <a *ngIf="teacher.status === 'pending_approval'" [routerLink]="['/admin/teachers', teacher.uid]" class="action-button" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); text-decoration: none; display: inline-block;">
+              Review Application
+            </a>
+            <button *ngIf="teacher.status !== 'pending_approval'" class="action-button" (click)="toggleTeacherStatus(teacher)">
               {{ teacher.status === 'suspended' ? 'Activate' : 'Suspend' }}
             </button>
           </td>

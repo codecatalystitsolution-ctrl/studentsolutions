@@ -2,11 +2,12 @@
   <div class="page-header premium-header">
     <div class="heading-group">
       <h1>Payment &amp; Refund Management</h1>
-      <p>Audit financial ledger entries, verify bank/UPI transaction references, and process student refunds.</p>
+      <p>Audit incoming student order payments, verify transaction proofs, and process partner payout requests.</p>
     </div>
 
     <div class="header-actions-row">
-      <div class="summary-pill">
+      <!-- Summary for Orders tab -->
+      <div class="summary-pill" *ngIf="activeTab === 'orders'">
         <div>
           <span>Verified Funds</span>
           <strong>&#8377;{{ totalCollected | number }}</strong>
@@ -25,24 +26,52 @@
         </div>
       </div>
 
+      <!-- Summary for Payouts tab -->
+      <div class="summary-pill" *ngIf="activeTab === 'payouts'">
+        <div>
+          <span>Pending Payouts</span>
+          <strong class="text-warning">&#8377;{{ pendingPayoutsTotal | number }} ({{ pendingPayoutsCount }})</strong>
+        </div>
+        <div>
+          <span>Disbursed Funds</span>
+          <strong class="text-success">&#8377;{{ disbursedPayoutsTotal | number }} ({{ disbursedPayoutsCount }})</strong>
+        </div>
+        <div>
+          <span>Rejected</span>
+          <strong class="text-danger">{{ rejectedPayoutsCount }}</strong>
+        </div>
+      </div>
+
       <div class="action-buttons-group">
         <button
           type="button"
           class="btn-admin-action"
           (click)="refresh()"
           [disabled]="isRefreshing"
-          title="Refresh payment records"
+          title="Refresh records"
         >
           <span *ngIf="!isRefreshing">&#8635; Refresh</span>
           <span *ngIf="isRefreshing">Refreshing...</span>
         </button>
 
         <button
+          *ngIf="activeTab === 'orders'"
           type="button"
           class="btn-admin-action export-btn"
           (click)="exportCsv()"
           [disabled]="filteredPayments.length === 0"
-          title="Download CSV"
+          title="Download Student Payments CSV"
+        >
+          &#8681; Download CSV
+        </button>
+
+        <button
+          *ngIf="activeTab === 'payouts'"
+          type="button"
+          class="btn-admin-action export-btn"
+          (click)="exportPayoutsCsv()"
+          [disabled]="filteredPayouts.length === 0"
+          title="Download Partner Payouts CSV"
         >
           &#8681; Download CSV
         </button>
@@ -50,191 +79,373 @@
     </div>
   </div>
 
-  <!-- Filter & Search Toolbar (PRD Section 7.4) -->
-  <div class="toolbar-card glass-card">
-    <div class="toolbar-grid">
-      <div class="search-box">
-        <input
-          type="text"
-          [(ngModel)]="searchTerm"
-          (input)="filterPayments()"
-          placeholder="Search by transaction reference, order ID, student UID, or UPI..."
-          class="search-input"
-        />
-        <button class="clear-btn" *ngIf="searchTerm" (click)="searchTerm=''; filterPayments()">&times;</button>
-      </div>
-
-      <div class="filter-group">
-        <label for="pStatusSelect">Status:</label>
-        <select
-          id="pStatusSelect"
-          [(ngModel)]="statusFilter"
-          (change)="filterPayments()"
-          class="filter-select"
-        >
-          <option value="">All Statuses</option>
-          <option value="pending">Pending Verification</option>
-          <option value="verified">Verified</option>
-          <option value="rejected">Rejected</option>
-          <option value="refunded">Refunded</option>
-        </select>
-      </div>
-
-      <div class="filter-group">
-        <label for="pDateSelect">Date Range:</label>
-        <select
-          id="pDateSelect"
-          [(ngModel)]="dateFilter"
-          (change)="filterPayments()"
-          class="filter-select"
-        >
-          <option value="all">All Time</option>
-          <option value="today">Today</option>
-          <option value="week">Current Week</option>
-          <option value="month">Current Month</option>
-        </select>
-      </div>
-
-      <div class="total-badge">
-        <span>Records: <strong>{{ filteredPayments.length }}</strong></span>
-      </div>
-    </div>
+  <!-- Primary Tab Selector -->
+  <div class="tabs-nav-bar">
+    <button
+      type="button"
+      class="tab-pill"
+      [class.active]="activeTab === 'orders'"
+      (click)="activeTab = 'orders'">
+      <span>Student Order Payments</span>
+      <span class="tab-count">{{ filteredPayments.length }}</span>
+    </button>
+    <button
+      type="button"
+      class="tab-pill"
+      [class.active]="activeTab === 'payouts'"
+      (click)="activeTab = 'payouts'">
+      <span>Partner Payout Requests</span>
+      <span class="tab-count" [class.warn]="pendingPayoutsCount > 0">{{ payouts.length }}</span>
+      <span class="tab-alert-dot" *ngIf="pendingPayoutsCount > 0"></span>
+    </button>
   </div>
 
-  <!-- Table Section -->
-  <div class="table-card glass-card">
-    <div *ngIf="isLoading" class="loading-panel">
-      <div class="spinner"></div>
-      <span>Loading financial records...</span>
-    </div>
+  <!-- ========================================== -->
+  <!-- TAB 1: STUDENT ORDER PAYMENTS              -->
+  <!-- ========================================== -->
+  <ng-container *ngIf="activeTab === 'orders'">
+    <!-- Filter & Search Toolbar (PRD Section 7.4) -->
+    <div class="toolbar-card glass-card">
+      <div class="toolbar-grid">
+        <div class="search-box">
+          <input
+            type="text"
+            [(ngModel)]="searchTerm"
+            (input)="filterPayments()"
+            placeholder="Search by transaction reference, order ID, student UID, or UPI..."
+            class="search-input"
+          />
+          <button class="clear-btn" *ngIf="searchTerm" (click)="searchTerm=''; filterPayments()">&times;</button>
+        </div>
 
-    <div class="table-responsive" *ngIf="!isLoading">
-      <table class="premium-table">
-        <thead>
-          <tr>
-            <th>Transaction Ref</th>
-            <th>Related Order</th>
-            <th>Amount (INR)</th>
-            <th>Payment Method</th>
-            <th>Submitted At</th>
-            <th>Ledger Status</th>
-            <th>Verification Note</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let p of paginatedPayments">
-            <td>
-              <strong class="ref-code">{{ p.transactionRef || p.id }}</strong>
-            </td>
-            <td>
-              <a
-                class="order-link"
-                [routerLink]="['/admin/order-details']"
-                [queryParams]="{ search: p.orderId }"
-                title="View full order details"
-              >
-                #{{ shortId(p.orderId) | uppercase }} &#8599;
-              </a>
-            </td>
-            <td>
-              <span class="amount-badge">&#8377;{{ p.amount | number }}</span>
-            </td>
-            <td>
-              <span class="method-text">{{ p.upiId || 'UPI Direct' }}</span>
-            </td>
-            <td>
-              <span class="date-text">{{ p.createdAt | date: 'MMM d, y, h:mm a' }}</span>
-            </td>
-            <td>
-              <span
-                class="status-pill"
-                [ngClass]="{
-                  'status-pending': p.status === 'pending',
-                  'status-verified': p.status === 'verified',
-                  'status-rejected': p.status === 'rejected',
-                  'status-refunded': p.status === 'refunded'
-                }"
-              >
-                {{ (p.status || 'pending') | uppercase }}
-              </span>
-            </td>
-            <td>
-              <span class="note-text" *ngIf="p.verificationNote">{{ p.verificationNote }}</span>
-              <span class="text-muted" *ngIf="!p.verificationNote">&mdash;</span>
-            </td>
-            <td class="action-cell">
-              <ng-container *ngIf="p.status === 'pending'">
-                <button
-                  type="button"
-                  class="btn-table-action verify-btn"
-                  (click)="openDecisionModal(p, 'verify')"
-                  title="Verify payment against bank/UPI records"
-                >
-                  Verify
-                </button>
-                <button
-                  type="button"
-                  class="btn-table-action reject-btn"
-                  (click)="openDecisionModal(p, 'reject')"
-                  title="Reject invalid transaction reference"
-                >
-                  Reject
-                </button>
-              </ng-container>
+        <div class="filter-group">
+          <label for="pStatusSelect">Status:</label>
+          <select
+            id="pStatusSelect"
+            [(ngModel)]="statusFilter"
+            (change)="filterPayments()"
+            class="filter-select"
+          >
+            <option value="">All Statuses</option>
+            <option value="pending">Pending Verification</option>
+            <option value="verified">Verified</option>
+            <option value="rejected">Rejected</option>
+            <option value="refunded">Refunded</option>
+          </select>
+        </div>
 
-              <ng-container *ngIf="p.status === 'verified'">
-                <span class="verified-tag">&#10003; Audited</span>
-              </ng-container>
+        <div class="filter-group">
+          <label for="pDateSelect">Date Range:</label>
+          <select
+            id="pDateSelect"
+            [(ngModel)]="dateFilter"
+            (change)="filterPayments()"
+            class="filter-select"
+          >
+            <option value="all">All Time</option>
+            <option value="today">Today</option>
+            <option value="week">Current Week</option>
+            <option value="month">Current Month</option>
+          </select>
+        </div>
 
-              <ng-container *ngIf="p.status === 'rejected' || p.status === 'refunded'">
-                <span class="finalized-tag">Finalized</span>
-              </ng-container>
-            </td>
-          </tr>
-
-          <tr *ngIf="filteredPayments.length === 0">
-            <td colspan="8" class="empty-state">No payment records match your filters.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Pagination Controls (PRD Section 7.6) -->
-    <div class="pagination-footer" *ngIf="filteredPayments.length > 0">
-      <div class="pagination-info">
-        Showing
-        <strong>{{ (currentPage - 1) * pageSize + 1 }}</strong>
-        to
-        <strong>{{ (currentPage * pageSize > filteredPayments.length) ? filteredPayments.length : (currentPage * pageSize) }}</strong>
-        of
-        <strong>{{ filteredPayments.length }}</strong>
-        records
-      </div>
-
-      <div class="pagination-controls">
-        <button
-          type="button"
-          class="page-btn"
-          (click)="prevPage()"
-          [disabled]="currentPage === 1"
-        >
-          &larr; Previous
-        </button>
-        <span class="page-indicator">Page {{ currentPage }} of {{ totalPages }}</span>
-        <button
-          type="button"
-          class="page-btn"
-          (click)="nextPage()"
-          [disabled]="currentPage === totalPages"
-        >
-          Next &rarr;
-        </button>
+        <div class="total-badge">
+          <span>Records: <strong>{{ filteredPayments.length }}</strong></span>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Decision Modal (Verify / Reject / Refund) -->
+    <!-- Payments Ledger Table -->
+    <div class="table-container glass-card">
+      <div *ngIf="isLoading" class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading payment ledger...</p>
+      </div>
+
+      <div *ngIf="!isLoading && filteredPayments.length === 0" class="empty-state">
+        <div class="empty-icon">&#128179;</div>
+        <h3>No payment records found</h3>
+        <p>Try adjusting your search filters or check back later.</p>
+      </div>
+
+      <div class="table-responsive" *ngIf="!isLoading && filteredPayments.length > 0">
+        <table class="ledger-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Order ID</th>
+              <th>Transaction Ref</th>
+              <th>Student</th>
+              <th>Amount</th>
+              <th>Method / UPI</th>
+              <th>Status</th>
+              <th class="actions-header">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let payment of paginatedPayments" [class.highlight-pending]="payment.status === 'pending'">
+              <td class="date-cell">
+                <span class="date-primary">{{ payment.createdAt | date:'mediumDate' }}</span>
+                <span class="date-secondary">{{ payment.createdAt | date:'shortTime' }}</span>
+              </td>
+              <td>
+                <a class="order-link" [routerLink]="['/admin/order-details']" [queryParams]="{ search: payment.orderId }">
+                  #{{ shortId(payment.orderId) }}
+                </a>
+              </td>
+              <td class="ref-cell">
+                <code>{{ payment.transactionRef }}</code>
+              </td>
+              <td class="student-cell">
+                <span class="uid-pill" [title]="payment.uid">{{ shortId(payment.uid) }}</span>
+              </td>
+              <td class="amount-cell">
+                <strong>&#8377;{{ payment.amount | number }}</strong>
+              </td>
+              <td class="upi-cell">
+                <span>{{ payment.upiId || 'N/A' }}</span>
+              </td>
+              <td>
+                <span class="status-badge" [ngClass]="payment.status || 'pending'">
+                  {{ (payment.status || 'pending') | uppercase }}
+                </span>
+              </td>
+              <td class="actions-cell">
+                <div class="btn-group" *ngIf="payment.status === 'pending'">
+                  <button
+                    type="button"
+                    class="btn-action verify"
+                    (click)="openDecisionModal(payment, 'verify')"
+                    title="Mark payment as verified"
+                  >
+                    &#10003; Verify
+                  </button>
+                  <button
+                    type="button"
+                    class="btn-action reject"
+                    (click)="openDecisionModal(payment, 'reject')"
+                    title="Reject transaction reference"
+                  >
+                    &times; Reject
+                  </button>
+                </div>
+
+                <div class="btn-group" *ngIf="payment.status === 'verified'">
+                  <button
+                    type="button"
+                    class="btn-action refund"
+                    (click)="openDecisionModal(payment, 'refund')"
+                    title="Process student refund"
+                  >
+                    &#8634; Refund
+                  </button>
+                </div>
+
+                <div class="note-pill" *ngIf="payment.status === 'rejected' || payment.status === 'refunded'" [title]="payment.rejectionNote || payment.refundNote || ''">
+                  <span>{{ payment.rejectionNote || payment.refundNote || 'Completed' }}</span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination Controls (PRD Section 7.6) -->
+      <div class="pagination-footer" *ngIf="filteredPayments.length > 0">
+        <div class="pagination-info">
+          Showing
+          <strong>{{ (currentPage - 1) * pageSize + 1 }}</strong>
+          to
+          <strong>{{ (currentPage * pageSize > filteredPayments.length) ? filteredPayments.length : (currentPage * pageSize) }}</strong>
+          of
+          <strong>{{ filteredPayments.length }}</strong>
+          records
+        </div>
+
+        <div class="pagination-controls">
+          <button
+            type="button"
+            class="page-btn"
+            (click)="prevPage()"
+            [disabled]="currentPage === 1"
+          >
+            &larr; Previous
+          </button>
+          <span class="page-indicator">Page {{ currentPage }} of {{ totalPages }}</span>
+          <button
+            type="button"
+            class="page-btn"
+            (click)="nextPage()"
+            [disabled]="currentPage === totalPages"
+          >
+            Next &rarr;
+          </button>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ========================================== -->
+  <!-- TAB 2: PARTNER PAYOUT REQUESTS             -->
+  <!-- ========================================== -->
+  <ng-container *ngIf="activeTab === 'payouts'">
+    <!-- Filter & Search Toolbar for Payouts -->
+    <div class="toolbar-card glass-card">
+      <div class="toolbar-grid">
+        <div class="search-box">
+          <input
+            type="text"
+            [(ngModel)]="payoutSearchTerm"
+            (input)="filterPayouts()"
+            placeholder="Search partner by name, email, UPI, bank account, or request ID..."
+            class="search-input"
+          />
+          <button class="clear-btn" *ngIf="payoutSearchTerm" (click)="payoutSearchTerm=''; filterPayouts()">&times;</button>
+        </div>
+
+        <div class="filter-group">
+          <label for="pRoleSelect">Role:</label>
+          <select
+            id="pRoleSelect"
+            [(ngModel)]="payoutRoleFilter"
+            (change)="filterPayouts()"
+            class="filter-select"
+          >
+            <option value="">All Roles</option>
+            <option value="Teacher">Faculty / Teachers</option>
+            <option value="Delivery">Delivery Drivers</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="pPayoutStatusSelect">Status:</label>
+          <select
+            id="pPayoutStatusSelect"
+            [(ngModel)]="payoutStatusFilter"
+            (change)="filterPayouts()"
+            class="filter-select"
+          >
+            <option value="">All Statuses</option>
+            <option value="pending">Pending Approval</option>
+            <option value="disbursed">Disbursed (Paid)</option>
+            <option value="rejected">Rejected</option>
+          </select>
+        </div>
+
+        <div class="total-badge">
+          <span>Payout Requests: <strong>{{ filteredPayouts.length }}</strong></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payouts Table -->
+    <div class="table-container glass-card">
+      <div *ngIf="isPayoutsLoading" class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading partner payout requests...</p>
+      </div>
+
+      <div *ngIf="!isPayoutsLoading && filteredPayouts.length === 0" class="empty-state">
+        <div class="empty-icon">&#128181;</div>
+        <h3>No partner payout requests found</h3>
+        <p>When teachers or delivery personnel submit earnings withdrawal requests, they will appear here for review.</p>
+      </div>
+
+      <div class="table-responsive" *ngIf="!isPayoutsLoading && filteredPayouts.length > 0">
+        <table class="ledger-table">
+          <thead>
+            <tr>
+              <th>Request ID & Date</th>
+              <th>Partner Details</th>
+              <th>Role</th>
+              <th>Amount</th>
+              <th>Receiving Account (UPI / Bank)</th>
+              <th>Status</th>
+              <th class="actions-header">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let payout of filteredPayouts" [class.highlight-pending]="payout.status === 'pending'">
+              <td class="date-cell">
+                <span class="ref-pill">{{ payout.id }}</span>
+                <span class="date-secondary">{{ payout.createdAt | date:'mediumDate' }} {{ payout.createdAt | date:'shortTime' }}</span>
+              </td>
+              <td class="student-cell">
+                <strong>{{ payout.applicantName }}</strong>
+                <div class="partner-subtext">{{ payout.applicantEmail }}</div>
+                <div class="partner-subtext" *ngIf="payout.phone">&#9742; {{ payout.phone }}</div>
+              </td>
+              <td>
+                <span class="role-badge" [ngClass]="(payout.role || 'Teacher').toLowerCase()">
+                  {{ payout.role === 'Delivery' ? 'Delivery Partner' : 'Teacher' }}
+                </span>
+              </td>
+              <td class="amount-cell">
+                <strong class="text-success">&#8377;{{ payout.amount | number }}</strong>
+              </td>
+              <td class="account-cell">
+                <div *ngIf="payout.method === 'upi' || payout.details.upiId" class="account-details-box">
+                  <span class="method-tag upi">UPI</span>
+                  <span class="account-val">{{ payout.details.upiId || 'N/A' }}</span>
+                  <button type="button" class="btn-copy-sm" (click)="copyToClipboard(payout.details.upiId || '', 'UPI ID')" title="Copy UPI ID">&#128203;</button>
+                </div>
+                <div *ngIf="payout.method === 'bank' && !payout.details.upiId" class="account-details-box">
+                  <span class="method-tag bank">BANK</span>
+                  <div class="bank-details-lines">
+                    <span><strong>{{ payout.details.bankName || 'Bank' }}</strong> &middot; {{ payout.details.accountHolder }}</span>
+                    <span>Acct: <code>{{ payout.details.accountNumber }}</code></span>
+                    <span>IFSC: <code>{{ payout.details.ifsc }}</code></span>
+                  </div>
+                  <button type="button" class="btn-copy-sm" (click)="copyToClipboard(payout.details.accountNumber || '', 'Account Number')" title="Copy Account Number">&#128203;</button>
+                </div>
+                <div *ngIf="payout.notes" class="payout-note-hint">
+                  <small>Note: {{ payout.notes }}</small>
+                </div>
+              </td>
+              <td>
+                <span class="status-badge" [ngClass]="payout.status || 'pending'">
+                  {{ (payout.status === 'disbursed' ? 'DISBURSED' : payout.status || 'pending') | uppercase }}
+                </span>
+              </td>
+              <td class="actions-cell">
+                <div class="btn-group" *ngIf="payout.status === 'pending'">
+                  <button
+                    type="button"
+                    class="btn-action verify"
+                    (click)="openPayoutModal(payout, 'disburse')"
+                    title="Disburse payout and mark paid"
+                  >
+                    &#10003; Disburse
+                  </button>
+                  <button
+                    type="button"
+                    class="btn-action reject"
+                    (click)="openPayoutModal(payout, 'reject')"
+                    title="Reject payout request"
+                  >
+                    &times; Reject
+                  </button>
+                </div>
+
+                <div class="disbursed-info-box" *ngIf="payout.status === 'disbursed'">
+                  <span class="ref-text" title="Transaction reference">Ref: <strong>{{ payout.transactionRef || 'Paid' }}</strong></span>
+                  <small *ngIf="payout.disbursedAt">{{ payout.disbursedAt | date:'shortDate' }}</small>
+                </div>
+
+                <div class="rejected-info-box" *ngIf="payout.status === 'rejected'" [title]="payout.rejectionReason || 'Rejected'">
+                  <span class="reason-text">{{ payout.rejectionReason || 'Rejected' }}</span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ========================================== -->
+  <!-- MODAL: Student Payment Decision            -->
+  <!-- ========================================== -->
   <div class="modal-backdrop" *ngIf="selectedPayment" (click)="closeDecisionModal()">
     <div class="modal-dialog glass-panel" (click)="$event.stopPropagation()">
       <div class="modal-header">
@@ -288,6 +499,98 @@
         >
           <span *ngIf="!isSubmittingDecision">Confirm Decision &rarr;</span>
           <span *ngIf="isSubmittingDecision">Processing...</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: Partner Payout Disburse / Reject    -->
+  <!-- ========================================== -->
+  <div class="modal-backdrop" *ngIf="selectedPayout" (click)="closePayoutModal()">
+    <div class="modal-dialog glass-panel" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>
+          <span *ngIf="payoutAction === 'disburse'">Disburse Partner Earnings</span>
+          <span *ngIf="payoutAction === 'reject'">Reject Partner Payout Request</span>
+        </h3>
+        <button class="modal-close-btn" type="button" (click)="closePayoutModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="payment-summary-box">
+          <div>
+            <small>Partner</small>
+            <strong>{{ selectedPayout.applicantName }} ({{ selectedPayout.role }})</strong>
+          </div>
+          <div>
+            <small>Withdrawal Amount</small>
+            <strong class="text-success">&#8377;{{ selectedPayout.amount | number }}</strong>
+          </div>
+          <div *ngIf="selectedPayout.details.upiId">
+            <small>UPI Address</small>
+            <code>{{ selectedPayout.details.upiId }}</code>
+          </div>
+          <div *ngIf="selectedPayout.details.accountNumber">
+            <small>Bank Account</small>
+            <code>{{ selectedPayout.details.accountNumber }} ({{ selectedPayout.details.ifsc }})</code>
+          </div>
+        </div>
+
+        <!-- Disburse Form -->
+        <ng-container *ngIf="payoutAction === 'disburse'">
+          <div class="form-group">
+            <label for="payoutTxnRefInput">Bank UTR / UPI Transaction Reference Number *</label>
+            <input
+              id="payoutTxnRefInput"
+              type="text"
+              [(ngModel)]="payoutTxnRef"
+              placeholder="e.g. UPI/502938192849 or NEFT-382910"
+              class="modal-input"
+            />
+            <small class="field-hint">This reference will be visible to the partner in their portal statement.</small>
+          </div>
+
+          <div class="form-group">
+            <label for="payoutAdminNoteInput">Optional Memo / Internal Note</label>
+            <textarea
+              id="payoutAdminNoteInput"
+              [(ngModel)]="payoutAdminNote"
+              rows="2"
+              placeholder="e.g. Disbursed via HDFC Business NetBanking on batch #14."
+              class="modal-textarea"
+            ></textarea>
+          </div>
+        </ng-container>
+
+        <!-- Reject Form -->
+        <ng-container *ngIf="payoutAction === 'reject'">
+          <div class="form-group">
+            <label for="payoutRejectionReasonInput">Rejection Reason (Visible to Partner) *</label>
+            <textarea
+              id="payoutRejectionReasonInput"
+              [(ngModel)]="payoutRejectionReason"
+              rows="3"
+              placeholder="e.g. Invalid UPI ID or beneficiary name does not match KYC details. Please update and re-request."
+              class="modal-textarea"
+            ></textarea>
+            <small class="field-hint">The partner's pending balance will be returned so they can correct account details.</small>
+          </div>
+        </ng-container>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" (click)="closePayoutModal()">Cancel</button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="isSubmittingPayoutDecision || (payoutAction === 'disburse' && !payoutTxnRef.trim()) || (payoutAction === 'reject' && !payoutRejectionReason.trim())"
+          (click)="submitPayoutDecision()"
+        >
+          <span *ngIf="!isSubmittingPayoutDecision">
+            {{ payoutAction === 'disburse' ? 'Confirm Disbursement \u2192' : 'Reject Payout' }}
+          </span>
+          <span *ngIf="isSubmittingPayoutDecision">Processing...</span>
         </button>
       </div>
     </div>

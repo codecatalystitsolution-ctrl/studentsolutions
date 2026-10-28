@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -7,6 +7,7 @@ import { Database, DatabaseReference, get, ref, push, set, onValue } from '@angu
 import { Storage, getMetadata, ref as storageRef, uploadBytes } from '@angular/fire/storage';
 import { NotificationService } from '../../shared/notification/notification.service';
 import { ThemeService } from '../../services/theme.service';
+import { PricingConfigService } from '../../services/pricing-config.service';
 
 @Component({
   selector: 'app-new-order',
@@ -15,7 +16,7 @@ import { ThemeService } from '../../services/theme.service';
   templateUrl: './new-order.component.html',
   styleUrls: ['./new-order.component.scss']
 })
-export class NewOrderComponent implements OnInit {
+export class NewOrderComponent implements OnInit, OnDestroy {
   orderForm!: FormGroup;
   currentStep = 1;
   fileUploadError = '';
@@ -27,6 +28,8 @@ export class NewOrderComponent implements OnInit {
   private router = inject(Router);
   private notificationService = inject(NotificationService);
   private themeService = inject(ThemeService);
+  private pricingConfigService = inject(PricingConfigService, { optional: true });
+  private stopPricingWatcher: (() => void) | null = null;
   readonly theme = this.themeService.theme;
 
   toggleTheme(): void {
@@ -43,6 +46,8 @@ export class NewOrderComponent implements OnInit {
   currentBindingCost: number = 0;
   totalEstimatedPrice: number = 0;
   selfUploadFeeDeduction: number = 0;
+  bindingCosts = { spiral: 50, hardbound: 150, stick: 20 };
+  selfUploadDiscountAmount = 50;
   uploadedFiles: Array<{ name: string; sizeLabel: string; file: File }> = [];
   uploadedFileNames: string = '';
   uploadedFilesSizeLabel: string = '';
@@ -98,6 +103,25 @@ export class NewOrderComponent implements OnInit {
         this.router.navigate(['/login']);
       }
     });
+
+    if (this.pricingConfigService) {
+      this.stopPricingWatcher = this.pricingConfigService.watchPricing(config => {
+        if (config?.slabs) {
+          this.slabConfig = config.slabs;
+        }
+        if (config?.binding) {
+          this.bindingCosts = config.binding;
+        }
+        if (typeof config?.selfUploadDiscount === 'number') {
+          this.selfUploadDiscountAmount = config.selfUploadDiscount;
+        }
+        const currentType = this.orderForm?.get('fileType')?.value;
+        if (currentType && (this.slabConfig as any)[currentType]) {
+          this.availableSlabs = (this.slabConfig as any)[currentType];
+        }
+        this.updatePricingPreview();
+      });
+    }
 
     this.orderForm = this.fb.group({
       fileType: ['', Validators.required],
@@ -195,19 +219,19 @@ export class NewOrderComponent implements OnInit {
 
     this.currentBindingCost = 0;
     if (val.fileType === 'project') {
-      if (val.bindingType === 'spiral') this.currentBindingCost = 50;
-      else if (val.bindingType === 'hardbound') this.currentBindingCost = 150;
-      else if (val.bindingType === 'stick') this.currentBindingCost = 20;
+      if (val.bindingType === 'spiral') this.currentBindingCost = this.bindingCosts.spiral;
+      else if (val.bindingType === 'hardbound') this.currentBindingCost = this.bindingCosts.hardbound;
+      else if (val.bindingType === 'stick') this.currentBindingCost = this.bindingCosts.stick;
     }
 
     const uploadEligible = ['assignment', 'practical', 'project'].includes(val.fileType);
-    this.selfUploadFeeDeduction = Boolean(val.uploadOwnFile) && uploadEligible && this.uploadedFiles.length > 0 ? 50 : 0;
+    this.selfUploadFeeDeduction = Boolean(val.uploadOwnFile) && uploadEligible && this.uploadedFiles.length > 0 ? this.selfUploadDiscountAmount : 0;
 
     const quantity = ['assignment', 'practical'].includes(val.fileType) ? Number(val.fileQuantity || 1) : 1;
     this.totalEstimatedPrice = Math.max(0, (this.currentPrintCost * quantity) + this.currentBindingCost - this.selfUploadFeeDeduction);
 
     if (this.selfUploadFeeDeduction > 0) {
-      this.uploadStatusMessage = '\u20B950 discount applied because you uploaded your own PDF.';
+      this.uploadStatusMessage = `\u20B9${this.selfUploadDiscountAmount} discount applied because you uploaded your own PDF.`;
     } else if (this.uploadedFileNames) {
       this.uploadStatusMessage = 'Upload option disabled. No discount will be applied.';
     } else {
@@ -424,7 +448,7 @@ export class NewOrderComponent implements OnInit {
           fileName: selfUploaded ? this.uploadedFileNames : null,
           fileSize: this.uploadedFilesSizeLabel || null,
           note: selfUploaded
-            ? 'Student uploaded PDF file(s) and a \u20B950 discount was applied.'
+            ? `Student uploaded PDF file(s) and a \u20B9${this.selfUploadDiscountAmount} discount was applied.`
             : 'No self-upload selected. Admin will prepare the file from scratch.'
         },
         paymentDetails: { status: 'Awaiting Quotation' },
@@ -497,6 +521,12 @@ export class NewOrderComponent implements OnInit {
       this.pendingUploadedFileRecords = [];
     } else {
       setTimeout(() => { this.isLoading = false; }, 0);
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.stopPricingWatcher) {
+      this.stopPricingWatcher();
     }
   }
 }

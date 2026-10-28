@@ -73,4 +73,110 @@
     </div>
   </div>
 
+  <!-- Application Pending Review Modal -->
+  <div class="verification-modal-backdrop" *ngIf="showPendingModal">
+    <div class="verification-modal-card">
+      <div class="modal-head">
+        <div class="modal-title-wrap">
+          <span class="head-icon">⏳</span>
+          <h3>Application Under Verification</h3>
+        </div>
+        <button type="button" class="modal-close-btn" (click)="closeStatusModals()" aria-label="Close modal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="applicant-summary-card">
+          <div class="summary-item">
+            <span class="label">Applicant</span>
+            <span class="value">{{ pendingApplicant?.fullName }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Requested Role</span>
+            <span class="value">{{ pendingApplicant?.role }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Reference ID</span>
+            <span class="value">{{ pendingApplicant?.id }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Registered Email</span>
+            <span class="value">{{ pendingApplicant?.email }}</span>
+          </div>
+        </div>
+
+        <div class="verification-callout-banner pending">
+          <span class="banner-icon">📋</span>
+          <div class="banner-content">
+            <h4>Awaiting FileCrafters Admin Approval</h4>
+            <p>
+              Your application is currently being verified by our operations team. You will receive an official approval email once your account has been reviewed.
+            </p>
+            <div class="banner-meta" *ngIf="pendingApplicant?.appliedAt">
+              <span>Submitted on: {{ pendingApplicant?.appliedAt | date:'mediumDate' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0; line-height: 1.5;">
+          Once approved, your credentials will immediately grant you access to your dedicated portal.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" (click)="contactSupport()">Contact Support Desk</button>
+        <button type="button" class="btn-approve-action" (click)="closeStatusModals()">Got It</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Application Rejected Modal -->
+  <div class="verification-modal-backdrop" *ngIf="showRejectedModal">
+    <div class="verification-modal-card">
+      <div class="modal-head">
+        <div class="modal-title-wrap">
+          <span class="head-icon">❌</span>
+          <h3>Application Not Approved</h3>
+        </div>
+        <button type="button" class="modal-close-btn" (click)="closeStatusModals()" aria-label="Close modal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="applicant-summary-card">
+          <div class="summary-item">
+            <span class="label">Applicant</span>
+            <span class="value">{{ rejectedApplicant?.fullName }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Role</span>
+            <span class="value">{{ rejectedApplicant?.role }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Status</span>
+            <span class="value" style="color: #ef4444;">Application Rejected</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Registered Email</span>
+            <span class="value">{{ rejectedApplicant?.email }}</span>
+          </div>
+        </div>
+
+        <div class="verification-callout-banner rejected">
+          <span class="banner-icon">⚠️</span>
+          <div class="banner-content">
+            <h4>Reason for Decision</h4>
+            <p><strong>{{ rejectedApplicant?.reason }}</strong></p>
+            <div class="banner-meta" *ngIf="rejectedApplicant?.rejectedAt">
+              <span>Reviewed on: {{ rejectedApplicant?.rejectedAt | date:'mediumDate' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0; line-height: 1.5;">
+          If you have additional verification documents or would like to submit an appeal, please click below to contact our verification desk.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" (click)="closeStatusModals()">Dismiss</button>
+        <button type="button" class="btn-reject-action" (click)="contactSupport()">Email Verification Team</button>
+      </div>
+    </div>
+  </div>
+
 </div>

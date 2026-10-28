@@ -1,4 +1,4 @@
-﻿<div class="dashboard-layout" [class.theme-light]="theme() === 'light'">
+<div class="dashboard-layout" [class.theme-light]="theme() === 'light'">
   <aside class="sidebar" [class.open]="isSidebarOpen">
     <div class="brand-block">
       <div class="brand-icon" aria-hidden="true">S</div>
@@ -72,6 +72,11 @@
       <div class="feature-box"><h3>Premium Features</h3><ul><li>Smart Formatting</li><li>Fast Delivery</li><li>Real-Time Order Tracking</li></ul></div>
       <div class="steps-box"><h3>How It Works</h3><div class="step-items"><div class="step"><span class="step-num">1</span><p>Place your order</p></div><div class="step"><span class="step-num">2</span><p>Share your requirements</p></div><div class="step"><span class="step-num">3</span><p>Track your delivery</p></div></div></div>
     </div>
-    <button class="btn-start" type="button" (click)="closeWelcomeModal()">Get Started</button>
+    <div class="dialog-footer-actions">
+      <a routerLink="/welcome" class="btn-showcase-dialog" (click)="closeWelcomeModal()">
+        <span>✨ Watch 3D Project File Showcase</span>
+      </a>
+      <button class="btn-start" type="button" (click)="closeWelcomeModal()">Continue to Dashboard</button>
+    </div>
   </div>
 </div>

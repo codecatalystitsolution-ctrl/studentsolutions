@@ -1,0 +1,498 @@
+:host {
+  display: block;
+}
+
+/* ------------------------------------------------------------------------- */
+/* 1. Floating Share Feedback Button (Matching User's Screenshot)            */
+/* ------------------------------------------------------------------------- */
+.floating-feedback-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1050;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.3rem;
+  background: #0f172a;
+  color: #f8fafc;
+  border: 1px solid #334155;
+  border-radius: 9999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28), 0 2px 6px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(8px);
+  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    background: #1e293b;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  .feedback-icon {
+    font-size: 1rem;
+    line-height: 1;
+  }
+}
+
+/* ------------------------------------------------------------------------- */
+/* 2. Bottom Cookie Consent Banner (Matching User's Screenshot)              */
+/* ------------------------------------------------------------------------- */
+.cookie-consent-bar {
+  position: fixed;
+  bottom: 18px;
+  left: 24px;
+  right: 210px; // Leaves room for floating feedback button on desktop
+  z-index: 1040;
+  background: rgba(255, 255, 255, 0.95);
+  color: #1e293b;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
+  padding: 0.9rem 1.4rem;
+  backdrop-filter: blur(16px);
+  animation: slideUpBar 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
+  @media (prefers-color-scheme: dark) {
+    background: rgba(15, 23, 42, 0.95);
+    color: #f8fafc;
+    border-color: #334155;
+  }
+}
+
+:host-context(body.app-theme-dark) .cookie-consent-bar {
+  background: rgba(15, 23, 42, 0.95);
+  color: #f8fafc;
+  border-color: #334155;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+
+  .cookie-btn.btn-necessary {
+    background: #1e293b;
+    border-color: #475569;
+    color: #e2e8f0;
+    &:hover { background: #334155; }
+  }
+}
+
+@keyframes slideUpBar {
+  0% {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cookie-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+}
+
+.cookie-text {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: inherit;
+  flex: 1;
+}
+
+.cookie-link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #2563eb;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+  margin-left: 0.35rem;
+
+  &:hover {
+    color: #1d4ed8;
+  }
+}
+
+.cookie-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-shrink: 0;
+}
+
+.cookie-btn {
+  padding: 0.5rem 1.15rem;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &.btn-necessary {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #334155;
+
+    &:hover {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+    }
+  }
+
+  &.btn-accept-all {
+    background: #2563eb;
+    border: 1px solid #2563eb;
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+
+    &:hover {
+      background: #1d4ed8;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+    }
+  }
+}
+
+/* ------------------------------------------------------------------------- */
+/* 3. Feedback Dialog Modal                                                  */
+/* ------------------------------------------------------------------------- */
+.feedback-modal-backdrop,
+.privacy-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: fadeInBackdrop 0.25s ease forwards;
+}
+
+@keyframes fadeInBackdrop {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.feedback-dialog-card,
+.privacy-dialog-card {
+  width: 100%;
+  max-width: 520px;
+  background: #ffffff;
+  color: #0f172a;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.2);
+  padding: 1.75rem;
+  position: relative;
+  animation: scaleUpCard 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
+  @media (prefers-color-scheme: dark) {
+    background: #0f172a;
+    color: #f8fafc;
+    border-color: #334155;
+  }
+}
+
+:host-context(body.app-theme-dark) .feedback-dialog-card,
+:host-context(body.app-theme-dark) .privacy-dialog-card {
+  background: #0f172a;
+  color: #f8fafc;
+  border-color: #334155;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5);
+
+  .dialog-title { color: #f8fafc; }
+  .dialog-subtitle { color: #94a3b8; }
+  .dialog-close-btn { color: #94a3b8; &:hover { color: #f8fafc; } }
+  .form-label { color: #e2e8f0; }
+  .form-input, .form-select, .form-textarea {
+    background: #1e293b;
+    border-color: #334155;
+    color: #f8fafc;
+    &:focus { border-color: #38bdf8; }
+  }
+  .btn-secondary {
+    background: #1e293b;
+    border-color: #475569;
+    color: #cbd5e1;
+    &:hover { background: #334155; }
+  }
+}
+
+@keyframes scaleUpCard {
+  0% {
+    opacity: 0;
+    transform: scale(0.92) translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.dialog-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.dialog-title {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+.dialog-subtitle {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.dialog-close-btn {
+  background: none;
+  border: none;
+  font-size: 1.75rem;
+  line-height: 1;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0 0.25rem;
+
+  &:hover {
+    color: #0f172a;
+  }
+}
+
+/* Feedback Form Controls */
+.feedback-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+
+  &.flex-1 {
+    flex: 1;
+  }
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.form-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #334155;
+
+  .required-star {
+    color: #ef4444;
+  }
+}
+
+.star-rating-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.star-btn {
+  background: none;
+  border: none;
+  font-size: 1.6rem;
+  line-height: 1;
+  color: #cbd5e1;
+  cursor: pointer;
+  padding: 0.15rem;
+  transition: transform 0.15s ease, color 0.15s ease;
+
+  &:hover,
+  &.active {
+    color: #f59e0b;
+    transform: scale(1.1);
+  }
+}
+
+.rating-label {
+  font-size: 0.825rem;
+  font-weight: 600;
+  color: #64748b;
+  margin-left: 0.5rem;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 0.9rem;
+  font-family: inherit;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  }
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 90px;
+}
+
+.error-text {
+  font-size: 0.78rem;
+  color: #ef4444;
+  font-weight: 500;
+}
+
+.dialog-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.btn {
+  padding: 0.6rem 1.3rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &.btn-secondary {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+
+    &:hover {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+  }
+
+  &.btn-primary {
+    background: #2563eb;
+    border: 1px solid #2563eb;
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+
+    &:hover {
+      background: #1d4ed8;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+    }
+  }
+}
+
+/* Success State */
+.feedback-success-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 1.5rem 0;
+
+  .success-icon-wrap {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: rgba(34, 197, 94, 0.15);
+    color: #16a34a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin-bottom: 0.85rem;
+  }
+
+  h3 {
+    margin: 0 0 0.4rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.88rem;
+    color: #64748b;
+    max-width: 380px;
+  }
+}
+
+/* Privacy Body */
+.privacy-body {
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: inherit;
+
+  p { margin: 0 0 0.85rem; }
+  ul {
+    margin: 0 0 1.25rem;
+    padding-left: 1.25rem;
+    li { margin-bottom: 0.5rem; }
+  }
+}
+
+/* ------------------------------------------------------------------------- */
+/* 4. Responsive Queries                                                     */
+/* ------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+  .cookie-consent-bar {
+    left: 14px;
+    right: 14px;
+    bottom: 84px; // Sits above floating feedback button on mobile
+    padding: 0.85rem 1rem;
+  }
+
+  .cookie-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .cookie-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .floating-feedback-btn {
+    bottom: 18px;
+    right: 18px;
+    padding: 0.55rem 1.1rem;
+    font-size: 0.85rem;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}

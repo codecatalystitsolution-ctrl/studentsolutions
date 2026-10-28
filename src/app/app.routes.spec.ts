@@ -21,6 +21,9 @@ import { VisitorCounterService } from './services/visitor-counter.service';
 
 const routeChecks = [
   ['/', 'Engineering-Grade Projects'],
+  ['/home', 'Engineering-Grade Projects'],
+  ['/welcome', 'FileCrafters'],
+  ['/splash', 'StudentSolutions Studio'],
   ['/login', 'Welcome Back'],
   ['/login-support', 'Account Suspension Support'],
   ['/register', 'Create an Account'],
@@ -49,6 +52,7 @@ const routeChecks = [
   ['/admin/delivery/test-delivery', 'Delivery Staff Profile'],
   ['/admin/order-details', 'Full Order Details'],
   ['/admin/complaints', 'Support Desk'],
+  ['/admin/pricing', 'Pricing & Commission Settings'],
   ['/admin/audit', 'Audit history'],
 ] as const;
 
@@ -63,7 +67,7 @@ describe('application route rendering', () => {
         { provide: Auth, useValue: { testUser: testAdmin } },
         { provide: Database, useValue: {} },
         { provide: Storage, useValue: {} },
-        { provide: AuthService, useValue: { logout: vi.fn(async () => undefined) } },
+        { provide: AuthService, useValue: { logout: vi.fn(async () => undefined), getUserProfile: vi.fn(async () => null) } },
         { provide: ConfirmService, useValue: { confirm: vi.fn(async () => true) } },
         { provide: NotificationService, useValue: { show: vi.fn() } },
         { provide: QuotationService, useValue: { watch: vi.fn(() => () => undefined), watchDecision: vi.fn(() => () => undefined), decide: vi.fn(), createVersion: vi.fn() } },

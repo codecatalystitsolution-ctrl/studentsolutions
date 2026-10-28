@@ -43,6 +43,9 @@
           <div class="info-item">
             <span>Roll Number</span> <strong>{{ userData?.rollNumber || 'Not provided' }}</strong>
           </div>
+          <div class="info-item" *ngIf="userData?.referralCode">
+            <span>Faculty Referral</span> <strong>Code {{ userData.referralCode }}</strong>
+          </div>
         </div>
       </div>
 

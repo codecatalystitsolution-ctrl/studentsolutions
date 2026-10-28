@@ -6,7 +6,7 @@ import { catchError, defer, from, map, of, switchMap } from 'rxjs';
 
 const adminEmails = new Set(['admin@filecrafters.in', 'wmohd2514@outlook.com']);
 
-/** Protects student routes and keeps pending staff accounts out of student workflows. */
+/** Protects student routes and ensures only active students (and admins) can access. */
 export const studentGuard: CanActivateFn = () => {
   const auth = inject(Auth);
   const db = inject(Database);

@@ -1,4 +1,4 @@
-﻿<section class="admin-dashboard-container fade-in">
+<section class="admin-dashboard-container fade-in">
   <header class="dashboard-heading">
     <div><p class="section-eyebrow">ADMIN OVERVIEW</p><h1>Good morning, Admin <span aria-hidden="true">&#128075;</span></h1><p>Here is what is happening across your platform today.</p></div>
     <div class="heading-actions"><span class="date-chip">{{ today | date:'EEE, d MMM y' }}</span><button class="primary-action" type="button" (click)="openCreateOrder()"><span aria-hidden="true">+</span> Create new order</button></div>
@@ -9,6 +9,52 @@
     <article class="metric-card metric-students"><div class="metric-top"><span class="metric-icon">&#9787;</span><span class="metric-caption">ACTIVE STUDENTS</span></div><strong class="metric-value">{{ activeStudents }}</strong><small>{{ totalStudents }} registered accounts</small></article>
     <a class="metric-card metric-pending" routerLink="/admin/orders" [queryParams]="{status:'pending'}"><div class="metric-top"><span class="metric-icon">&#9679;</span><span class="metric-caption">PENDING ORDERS</span></div><strong class="metric-value">{{ pendingOrders }}</strong><small>Open pending orders</small></a>
   </div>
+
+  <!-- Partner Verification Queue Banner (When Applications Pending) -->
+  <section class="admin-verification-queue-card" *ngIf="pendingTeachers + pendingDelivery > 0">
+    <div class="queue-header">
+      <div class="queue-title-wrap">
+        <span class="queue-icon">🛡️</span>
+        <div>
+          <h3>Partner Onboarding Verification Queue</h3>
+          <p style="margin: 0.15rem 0 0; font-size: 0.84rem; color: var(--text-secondary);">
+            {{ pendingTeachers + pendingDelivery }} new partner application(s) require review and document verification before portal access is granted.
+          </p>
+        </div>
+      </div>
+      <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+        <span class="queue-meta-pill" *ngIf="pendingTeachers > 0">{{ pendingTeachers }} Faculty Pending</span>
+        <span class="queue-meta-pill" *ngIf="pendingDelivery > 0">{{ pendingDelivery }} Delivery Pending</span>
+        <a routerLink="/admin/teachers" [queryParams]="{filter:'pending'}" style="font-size: 0.82rem; font-weight: 700; color: #fbbf24; text-decoration: none;">View All &rarr;</a>
+      </div>
+    </div>
+
+    <div class="queue-grid">
+      <div class="queue-item" *ngFor="let applicant of pendingApplications.slice(0, 4)">
+        <div class="item-top">
+          <div>
+            <h4 class="item-name">{{ applicant.fullName || 'Partner Applicant' }}</h4>
+            <p class="item-email">{{ applicant.email }}</p>
+          </div>
+          <span class="role-chip" [ngClass]="applicant.role.toLowerCase()">
+            {{ applicant.roleLabel }}
+          </span>
+        </div>
+        <div class="item-details">
+          <div><strong>ID:</strong> {{ applicant.referenceId }}</div>
+          <div><strong>Details:</strong> {{ applicant.serviceInfo }}</div>
+          <div *ngIf="applicant.phone"><strong>Phone:</strong> {{ applicant.phone }}</div>
+        </div>
+        <div class="item-actions">
+          <span class="date-text">Applied {{ (applicant.appliedAt || applicant.createdAt) | date:'mediumDate' }}</span>
+          <a [routerLink]="applicant.detailLink" class="btn-review-link">
+            Review Application &rarr;
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <div class="dashboard-columns">
     <section class="dashboard-panel chart-section"><div class="panel-heading"><div><p class="section-eyebrow">PERFORMANCE</p><h2>Revenue overview</h2><p>Revenue and incoming orders over the last 7 days.</p></div><span class="live-tag"><i></i>Live data</span></div><div class="chart-container"><canvas id="performanceChart" aria-label="Revenue and orders over the past seven days"></canvas></div></section>
     <section class="dashboard-panel recent-panel"><div class="panel-heading"><div><p class="section-eyebrow">WORKSPACE</p><h2>Recent orders</h2><p>Latest requests from students.</p></div><a routerLink="/admin/orders" class="view-all">View all <span aria-hidden="true">&rarr;</span></a></div>
@@ -17,7 +63,7 @@
     </section>
   </div>
   <div class="bottom-grid">
-    <section class="dashboard-panel quick-panel"><div class="panel-heading"><div><p class="section-eyebrow">SHORTCUTS</p><h2>Quick actions</h2></div></div><div class="quick-actions"><a routerLink="/admin/orders"><span class="action-symbol orders-symbol">+</span><strong>Manage<br>orders</strong></a><a routerLink="/admin/students"><span class="action-symbol student-symbol">&#9787;</span><strong>Students</strong></a><a routerLink="/admin/complaints"><span class="action-symbol support-symbol">?</span><strong>Support<br>desk</strong></a><a routerLink="/admin/delivery"><span class="action-symbol delivery-symbol">&#9638;</span><strong>Delivery</strong></a></div></section>
+    <section class="dashboard-panel quick-panel"><div class="panel-heading"><div><p class="section-eyebrow">SHORTCUTS</p><h2>Quick actions</h2></div></div><div class="quick-actions"><a routerLink="/admin/orders"><span class="action-symbol orders-symbol">+</span><strong>Manage<br>orders</strong></a><a routerLink="/admin/pricing"><span class="action-symbol" style="background:#f3e8ff; color:#7e22ce;">&#8377;</span><strong>Pricing &<br>Rates</strong></a><a routerLink="/admin/payments" [queryParams]="{tab:'payouts'}"><span class="action-symbol" style="background:#ecfdf5; color:#059669;">&#128179;</span><strong>Payout<br>Requests</strong></a><a routerLink="/admin/students"><span class="action-symbol student-symbol">&#9787;</span><strong>Students</strong></a><a routerLink="/admin/complaints"><span class="action-symbol support-symbol">?</span><strong>Support<br>desk</strong></a><a routerLink="/admin/delivery"><span class="action-symbol delivery-symbol">&#9638;</span><strong>Delivery</strong></a></div></section>
     <section class="dashboard-panel activity-panel"><div class="panel-heading"><div><p class="section-eyebrow">LIVE UPDATES</p><h2>Recent activity</h2></div><a routerLink="/admin/orders" class="view-all">View all</a></div><div class="activity-list" *ngIf="recentOrders.length; else noActivity"><a *ngFor="let order of recentOrders.slice(0,4)" [routerLink]="['/admin/order-details']" [queryParams]="{search:order.id}"><span class="activity-dot"></span><span><strong>{{ order.status || 'Pending' }} order received</strong><small>#{{ shortOrderId(order.id) | uppercase }} &middot; {{ order.projectDetails?.submittedBy || 'Student' }}</small></span><time>{{ order.createdAt | date:'shortDate' }}</time></a></div><ng-template #noActivity><p class="muted-copy">No recent activity to show.</p></ng-template></section>
     <section class="dashboard-panel support-panel"><div class="support-icon" aria-hidden="true">?</div><p class="section-eyebrow">HERE TO HELP</p><h2>Support desk</h2><p>Review student questions and resolve open tickets.</p><a class="support-button" routerLink="/admin/complaints">Open support desk <span aria-hidden="true">&rarr;</span></a></section>
   </div>

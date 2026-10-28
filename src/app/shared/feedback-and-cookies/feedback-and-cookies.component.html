@@ -1,0 +1,219 @@
+<!-- ========================================================================= -->
+<!-- 1. FLOATING SHARE FEEDBACK BUTTON                                        -->
+<!-- ========================================================================= -->
+<button
+  type="button"
+  class="floating-feedback-btn"
+  (click)="openFeedbackDialog()"
+  title="Share your feedback"
+  aria-label="Share feedback"
+>
+  <span class="feedback-icon" aria-hidden="true">&#128172;</span>
+  <span>Share feedback</span>
+</button>
+
+<!-- ========================================================================= -->
+<!-- 2. BOTTOM COOKIE CONSENT BANNER                                          -->
+<!-- ========================================================================= -->
+<aside
+  class="cookie-consent-bar"
+  *ngIf="showCookieBanner()"
+  role="region"
+  aria-label="Cookie and storage preferences"
+>
+  <div class="cookie-content">
+    <p class="cookie-text">
+      We use essential browser storage to remember your preferences. Project details are emailed only after you confirm
+      in the project chat.
+      <button type="button" class="cookie-link-btn" (click)="openPrivacyModal()">
+        Read privacy &amp; terms
+      </button>
+    </p>
+
+    <div class="cookie-actions">
+      <button
+        type="button"
+        class="cookie-btn btn-necessary"
+        (click)="acceptNecessaryOnly()"
+      >
+        Necessary only
+      </button>
+      <button
+        type="button"
+        class="cookie-btn btn-accept-all"
+        (click)="acceptAllCookies()"
+      >
+        Accept all
+      </button>
+    </div>
+  </div>
+</aside>
+
+<!-- ========================================================================= -->
+<!-- 3. FEEDBACK DIALOG MODAL                                                 -->
+<!-- ========================================================================= -->
+<div
+  class="feedback-modal-backdrop"
+  *ngIf="isFeedbackOpen()"
+  (click)="closeFeedbackDialog()"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="feedbackDialogTitle"
+>
+  <div class="feedback-dialog-card" (click)="$event.stopPropagation()">
+    <!-- Modal Header -->
+    <header class="dialog-header">
+      <div class="header-titles">
+        <h2 id="feedbackDialogTitle" class="dialog-title">Share Your Feedback</h2>
+        <p class="dialog-subtitle">Your input directly helps us refine StudentSolutions for everyone.</p>
+      </div>
+      <button
+        type="button"
+        class="dialog-close-btn"
+        (click)="closeFeedbackDialog()"
+        aria-label="Close feedback dialog"
+      >
+        &times;
+      </button>
+    </header>
+
+    <!-- Success State -->
+    <div class="feedback-success-state" *ngIf="feedbackSubmitted()">
+      <div class="success-icon-wrap">
+        <span>&#10003;</span>
+      </div>
+      <h3>Thank you for your feedback!</h3>
+      <p>We review every submission to improve file crafting, documentation, and student support.</p>
+    </div>
+
+    <!-- Feedback Form -->
+    <form class="feedback-form" *ngIf="!feedbackSubmitted()" (ngSubmit)="submitFeedback()">
+      <!-- Rating Selection -->
+      <div class="form-group">
+        <label class="form-label">How would you rate your experience?</label>
+        <div class="star-rating-row" role="radiogroup" aria-label="Experience Rating">
+          <button
+            type="button"
+            class="star-btn"
+            *ngFor="let s of [1, 2, 3, 4, 5]"
+            [class.active]="s <= feedbackForm.rating"
+            (click)="setRating(s)"
+            [attr.aria-label]="s + ' stars'"
+          >
+            &#9733;
+          </button>
+          <span class="rating-label">
+            {{ feedbackForm.rating === 5 ? 'Excellent' : feedbackForm.rating === 4 ? 'Good' : feedbackForm.rating === 3 ? 'Average' : 'Needs Improvement' }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Category Select -->
+      <div class="form-group">
+        <label for="feedbackCategory" class="form-label">Topic / Category</label>
+        <select
+          id="feedbackCategory"
+          name="category"
+          class="form-select"
+          [(ngModel)]="feedbackForm.category"
+        >
+          <option *ngFor="let cat of feedbackCategories" [value]="cat">{{ cat }}</option>
+        </select>
+      </div>
+
+      <!-- Name & Email (Optional) -->
+      <div class="form-row">
+        <div class="form-group flex-1">
+          <label for="feedbackName" class="form-label">Your Name <small class="text-muted">(Optional)</small></label>
+          <input
+            id="feedbackName"
+            type="text"
+            name="name"
+            class="form-input"
+            placeholder="e.g. Rahul Sharma"
+            [(ngModel)]="feedbackForm.name"
+          />
+        </div>
+        <div class="form-group flex-1">
+          <label for="feedbackEmail" class="form-label">Email <small class="text-muted">(Optional)</small></label>
+          <input
+            id="feedbackEmail"
+            type="email"
+            name="email"
+            class="form-input"
+            placeholder="name@college.edu"
+            [(ngModel)]="feedbackForm.email"
+          />
+        </div>
+      </div>
+
+      <!-- Feedback Comments (Required) -->
+      <div class="form-group">
+        <label for="feedbackMessage" class="form-label">
+          Your Comments &amp; Suggestions <span class="required-star">*</span>
+        </label>
+        <textarea
+          id="feedbackMessage"
+          name="message"
+          rows="4"
+          class="form-textarea"
+          placeholder="Tell us what you loved or how we can make projects, lab files, or features better..."
+          [(ngModel)]="feedbackForm.message"
+          required
+        ></textarea>
+        <small class="error-text" *ngIf="feedbackError()">{{ feedbackError() }}</small>
+      </div>
+
+      <!-- Dialog Footer Actions -->
+      <footer class="dialog-footer">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="closeFeedbackDialog()"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          class="btn btn-primary"
+        >
+          Submit Feedback
+        </button>
+      </footer>
+    </form>
+  </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- 4. PRIVACY & STORAGE TERMS MODAL                                         -->
+<!-- ========================================================================= -->
+<div
+  class="privacy-modal-backdrop"
+  *ngIf="showPrivacyModal()"
+  (click)="closePrivacyModal()"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="privacyDialogTitle"
+>
+  <div class="privacy-dialog-card" (click)="$event.stopPropagation()">
+    <header class="dialog-header">
+      <h2 id="privacyDialogTitle" class="dialog-title">Essential Storage &amp; Privacy Policy</h2>
+      <button type="button" class="dialog-close-btn" (click)="closePrivacyModal()">&times;</button>
+    </header>
+    <div class="privacy-body">
+      <p>
+        <strong>StudentSolutions / FileCrafters</strong> respects your digital privacy. We do not use third-party tracking or advertising cookies.
+      </p>
+      <ul>
+        <li><strong>Essential Storage:</strong> Used strictly to preserve your selected theme (Dark/Light mode) and secure session credentials.</li>
+        <li><strong>Student Data Security:</strong> Order specifications and project files are encrypted and accessible only by you and verified mentors.</li>
+        <li><strong>No Telemarketing:</strong> We never sell your personal data or academic submissions to external parties.</li>
+      </ul>
+    </div>
+    <footer class="dialog-footer">
+      <button type="button" class="btn btn-primary" (click)="closePrivacyModal()">
+        I Understand
+      </button>
+    </footer>
+  </div>
+</div>

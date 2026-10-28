@@ -1,9 +1,14 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { Auth, authState } from '@angular/fire/auth';
+import { AuthService } from '../../services/auth.service';
 import { ThemeService } from '../../services/theme.service';
 import { VisitorCounterService } from '../../services/visitor-counter.service';
+import { SplashScreenService } from '../../services/splash-screen.service';
+import { FeedbackAndCookiesComponent } from '../../shared/feedback-and-cookies/feedback-and-cookies.component';
+import { NotificationService } from '../../shared/notification/notification.service';
 
 export interface SampleProject {
   id: string;
@@ -21,14 +26,20 @@ export interface SampleProject {
 @Component({
   selector: 'app-public-preview',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule, FeedbackAndCookiesComponent],
   templateUrl: './public-preview.component.html',
   styleUrls: ['./public-preview.component.scss']
 })
-export class PublicPreviewComponent implements OnInit {
+export class PublicPreviewComponent implements OnInit, OnDestroy {
+  private readonly router = inject(Router);
   private readonly themeService = inject(ThemeService);
   private readonly visitorCounter = inject(VisitorCounterService);
+  protected readonly splashService = inject(SplashScreenService);
+  private readonly auth = inject(Auth, { optional: true });
+  private readonly authService = inject(AuthService, { optional: true });
+  private readonly notificationService = inject(NotificationService, { optional: true });
 
+  readonly currentUser = signal<any | null>(null);
   readonly isMobileMenuOpen = signal<boolean>(false);
   readonly selectedCategory = signal<string>('all');
   readonly selectedProject = signal<SampleProject | null>(null);
@@ -44,8 +55,18 @@ export class PublicPreviewComponent implements OnInit {
     message: ''
   };
 
-  // Unique visitor counter from service
+  // Dynamic visitor counter
   readonly visitorCount = this.visitorCounter.visitorCount;
+  readonly animatedVisitorCount = signal<number>(1420);
+
+  private animationFrameId: number | null = null;
+
+  constructor() {
+    effect(() => {
+      const target = this.visitorCount();
+      this.animateVisitorCounter(target);
+    });
+  }
 
   // Project Portfolio Samples
   readonly projects: SampleProject[] = [
@@ -154,6 +175,63 @@ export class PublicPreviewComponent implements OnInit {
   ngOnInit(): void {
     // Record unique visit per 24-hour counting policy
     void this.visitorCounter.recordUniqueVisit();
+
+    if (this.auth) {
+      authState(this.auth).subscribe(async user => {
+        if (user) {
+          const profile = (this.authService && typeof this.authService.getUserProfile === 'function')
+            ? await this.authService.getUserProfile(user.uid)
+            : null;
+          this.currentUser.set({ uid: user.uid, email: user.email, ...profile });
+        } else {
+          this.currentUser.set(null);
+        }
+      });
+    }
+
+    if (!this.splashService.hasSeenSplash()) {
+      queueMicrotask(() => {
+        this.splashService.triggerSplash('/home');
+      });
+    }
+
+    this.animateVisitorCounter(this.visitorCount());
+  }
+
+  ngOnDestroy(): void {
+    if (this.animationFrameId) {
+      cancelAnimationFrame(this.animationFrameId);
+    }
+  }
+
+  private animateVisitorCounter(target: number): void {
+    if (typeof requestAnimationFrame === 'undefined' || typeof performance === 'undefined') {
+      this.animatedVisitorCount.set(target);
+      return;
+    }
+
+    const start = Math.max(target - 38, 1000);
+    const duration = 1400;
+    const startTime = performance.now();
+
+    const step = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = Math.floor(start + (target - start) * eased);
+      this.animatedVisitorCount.set(current);
+
+      if (progress < 1) {
+        this.animationFrameId = requestAnimationFrame(step);
+      } else {
+        this.animatedVisitorCount.set(target);
+      }
+    };
+
+    if (this.animationFrameId) {
+      cancelAnimationFrame(this.animationFrameId);
+    }
+    this.animationFrameId = requestAnimationFrame(step);
   }
 
   get currentTheme(): string {
@@ -198,9 +276,70 @@ export class PublicPreviewComponent implements OnInit {
     }
   }
 
+  orderNow(project?: SampleProject | null): void {
+    this.closeMobileMenu();
+    this.closeProjectDetails();
+
+    const user = this.currentUser();
+    if (!user) {
+      this.notificationService?.show(
+        'info',
+        'Please sign in or register before placing or booking a project order.',
+        'Login Required'
+      );
+      this.router.navigate(['/login'], { queryParams: { returnUrl: '/new-order' } });
+      return;
+    }
+
+    if (user.role === 'Teacher') {
+      this.router.navigate(['/teacher/referrals']);
+    } else if (user.role === 'Delivery') {
+      this.router.navigate(['/delivery-portal']);
+    } else if (user.role === 'Admin') {
+      this.router.navigate(['/admin/dashboard']);
+    } else {
+      this.router.navigate(['/new-order']);
+    }
+  }
+
+  goToDashboard(): void {
+    this.closeMobileMenu();
+    const user = this.currentUser();
+    if (!user) {
+      this.router.navigate(['/login']);
+      return;
+    }
+    if (user.role === 'Teacher') {
+      this.router.navigate(['/teacher/referrals']);
+    } else if (user.role === 'Delivery') {
+      this.router.navigate(['/delivery-portal']);
+    } else if (user.role === 'Admin') {
+      this.router.navigate(['/admin/dashboard']);
+    } else {
+      this.router.navigate(['/dashboard/home']);
+    }
+  }
+
   submitContactForm(): void {
     if (!this.contactForm.name || !this.contactForm.email || !this.contactForm.message) return;
+
+    const user = this.currentUser();
+    if (!user) {
+      this.notificationService?.show(
+        'warning',
+        'Please sign in or create an account to confirm and track your project booking.',
+        'Login Required'
+      );
+      this.router.navigate(['/login'], { queryParams: { returnUrl: '/new-order' } });
+      return;
+    }
+
     this.contactSuccess.set(true);
+    this.notificationService?.show(
+      'success',
+      'Your order inquiry has been received! Our team will contact you shortly.',
+      'Inquiry Submitted'
+    );
     setTimeout(() => {
       this.contactSuccess.set(false);
       this.contactForm = {

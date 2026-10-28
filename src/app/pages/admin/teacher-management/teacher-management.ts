@@ -1,7 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { RouterLink, ActivatedRoute } from '@angular/router';
 import { Database, ref, onValue, update, get } from '@angular/fire/database';
 import { ConfirmService } from '../../../shared/confirmation/confirm.service';
 import { NotificationService } from '../../../shared/notification/notification.service';
@@ -19,6 +19,7 @@ export class TeacherManagementComponent implements OnInit {
   private confirmService = inject(ConfirmService);
   private notificationService = inject(NotificationService);
   private csvExportService = inject(CsvExportService);
+  private route = inject(ActivatedRoute, { optional: true });
 
   teachers: any[] = [];
   filteredTeachers: any[] = [];
@@ -29,12 +30,28 @@ export class TeacherManagementComponent implements OnInit {
   totalTeachers = 0;
   activeTeachers = 0;
   suspendedTeachers = 0;
+  pendingTeachers = 0;
+  rejectedTeachers = 0;
+  currentFilter: 'all' | 'pending' | 'active' | 'suspended_rejected' = 'all';
 
   // Pagination (Default: 15 per page)
   currentPage = 1;
   readonly pageSize = 15;
 
   ngOnInit() {
+    this.route?.queryParams.subscribe(params => {
+      const filterParam = params['filter'] || params['status'];
+      if (filterParam === 'pending' || filterParam === 'pending_approval') {
+        this.currentFilter = 'pending';
+      } else if (filterParam === 'active') {
+        this.currentFilter = 'active';
+      } else if (filterParam === 'suspended' || filterParam === 'rejected') {
+        this.currentFilter = 'suspended_rejected';
+      }
+      if (this.teachers.length > 0) {
+        this.filterTeachers();
+      }
+    });
     this.loadTeachers();
   }
 
@@ -67,13 +84,20 @@ export class TeacherManagementComponent implements OnInit {
     this.totalTeachers = 0;
     this.activeTeachers = 0;
     this.suspendedTeachers = 0;
+    this.pendingTeachers = 0;
+    this.rejectedTeachers = 0;
 
     if (users) {
       Object.keys(users).forEach(uid => {
         const user = users[uid];
         if (user.role?.toLowerCase() === 'teacher') {
           this.totalTeachers += 1;
-          if (user.status === 'suspended') {
+          const status = (user.status || 'active').toLowerCase();
+          if (status === 'pending_approval') {
+            this.pendingTeachers += 1;
+          } else if (status === 'rejected') {
+            this.rejectedTeachers += 1;
+          } else if (status === 'suspended') {
             this.suspendedTeachers += 1;
           } else {
             this.activeTeachers += 1;
@@ -87,12 +111,29 @@ export class TeacherManagementComponent implements OnInit {
     this.filterTeachers();
   }
 
+  setFilter(filter: 'all' | 'pending' | 'active' | 'suspended_rejected'): void {
+    this.currentFilter = filter;
+    this.filterTeachers();
+  }
+
   filterTeachers() {
     const query = this.searchTerm.trim().toLowerCase();
-    if (!query) {
-      this.filteredTeachers = [...this.teachers];
-    } else {
-      this.filteredTeachers = this.teachers.filter(teacher => {
+    let result = [...this.teachers];
+
+    // Status Filter Tab
+    if (this.currentFilter === 'pending') {
+      result = result.filter(t => (t.status || '').toLowerCase() === 'pending_approval');
+    } else if (this.currentFilter === 'active') {
+      result = result.filter(t => (t.status || 'active').toLowerCase() === 'active');
+    } else if (this.currentFilter === 'suspended_rejected') {
+      result = result.filter(t => {
+        const s = (t.status || '').toLowerCase();
+        return s === 'suspended' || s === 'rejected';
+      });
+    }
+
+    if (query) {
+      result = result.filter(teacher => {
         const email = (teacher.email || '').toLowerCase();
         const name = (teacher.fullName || '').toLowerCase();
         const college = (teacher.collegeName || '').toLowerCase();
@@ -111,6 +152,7 @@ export class TeacherManagementComponent implements OnInit {
         );
       });
     }
+    this.filteredTeachers = result;
     this.currentPage = 1;
   }
 
@@ -189,6 +231,18 @@ export class TeacherManagementComponent implements OnInit {
   }
 
   statusBadgeClass(status: string) {
-    return status === 'suspended' ? 'badge-suspended' : 'badge-active';
+    const s = (status || 'active').toLowerCase();
+    if (s === 'pending_approval') return 'badge-pending';
+    if (s === 'rejected') return 'badge-rejected';
+    if (s === 'suspended') return 'badge-suspended';
+    return 'badge-active';
+  }
+
+  statusLabel(status: string) {
+    const s = (status || 'active').toLowerCase();
+    if (s === 'pending_approval') return '⏳ Pending Review';
+    if (s === 'rejected') return '✕ Rejected';
+    if (s === 'suspended') return '⛔ Suspended';
+    return '✓ Active';
   }
 }

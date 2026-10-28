@@ -1,3 +1,7 @@
 <router-outlet></router-outlet>
 <app-notifications></app-notifications>
 <app-confirmation></app-confirmation>
+<app-splash-screen
+  *ngIf="splashService.isActive()"
+  [targetRoute]="splashService.targetRoute()"
+></app-splash-screen>

@@ -1,0 +1,217 @@
+<div
+  class="splash-viewport"
+  [attr.data-phase]="phase()"
+  [class.light-mode]="isLightMode()"
+  [class.dissolving]="isDissolving()"
+  aria-label="StudentSolutions Animated Splash Screen"
+>
+  <!-- Ambient Background & Wave Contours -->
+  <div class="splash-background">
+    <div class="ambient-glow"></div>
+    <div class="floor-reflection" *ngIf="phase() <= 4"></div>
+
+    <!-- Organic Light Mode Waves (Panel 7 & 8) -->
+    <div class="light-wave wave-top" *ngIf="isLightMode()">
+      <svg viewBox="0 0 500 150" preserveAspectRatio="none">
+        <path d="M0,0 L500,0 L500,40 Q350,140 180,60 Q80,20 0,80 Z" fill="url(#waveTopGrad)" />
+        <defs>
+          <linearGradient id="waveTopGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#0284c7" stop-opacity="0.35" />
+            <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.15" />
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+
+    <div class="light-wave wave-bottom" *ngIf="isLightMode()">
+      <svg viewBox="0 0 500 200" preserveAspectRatio="none">
+        <path d="M0,120 Q120,40 280,110 Q400,170 500,80 L500,200 L0,200 Z" fill="url(#waveBottomGrad)" />
+        <defs>
+          <linearGradient id="waveBottomGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#2563eb" stop-opacity="0.45" />
+            <stop offset="100%" stop-color="#0284c7" stop-opacity="0.25" />
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Top Controls: Skip Button & Brand Badge -->
+  <header class="splash-header">
+    <div class="header-brand-chip">
+      <span class="chip-pulse"></span>
+      <span class="chip-text">StudentSolutions Studio</span>
+    </div>
+
+    <button
+      type="button"
+      class="splash-skip-btn"
+      (click)="skip()"
+      title="Skip to Website Home"
+      aria-label="Skip splash screen"
+    >
+      <span>Skip</span>
+      <span class="skip-arrow">&rarr;</span>
+    </button>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- MAIN 3D ANIMATION STAGE                                                  -->
+  <!-- ========================================================================= -->
+  <main class="splash-stage">
+    <!-- --------------------------------------------------------------------- -->
+    <!-- 1. 3D NEON FOLDER FABRICATION (Phases 1 to 4: 0.0s - 3.2s)              -->
+    <!-- --------------------------------------------------------------------- -->
+    <div class="folder-scene" *ngIf="phase() <= 4">
+      <div class="folder-3d" [attr.data-folder-state]="phase()">
+        <!-- Swirling Neon Orbit Rings (0.8s - 3.2s) -->
+        <div class="neon-orbit-system" *ngIf="phase() >= 2">
+          <div class="orbit-ring ring-1"></div>
+          <div class="orbit-ring ring-2"></div>
+          <div class="orbit-ring ring-3" *ngIf="phase() >= 3"></div>
+        </div>
+
+        <!-- Floating Holographic Badge Icons (0.8s - 3.2s) -->
+        <div class="hologram-badges-layer" *ngIf="phase() >= 2">
+          <!-- Graduation Cap Badge -->
+          <div class="hologram-badge badge-cap" [class.emerge]="phase() >= 2">
+            <div class="badge-glass">
+              <svg viewBox="0 0 24 24" class="badge-icon cap-icon" fill="currentColor">
+                <path d="M12 3 1 9l11 6 9-4.91V17h2V9M5 13.18v4L12 21l7-3.82v-4L12 17z"/>
+              </svg>
+            </div>
+            <div class="badge-light-flare"></div>
+          </div>
+
+          <!-- Document Badge -->
+          <div class="hologram-badge badge-doc" [class.emerge]="phase() >= 2">
+            <div class="badge-glass">
+              <svg viewBox="0 0 24 24" class="badge-icon doc-icon" fill="currentColor">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+              </svg>
+            </div>
+            <div class="badge-light-flare"></div>
+          </div>
+
+          <!-- Cloud Sync Badge (1.6s - 3.2s) -->
+          <div class="hologram-badge badge-cloud" *ngIf="phase() >= 3" [class.emerge]="phase() >= 3">
+            <div class="badge-glass">
+              <svg viewBox="0 0 24 24" class="badge-icon cloud-icon" fill="currentColor">
+                <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/>
+              </svg>
+            </div>
+            <div class="badge-light-flare"></div>
+          </div>
+        </div>
+
+        <!-- Folder Back Plate & Tab -->
+        <div class="folder-body-back">
+          <div class="folder-tab"></div>
+          <div class="folder-inner-glow"></div>
+
+          <!-- Rising Paper Sheets inside folder (1.6s - 3.2s) -->
+          <div class="folder-sheets-stack" *ngIf="phase() >= 2">
+            <div class="rising-sheet sheet-1">
+              <div class="sheet-line line-h"></div>
+              <div class="sheet-line line-b"></div>
+              <div class="sheet-line line-b short"></div>
+            </div>
+            <div class="rising-sheet sheet-2">
+              <div class="sheet-line line-h"></div>
+              <div class="sheet-line line-b"></div>
+            </div>
+            <div class="rising-sheet sheet-3" *ngIf="phase() >= 3">
+              <div class="sheet-line line-h"></div>
+              <div class="sheet-line line-b"></div>
+            </div>
+          </div>
+
+          <!-- Bursting Flying Sheets (Phase 4: 2.4s - 3.2s) -->
+          <div class="burst-sheets-cluster" *ngIf="phase() === 4">
+            <div class="flying-sheet fly-left-top"></div>
+            <div class="flying-sheet fly-left-mid"></div>
+            <div class="flying-sheet fly-right-top"></div>
+            <div class="flying-sheet fly-right-mid"></div>
+          </div>
+        </div>
+
+        <!-- Folder Front Flap that opens forward in 3D -->
+        <div class="folder-body-front">
+          <div class="folder-front-rim"></div>
+          <div class="folder-front-surface">
+            <div class="front-reflection"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- --------------------------------------------------------------------- -->
+    <!-- 2. LOGO EMERGENCE & BRAND CENTERPIECE (Phases 4 to 8: 2.4s - 6.0s)       -->
+    <!-- --------------------------------------------------------------------- -->
+    <div class="centerpiece-scene" *ngIf="phase() >= 4" [attr.data-logo-state]="phase()">
+      <!-- Pulsing Neon Halo Ring (Phase 6: 4.0s - 4.8s) -->
+      <div class="neon-halo-ring" *ngIf="phase() >= 5 && !isLightMode()"></div>
+
+      <!-- Radiant Background Light Flares -->
+      <div class="logo-light-burst" *ngIf="phase() === 4 || phase() === 5"></div>
+
+      <!-- The Official StudentSolutions Brand Logo Emblem -->
+      <div class="brand-mascot-container">
+        <div class="mascot-ambient-glow"></div>
+        <img
+          src="assets/images/studentsolutions-emblem.png"
+          alt="StudentSolutions Official Logo"
+          class="studentsolutions-official-emblem"
+          draggable="false"
+        />
+      </div>
+
+      <!-- ----------------------------------------------------------------- -->
+      <!-- 3. BRAND TYPOGRAPHY & TAGLINES                                     -->
+      <!-- ----------------------------------------------------------------- -->
+      <div class="brand-text-block">
+        <!-- Main Brand Name: StudentSolutions -->
+        <h1 class="brand-name-title">
+          <span class="part-student">Student</span><span class="part-solutions">Solutions</span>
+        </h1>
+
+        <!-- Primary 3-Pillar Tagline: Learn • Submit • Succeed -->
+        <p class="brand-pillars-tagline">
+          <span>Learn</span>
+          <span class="dot-sep">•</span>
+          <span>Submit</span>
+          <span class="dot-sep">•</span>
+          <span>Succeed</span>
+        </p>
+
+        <!-- Horizontal Charging Neon Loading Bar (Phase 6: 4.0s - 4.8s) -->
+        <div class="charging-progress-track" *ngIf="phase() === 6">
+          <div class="charging-progress-fill" [style.width.%]="progress()"></div>
+        </div>
+
+        <!-- Handwritten Sub-Tagline with Brush Underline (Phase 8: 5.6s - 6.0s) -->
+        <div class="handwritten-tagline-wrap" *ngIf="phase() >= 8">
+          <span class="script-tagline">Your Academic Journey, Simplified</span>
+          <svg class="brush-stroke-svg" viewBox="0 0 200 16" fill="none">
+            <path
+              d="M5 11 Q60 3 105 9 Q150 15 195 7"
+              stroke="#2563eb"
+              stroke-width="3.5"
+              stroke-linecap="round"
+            />
+          </svg>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Bottom Bar in Standalone Mode (/splash route) -->
+  <footer class="splash-footer" *ngIf="standaloneMode">
+    <button type="button" class="footer-btn replay-btn" (click)="replay()">
+      <span>↺ Replay 3D Intro</span>
+    </button>
+    <button type="button" class="footer-btn enter-btn" (click)="completeSplash()">
+      <span>Enter Website &rarr;</span>
+    </button>
+  </footer>
+</div>
