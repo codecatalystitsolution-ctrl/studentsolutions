@@ -156,7 +156,7 @@ export class PublicPreviewComponent implements OnInit, OnDestroy {
     },
     {
       question: 'Can I get physical spiral or hardcover printed copies delivered to my campus or home?',
-      answer: 'Yes! FileCrafters provides an integrated print and doorstep delivery service. You can choose glossy photo-paper color printing, black & white printing, standard spiral binding, or formal university-embossed hardcover binding with golden foil stamping.'
+      answer: 'Yes! Student Solutions provides an integrated print and doorstep delivery service. You can choose glossy photo-paper color printing, black & white printing, standard spiral binding, or formal university-embossed hardcover binding with golden foil stamping.'
     },
     {
       question: 'Is my student identity and code submission kept confidential?',

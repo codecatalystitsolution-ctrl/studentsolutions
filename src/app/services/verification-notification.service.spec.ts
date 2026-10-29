@@ -32,7 +32,7 @@ describe('VerificationNotificationService', () => {
     expect(email.subject).toContain('Account Approved');
     expect(email.bodyText).toContain('Dr. Sharma');
     expect(email.bodyText).toContain('TEA-782A1B');
-    expect(email.bodyText).toContain('https://filecrafters.in/login');
+    expect(email.bodyText).toContain('https://studentsolutions.online/login');
     expect(email.mailtoUrl).toContain('mailto:dr.sharma%40college.edu');
   });
 

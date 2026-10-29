@@ -215,7 +215,7 @@ export class PdfExportService {
       <body>
         <div class="report-header">
           <div>
-            <div class="brand-title">FileCrafters Academic Services</div>
+            <div class="brand-title">Student Solutions Academic Services</div>
             <div class="brand-subtitle">Authorized System Records</div>
           </div>
           <div class="report-meta">
@@ -230,7 +230,7 @@ export class PdfExportService {
 
         <div class="report-footer">
           <span>Confidentiality Notice: This document contains authorized administrative records.</span>
-          <span>FileCrafters Platform</span>
+          <span>Student Solutions Platform</span>
         </div>
 
         <script>

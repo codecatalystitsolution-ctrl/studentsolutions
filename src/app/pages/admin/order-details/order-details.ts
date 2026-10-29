@@ -1,7 +1,6 @@
 import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-// Dhyan dein: 'get' import karna zaroori hai
 import { Database, ref, onValue, get } from '@angular/fire/database';
 import { ActivatedRoute } from '@angular/router';
 import { PrivateFileService } from '../../../services/private-file.service';
@@ -9,6 +8,7 @@ import { QuotationService, QuotationVersion } from '../../../services/quotation.
 import { NotificationService } from '../../../shared/notification/notification.service';
 import { LedgerEvent, PaymentLedgerService, PaymentRecord, RefundProcessingRecord, RefundProcessingStatus } from '../../../services/payment-ledger.service';
 import { DeliveryAssignment, DeliveryWorkflowService } from '../../../services/delivery-workflow.service';
+import { PricingConfigService, PaymentReceivingConfig } from '../../../services/pricing-config.service';
 import { calculateCommissionAmount, CommissionRecord, CommissionStatus, ReferralAttribution, ReferralCommissionService } from '../../../services/referral-commission.service';
 
 @Component({
@@ -21,22 +21,33 @@ import { calculateCommissionAmount, CommissionRecord, CommissionStatus, Referral
 export class OrderDetailsComponent implements OnInit, OnDestroy {
   private db = inject(Database);
   private cdr = inject(ChangeDetectorRef);
-  private route = inject(ActivatedRoute); // Naya injection
+  private route = inject(ActivatedRoute);
   private privateFileService = inject(PrivateFileService);
   private quotationService = inject(QuotationService);
   private notificationService = inject(NotificationService);
   private paymentLedger = inject(PaymentLedgerService);
   private deliveryWorkflow = inject(DeliveryWorkflowService);
   private referralCommission = inject(ReferralCommissionService);
+  private pricingConfig = inject(PricingConfigService);
+  paymentReceiving: PaymentReceivingConfig = this.pricingConfig.getDefaultPricing().paymentReceiving;
+  private stopPricingListener: (() => void) | null = null;
 
   orders: any[] = [];
   filteredOrders: any[] = [];
   isLoading: boolean = true;
   searchTerm: string = '';
+  statusFilter: string = '';
+
+  // Dialog State
+  selectedOrderForModal: any | null = null;
+  activeModalTab: 'overview' | 'payment_50' | 'quotation' | 'delivery' | 'commission' | 'refund' = 'overview';
+  readonly Math = Math;
+
   quoteAmounts: Record<string, number | null> = {};
   quoteTerms: Record<string, string> = {};
   quotations: Record<string, { currentVersionId: string; versions: Record<string, QuotationVersion> }> = {};
   private quotationSubscriptions = new Map<string, () => void>();
+
   payments: Record<string, Array<PaymentRecord & { id: string }>> = {};
   refunds: Record<string, any | null> = {};
   refundProcessing: Record<string, RefundProcessingRecord | null> = {};
@@ -47,16 +58,19 @@ export class OrderDetailsComponent implements OnInit, OnDestroy {
   paymentHistory: Record<string, Record<string, LedgerEvent>> = {};
   refundHistory: Record<string, Record<string, LedgerEvent>> = {};
   refundProcessingHistory: Record<string, Record<string, LedgerEvent>> = {};
+
   private paymentSubscriptions = new Map<string, () => void>();
   private refundSubscriptions = new Map<string, () => void>();
   private paymentHistorySubscriptions = new Map<string, () => void>();
   private refundHistorySubscriptions = new Map<string, () => void>();
   private refundProcessingSubscriptions = new Map<string, () => void>();
   private refundProcessingHistorySubscriptions = new Map<string, () => void>();
+
   deliveryAgents: Array<{ uid: string; fullName: string; email: string }> = [];
   selectedDeliveryAgent: Record<string, string> = {};
   deliveryAssignments: Record<string, DeliveryAssignment | null> = {};
   private deliverySubscriptions = new Map<string, () => void>();
+
   referralAttributions: Record<string, ReferralAttribution | null> = {};
   orderCommissions: Record<string, Array<CommissionRecord & { id: string }>> = {};
   commissionHistory: Record<string, Record<string, any>> = {};
@@ -68,11 +82,292 @@ export class OrderDetailsComponent implements OnInit, OnDestroy {
   private commissionHistorySubscriptions = new Map<string, () => void>();
   private stopUsersListener: (() => void) | null = null;
 
+  ngOnInit(): void {
+    this.stopPricingListener = this.pricingConfig.watchPaymentReceiving(cfg => {
+      this.paymentReceiving = cfg;
+      this.cdr.detectChanges();
+    });
+
+    this.route.queryParams.subscribe(params => {
+      if (params['search']) {
+        this.searchTerm = params['search'];
+      }
+    });
+
+    this.fetchAllDetailedOrders();
+    this.stopUsersListener = onValue(ref(this.db, 'users'), snapshot => {
+      const users = snapshot.val() || {};
+      this.deliveryAgents = Object.keys(users)
+        .filter(uid => users[uid].role === 'Delivery' && users[uid].status === 'active')
+        .map(uid => ({ uid, fullName: users[uid].fullName || users[uid].name || 'Delivery agent', email: users[uid].email || '' }));
+      this.cdr.detectChanges();
+    });
+  }
+
+  fetchAllDetailedOrders() {
+    const ordersRef = ref(this.db, 'orders');
+
+    onValue(ordersRef, async (snapshot) => {
+      this.isLoading = true;
+      const ordersData = snapshot.val();
+
+      if (ordersData) {
+        const rawOrders = Object.keys(ordersData).map(key => ({
+          id: key,
+          ...ordersData[key]
+        }));
+
+        const detailedOrders = await Promise.all(
+          rawOrders.map(async (order) => {
+            const userKey = order.userId || order.uid || order.userUID || order.customerUID;
+            let userDetails = null;
+
+            if (userKey) {
+              const userSnap = await get(ref(this.db, `users/${userKey}`));
+              if (userSnap.exists()) {
+                userDetails = userSnap.val();
+              }
+            }
+
+            if (!userDetails) {
+              userDetails = order.userDetails || {
+                phone: order.phone || order.userPhone || order.contact?.phone,
+                whatsapp: order.whatsapp || order.contact?.whatsapp,
+                address: order.address || order.deliveryAddress || order.contact?.address,
+                pincode: order.pincode || order.deliveryPincode || order.contact?.pincode
+              };
+            }
+
+            return { ...order, userDetails };
+          })
+        );
+
+        this.orders = detailedOrders.sort((a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+        this.watchQuotations(this.orders);
+        this.filterOrders();
+
+        // If direct search param opened with 1 match, auto-open modal
+        if (this.searchTerm && this.filteredOrders.length === 1 && !this.selectedOrderForModal) {
+          this.selectedOrderForModal = this.filteredOrders[0];
+        }
+      } else {
+        this.orders = [];
+        this.filteredOrders = [];
+      }
+
+      this.isLoading = false;
+      this.cdr.detectChanges();
+    });
+  }
+
+  private watchQuotations(orders: any[]): void {
+    for (const order of orders) {
+      if (!order.uid || this.quotationSubscriptions.has(order.id)) continue;
+      const unsubscribe = this.quotationService.watch(order.id, data => {
+        this.quotations[order.id] = data;
+        this.cdr.detectChanges();
+      });
+      this.quotationSubscriptions.set(order.id, unsubscribe);
+      if (!this.paymentSubscriptions.has(order.id)) {
+        this.paymentSubscriptions.set(order.id, this.paymentLedger.watchOrderPayments(order.id, payments => {
+          this.payments[order.id] = payments;
+          for (const payment of payments) this.watchPaymentDetails(payment.id);
+          this.cdr.detectChanges();
+        }));
+      }
+      if (!this.deliverySubscriptions.has(order.id)) {
+        this.deliverySubscriptions.set(order.id, this.deliveryWorkflow.watchAssignment(order.id, assignment => {
+          this.deliveryAssignments[order.id] = assignment;
+          if (assignment?.agentUid) this.selectedDeliveryAgent[order.id] = assignment.agentUid;
+          this.cdr.detectChanges();
+        }));
+      }
+      if (!this.referralSubscriptions.has(order.id)) {
+        this.referralSubscriptions.set(order.id, this.referralCommission.watchStudentAttribution(order.uid, attribution => {
+          this.referralAttributions[order.uid] = attribution;
+          this.cdr.detectChanges();
+        }));
+      }
+      if (!this.commissionSubscriptions.has(order.id)) {
+        this.commissionSubscriptions.set(order.id, this.referralCommission.watchOrderCommissions(order.id, records => {
+          this.orderCommissions[order.id] = records;
+          for (const record of records) this.watchCommissionHistory(record.id);
+          this.cdr.detectChanges();
+        }));
+      }
+    }
+  }
+
+  private watchCommissionHistory(commissionId: string): void {
+    if (this.commissionHistorySubscriptions.has(commissionId)) return;
+    this.commissionHistorySubscriptions.set(commissionId, this.referralCommission.watchCommissionHistory(commissionId, history => {
+      this.commissionHistory[commissionId] = history;
+      this.cdr.detectChanges();
+    }));
+  }
+
+  private watchPaymentDetails(paymentId: string): void {
+    if (!this.refundSubscriptions.has(paymentId)) {
+      this.refundSubscriptions.set(paymentId, this.paymentLedger.watchRefund(paymentId, refund => {
+        this.refunds[paymentId] = refund;
+        this.cdr.detectChanges();
+      }));
+    }
+    if (!this.paymentHistorySubscriptions.has(paymentId)) {
+      this.paymentHistorySubscriptions.set(paymentId, this.paymentLedger.watchPaymentHistory(paymentId, history => {
+        this.paymentHistory[paymentId] = history;
+        this.cdr.detectChanges();
+      }));
+    }
+    if (!this.refundHistorySubscriptions.has(paymentId)) {
+      this.refundHistorySubscriptions.set(paymentId, this.paymentLedger.watchRefundHistory(paymentId, history => {
+        this.refundHistory[paymentId] = history;
+        this.cdr.detectChanges();
+      }));
+    }
+    if (!this.refundProcessingSubscriptions.has(paymentId)) {
+      this.refundProcessingSubscriptions.set(paymentId, this.paymentLedger.watchRefundProcessing(paymentId, processing => {
+        this.refundProcessing[paymentId] = processing;
+        this.cdr.detectChanges();
+      }));
+    }
+    if (!this.refundProcessingHistorySubscriptions.has(paymentId)) {
+      this.refundProcessingHistorySubscriptions.set(paymentId, this.paymentLedger.watchRefundProcessingHistory(paymentId, history => {
+        this.refundProcessingHistory[paymentId] = history;
+        this.cdr.detectChanges();
+      }));
+    }
+  }
+
+  filterOrders() {
+    const term = (this.searchTerm || '').toLowerCase().trim();
+    const status = (this.statusFilter || '').toLowerCase().trim();
+
+    this.filteredOrders = this.orders.filter(order => {
+      const orderId = (order.id + '').toLowerCase();
+      const short = this.shortId(orderId).toLowerCase();
+
+      const matchesTerm = !term ||
+        orderId.includes(term) ||
+        short.includes(term) ||
+        (order.projectDetails?.submittedBy || '').toLowerCase().includes(term) ||
+        (order.projectDetails?.rollNumber || '').toLowerCase().includes(term) ||
+        (order.projectDetails?.subject || '').toLowerCase().includes(term) ||
+        (order.userDetails?.phone || '').includes(term);
+
+      const matchesStatus = !status || (order.status || 'pending').toLowerCase() === status;
+
+      return matchesTerm && matchesStatus;
+    });
+
+    this.cdr.detectChanges();
+  }
+
+  // --- Modal Helpers ---
+  openOrderModal(order: any, tab: 'overview' | 'payment_50' | 'quotation' | 'delivery' | 'commission' | 'refund' = 'overview'): void {
+    this.selectedOrderForModal = order;
+    this.activeModalTab = tab;
+  }
+
+  closeOrderModal(): void {
+    this.selectedOrderForModal = null;
+  }
+
+  setActiveModalTab(tab: 'overview' | 'payment_50' | 'quotation' | 'delivery' | 'commission' | 'refund'): void {
+    this.activeModalTab = tab;
+  }
+
+  // --- 50-50 Payment & Financial Helpers ---
+  getTotalAmount(order: any): number {
+    if (!order) return 0;
+    return Number(order.pricing?.totalAmount || order.requestedPricing?.estimatedAmount || 0);
+  }
+
+  getAdvanceAmount(order: any): number {
+    if (!order) return 0;
+    const total = this.getTotalAmount(order);
+    return Number(order.pricing?.advancePaid || Math.round(total * 0.5));
+  }
+
+  getBalanceDue(order: any): number {
+    if (!order) return 0;
+    const total = this.getTotalAmount(order);
+    const advance = this.getAdvanceAmount(order);
+    return Math.max(0, total - advance);
+  }
+
+  getAdvanceStatus(order: any): string {
+    if (!order) return 'Pending';
+    const payments = this.payments[order.id] || [];
+    if (payments.some(p => p.status === 'verified')) return 'Verified';
+    if (payments.some(p => p.status === 'pending')) return 'Under Review';
+    if (order.status && ['Printing', 'In Progress', 'Delivered'].includes(order.status)) return 'Verified';
+    return 'Pending';
+  }
+
+  getDeliveryBalanceStatus(order: any): string {
+    if (!order) return 'Pending Delivery';
+    const assignment = this.deliveryAssignments[order.id];
+    if (assignment?.paymentCollectionStatus === 'collected' || order.status === 'Delivered') {
+      return `Collected (${assignment?.collectedMethod === 'cash' ? 'Cash' : 'UPI QR'})`;
+    }
+    return 'Pending at Doorstep';
+  }
+
+  getDeliveryQrUrl(order: any): string {
+    if (!order) return '';
+    const due = this.getBalanceDue(order);
+    return this.pricingConfig.getUpiPaymentUrl(due, order.id, this.paymentReceiving);
+  }
+
+  getDeliveryQrImage(order: any): string {
+    if (!order) return '';
+    const url = this.getDeliveryQrUrl(order);
+    return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
+  }
+
+  async copyText(text: string, label: string): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(text);
+      this.notificationService.show('success', `${label} copied to clipboard!`, 'Copied');
+    } catch {
+      this.notificationService.show('info', text, label);
+    }
+  }
+
+  shortId(id: string): string {
+    if (!id) return '';
+    return id.startsWith('-') ? id.slice(1, 9) : id.slice(0, 8);
+  }
+
+  getDeliveryAgentName(agentUid: string | undefined): string {
+    if (!agentUid) return 'Not Assigned';
+    const found = this.deliveryAgents.find(a => a.uid === agentUid);
+    return found ? `${found.fullName} (${found.email})` : agentUid.slice(0, 10);
+  }
+
+  // --- KPI Counts ---
+  get pendingOrdersCount(): number {
+    return this.orders.filter(o => (o.status || '').toLowerCase() === 'pending').length;
+  }
+
+  get inProgressOrdersCount(): number {
+    return this.orders.filter(o => ['in progress', 'printing'].includes((o.status || '').toLowerCase())).length;
+  }
+
+  get deliveredOrdersCount(): number {
+    return this.orders.filter(o => (o.status || '').toLowerCase() === 'delivered').length;
+  }
+
+  // --- Quotation & Workflow Actions ---
   async createQuotation(order: any): Promise<void> {
     const amount = Number(this.quoteAmounts[order.id]);
     try {
       if (!order.uid || !Number.isFinite(amount)) throw new Error('A valid student order and amount are required.');
-      await this.quotationService.createVersion(order.id, amount, this.quoteTerms[order.id] || '', order.uid);
+      const terms = this.quoteTerms[order.id] || `50% Advance (₹${Math.round(amount * 0.5)}) required to start printing. Remaining 50% (₹${amount - Math.round(amount * 0.5)}) payable on delivery via UPI QR or Cash.`;
+      await this.quotationService.createVersion(order.id, amount, terms, order.uid);
       this.notificationService.show('success', 'A new quotation version is available to the student.', 'Quotation Created');
       this.quoteAmounts[order.id] = null;
       this.quoteTerms[order.id] = '';
@@ -195,159 +490,6 @@ export class OrderDetailsComponent implements OnInit, OnDestroy {
     }
   }
 
-  ngOnInit(): void {
-    // URL se 'search' parameter nikalna
-    this.route.queryParams.subscribe(params => {
-      if (params['search']) {
-        this.searchTerm = params['search'];
-      }
-    });
-
-    this.fetchAllDetailedOrders();
-    this.stopUsersListener = onValue(ref(this.db, 'users'), snapshot => {
-      const users = snapshot.val() || {};
-      this.deliveryAgents = Object.keys(users)
-        .filter(uid => users[uid].role === 'Delivery' && users[uid].status === 'active')
-        .map(uid => ({ uid, fullName: users[uid].fullName || users[uid].name || 'Delivery agent', email: users[uid].email || '' }));
-      this.cdr.detectChanges();
-    });
-  }
-
-  fetchAllDetailedOrders() {
-    const ordersRef = ref(this.db, 'orders');
-
-    onValue(ordersRef, async (snapshot) => {
-      this.isLoading = true;
-      const ordersData = snapshot.val();
-
-      if (ordersData) {
-        const rawOrders = Object.keys(ordersData).map(key => ({
-          id: key,
-          ...ordersData[key]
-        }));
-
-        // Har order ke liye user data fetch karna
-        const detailedOrders = await Promise.all(
-          rawOrders.map(async (order) => {
-            const userKey = order.userId || order.uid || order.userUID || order.customerUID;
-            let userDetails = null;
-
-            if (userKey) {
-              const userSnap = await get(ref(this.db, `users/${userKey}`));
-              if (userSnap.exists()) {
-                userDetails = userSnap.val();
-              }
-            }
-
-            if (!userDetails) {
-              userDetails = order.userDetails || {
-                phone: order.phone || order.userPhone || order.contact?.phone,
-                whatsapp: order.whatsapp || order.contact?.whatsapp,
-                address: order.address || order.deliveryAddress || order.contact?.address,
-                pincode: order.pincode || order.deliveryPincode || order.contact?.pincode
-              };
-            }
-
-            return { ...order, userDetails };
-          })
-        );
-
-        this.orders = detailedOrders.sort((a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
-        this.watchQuotations(this.orders);
-
-        // 2. CRITICAL FIX: Data aane ke baad check karo search term hai ya nahi
-        this.filterOrders();
-      } else {
-        this.orders = [];
-        this.filteredOrders = [];
-      }
-
-      this.isLoading = false;
-      this.cdr.detectChanges();
-    });
-  }
-
-  private watchQuotations(orders: any[]): void {
-    for (const order of orders) {
-      if (!order.uid || this.quotationSubscriptions.has(order.id)) continue;
-      const unsubscribe = this.quotationService.watch(order.id, data => {
-        this.quotations[order.id] = data;
-        this.cdr.detectChanges();
-      });
-      this.quotationSubscriptions.set(order.id, unsubscribe);
-      if (!this.paymentSubscriptions.has(order.id)) {
-        this.paymentSubscriptions.set(order.id, this.paymentLedger.watchOrderPayments(order.id, payments => {
-          this.payments[order.id] = payments;
-          for (const payment of payments) this.watchPaymentDetails(payment.id);
-          this.cdr.detectChanges();
-        }));
-      }
-      if (!this.deliverySubscriptions.has(order.id)) {
-        this.deliverySubscriptions.set(order.id, this.deliveryWorkflow.watchAssignment(order.id, assignment => {
-          this.deliveryAssignments[order.id] = assignment;
-          if (assignment?.agentUid) this.selectedDeliveryAgent[order.id] = assignment.agentUid;
-          this.cdr.detectChanges();
-        }));
-      }
-      if (!this.referralSubscriptions.has(order.id)) {
-        this.referralSubscriptions.set(order.id, this.referralCommission.watchStudentAttribution(order.uid, attribution => {
-          this.referralAttributions[order.uid] = attribution;
-          this.cdr.detectChanges();
-        }));
-      }
-      if (!this.commissionSubscriptions.has(order.id)) {
-        this.commissionSubscriptions.set(order.id, this.referralCommission.watchOrderCommissions(order.id, records => {
-          this.orderCommissions[order.id] = records;
-          for (const record of records) this.watchCommissionHistory(record.id);
-          this.cdr.detectChanges();
-        }));
-      }
-    }
-  }
-
-  private watchCommissionHistory(commissionId: string): void {
-    if (this.commissionHistorySubscriptions.has(commissionId)) return;
-    this.commissionHistorySubscriptions.set(commissionId, this.referralCommission.watchCommissionHistory(commissionId, history => {
-      this.commissionHistory[commissionId] = history;
-      this.cdr.detectChanges();
-    }));
-  }
-
-  private watchPaymentDetails(paymentId: string): void {
-    if (!this.refundSubscriptions.has(paymentId)) {
-      this.refundSubscriptions.set(paymentId, this.paymentLedger.watchRefund(paymentId, refund => {
-        this.refunds[paymentId] = refund;
-        this.cdr.detectChanges();
-      }));
-    }
-    if (!this.paymentHistorySubscriptions.has(paymentId)) {
-      this.paymentHistorySubscriptions.set(paymentId, this.paymentLedger.watchPaymentHistory(paymentId, history => {
-        this.paymentHistory[paymentId] = history;
-        this.cdr.detectChanges();
-      }));
-    }
-    if (!this.refundHistorySubscriptions.has(paymentId)) {
-      this.refundHistorySubscriptions.set(paymentId, this.paymentLedger.watchRefundHistory(paymentId, history => {
-        this.refundHistory[paymentId] = history;
-        this.cdr.detectChanges();
-      }));
-    }
-    if (!this.refundProcessingSubscriptions.has(paymentId)) {
-      this.refundProcessingSubscriptions.set(paymentId, this.paymentLedger.watchRefundProcessing(paymentId, processing => {
-        this.refundProcessing[paymentId] = processing;
-        this.cdr.detectChanges();
-      }));
-    }
-    if (!this.refundProcessingHistorySubscriptions.has(paymentId)) {
-      this.refundProcessingHistorySubscriptions.set(paymentId, this.paymentLedger.watchRefundProcessingHistory(paymentId, history => {
-        this.refundProcessingHistory[paymentId] = history;
-        this.cdr.detectChanges();
-      }));
-    }
-  }
-
   ngOnDestroy(): void {
     this.quotationSubscriptions.forEach(unsubscribe => unsubscribe());
     this.quotationSubscriptions.clear();
@@ -361,28 +503,7 @@ export class OrderDetailsComponent implements OnInit, OnDestroy {
     this.referralSubscriptions.forEach(unsubscribe => unsubscribe());
     this.commissionSubscriptions.forEach(unsubscribe => unsubscribe());
     this.commissionHistorySubscriptions.forEach(unsubscribe => unsubscribe());
+    this.stopPricingListener?.();
     this.stopUsersListener?.();
-  }
-
-  filterOrders() {
-    // Agar koi search term nahi hai, toh saare dikhao
-    if (!this.searchTerm || this.searchTerm.trim() === '') {
-      this.filteredOrders = [...this.orders];
-    } else {
-      const term = this.searchTerm.toLowerCase().trim();
-
-      this.filteredOrders = this.orders.filter(order => {
-        // Order ID check (Pure ID ya slice dono check karega)
-        const orderId = (order.id + '').toLowerCase();
-        const shortId = orderId.substring(1, 9); // Humne Manage orders me substring(1,9) bheja tha
-
-        return orderId.includes(term) ||
-          shortId.includes(term) ||
-          (order.projectDetails?.submittedBy || '').toLowerCase().includes(term) ||
-          (order.projectDetails?.rollNumber || '').toLowerCase().includes(term) ||
-          (order.userDetails?.phone || '').includes(term);
-      });
-    }
-    this.cdr.detectChanges();
   }
 }

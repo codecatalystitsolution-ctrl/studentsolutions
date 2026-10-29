@@ -85,6 +85,35 @@ export class PricingSettingsComponent implements OnInit {
       return;
     }
 
+    // Normalize receiving details - Bank and UPI details are flexible/optional
+    if (!this.config.paymentReceiving) {
+      this.config.paymentReceiving = {
+        upiId: 'studentsolutions@upi',
+        payeeName: 'Student Solutions',
+        bankName: '',
+        accountHolderName: '',
+        accountNumber: '',
+        ifscCode: '',
+        accountType: 'Current',
+        qrNote: 'Student Solutions Order'
+      };
+    }
+    const pay = this.config.paymentReceiving;
+    pay.upiId = (pay.upiId || '').trim();
+    if (!pay.upiId) {
+      pay.upiId = 'studentsolutions@upi';
+    } else if (!pay.upiId.includes('@')) {
+      this.notification.show('error', 'Please enter a valid Primary Receiving UPI ID (e.g., studentsolutions@upi).', 'UPI ID Required');
+      return;
+    }
+    pay.payeeName = (pay.payeeName || '').trim() || 'Student Solutions';
+    pay.bankName = (pay.bankName || '').trim();
+    pay.accountHolderName = (pay.accountHolderName || '').trim();
+    pay.accountNumber = (pay.accountNumber || '').trim();
+    pay.ifscCode = (pay.ifscCode || '').trim().toUpperCase();
+    pay.accountType = pay.accountType || 'Current';
+    pay.qrNote = (pay.qrNote || '').trim() || 'Student Solutions Order';
+
     this.isSaving = true;
     try {
       await this.pricingService.savePricing(this.config);
@@ -154,5 +183,22 @@ export class PricingSettingsComponent implements OnInit {
 
   get simDriverEarnings(): number {
     return this.config.deliveryPartnerPay || 40;
+  }
+
+  get previewUpiUrl(): string {
+    return this.pricingService.getUpiPaymentUrl(100, 'TEST', this.config.paymentReceiving);
+  }
+
+  get previewQrImage(): string {
+    return this.pricingService.getUpiQrImageUrl(100, 'TEST', this.config.paymentReceiving);
+  }
+
+  async copyText(text: string, label: string): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(text);
+      this.notification.show('success', `${label} copied to clipboard!`, 'Copied');
+    } catch {
+      this.notification.show('info', text, label);
+    }
   }
 }

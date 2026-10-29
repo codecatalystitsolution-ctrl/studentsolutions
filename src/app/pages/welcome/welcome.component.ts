@@ -83,7 +83,7 @@ export class WelcomeComponent implements OnInit, OnDestroy {
           { label: 'Submitted By', value: 'Morgan Lee (Roll: 24001001)' },
           { label: 'Project Partner', value: 'Jamie Patel (Roll: 24001002)' },
           { label: 'Project Guide', value: 'Dr. A. K. Sharma (Prof. & HOD)' },
-          { label: 'Platform Engine', value: 'FileCrafters Automated Solution' }
+          { label: 'Platform Engine', value: 'Student Solutions Automated Solution' }
         ]
       }
     },
@@ -133,7 +133,7 @@ export class WelcomeComponent implements OnInit, OnDestroy {
       rightContent: {
         heading: 'Core Verification Engine',
         subheading: 'Deterministic Verification & Mathematical Integrity',
-        codeSnippet: `// FileCrafters Automated Verification Engine
+        codeSnippet: `// Student Solutions Automated Verification Engine
 export function verifyAcademicReport(order: AcademicOrder): QAValidation {
   const isPlagiarismFree = runSimilarityCheck(order.fileBuffer) < 0.05;
   const marginCheck = inspectIEEEMargins(order.pdfDoc);

@@ -486,7 +486,7 @@ export class TeacherReferralsComponent implements OnInit, OnDestroy {
     ];
 
     const data = this.activeCommissions;
-    this.csvExport.exportToCsv(`filecrafters-teacher-commissions-${new Date().toISOString().slice(0, 10)}.csv`, columns, data);
+    this.csvExport.exportToCsv(`studentsolutions-teacher-commissions-${new Date().toISOString().slice(0, 10)}.csv`, columns, data);
     this.copyFeedback = 'Commission statement downloaded as CSV!';
     setTimeout(() => { this.copyFeedback = ''; this.cdr.detectChanges(); }, 3000);
   }
@@ -545,7 +545,7 @@ export class TeacherReferralsComponent implements OnInit, OnDestroy {
 
   // Share & Copy Utilities
   getShareUrl(code: string): string {
-    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://filecrafters.in';
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://studentsolutions.online';
     return `${origin}/register?ref=${encodeURIComponent(code)}`;
   }
 
@@ -567,7 +567,7 @@ export class TeacherReferralsComponent implements OnInit, OnDestroy {
 
   shareWhatsApp(code: string): void {
     const link = this.getShareUrl(code);
-    const message = `Hello Students! For all your college project reports, assignment prints, and spiral/hardcover binding, register on FileCrafters with my faculty referral code *${code}*:\n${link}`;
+    const message = `Hello Students! For all your college project reports, assignment prints, and spiral/hardcover binding, register on Student Solutions with my faculty referral code *${code}*:\n${link}`;
     const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
     if (typeof window !== 'undefined') {
       window.open(url, '_blank', 'noopener,noreferrer');
@@ -576,9 +576,9 @@ export class TeacherReferralsComponent implements OnInit, OnDestroy {
 
   shareEmail(code: string): void {
     const link = this.getShareUrl(code);
-    const subject = encodeURIComponent(`FileCrafters Project & Assignment Printing - Faculty Referral Code: ${code}`);
+    const subject = encodeURIComponent(`Student Solutions Project & Assignment Printing - Faculty Referral Code: ${code}`);
     const body = encodeURIComponent(
-      `Dear Students,\n\nYou can use FileCrafters for your upcoming project file submissions, reports, and spiral binding.\n\nUse faculty referral code: ${code}\nRegistration Link: ${link}\n\nBest regards,\nFaculty Partner`
+      `Dear Students,\n\nYou can use Student Solutions for your upcoming project file submissions, reports, and spiral binding.\n\nUse faculty referral code: ${code}\nRegistration Link: ${link}\n\nBest regards,\nFaculty Partner`
     );
     if (typeof window !== 'undefined') {
       window.location.href = `mailto:?subject=${subject}&body=${body}`;

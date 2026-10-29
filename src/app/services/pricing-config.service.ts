@@ -14,6 +14,17 @@ export interface BindingConfig {
   stick: number;
 }
 
+export interface PaymentReceivingConfig {
+  upiId: string;
+  payeeName: string;
+  bankName: string;
+  accountHolderName: string;
+  accountNumber: string;
+  ifscCode: string;
+  accountType: 'Current' | 'Savings';
+  qrNote?: string;
+}
+
 export interface SystemPricingConfig {
   slabs: {
     assignment: SlabItem[];
@@ -25,9 +36,21 @@ export interface SystemPricingConfig {
   deliveryCourierFee: number;
   deliveryPartnerPay: number;
   defaultTeacherCommissionPercent: number;
+  paymentReceiving: PaymentReceivingConfig;
   updatedAt?: string;
   updatedBy?: string;
 }
+
+export const DEFAULT_PAYMENT_RECEIVING: PaymentReceivingConfig = {
+  upiId: 'studentsolutions@upi',
+  payeeName: 'Student Solutions',
+  bankName: 'HDFC Bank',
+  accountHolderName: 'Student Solutions',
+  accountNumber: '50200012345678',
+  ifscCode: 'HDFC0000123',
+  accountType: 'Current',
+  qrNote: 'Scan to pay via any UPI App (GPay/PhonePe/Paytm/BHIM)'
+};
 
 export const DEFAULT_PRICING_CONFIG: SystemPricingConfig = {
   slabs: {
@@ -55,7 +78,8 @@ export const DEFAULT_PRICING_CONFIG: SystemPricingConfig = {
   selfUploadDiscount: 50,
   deliveryCourierFee: 50,
   deliveryPartnerPay: 40,
-  defaultTeacherCommissionPercent: 10
+  defaultTeacherCommissionPercent: 10,
+  paymentReceiving: { ...DEFAULT_PAYMENT_RECEIVING }
 };
 
 @Injectable({
@@ -128,12 +152,37 @@ export class PricingConfigService {
           'system_pricing_updated',
           'system_config',
           'pricing',
-          `Admin updated system rates: Assignment (${sanitized.slabs.assignment.length} slabs), Practical (${sanitized.slabs.practical.length} slabs), Project (${sanitized.slabs.project.length} slabs), Commission ${sanitized.defaultTeacherCommissionPercent}%, Driver pay \u20B9${sanitized.deliveryPartnerPay}.`
+          `Admin updated system rates & payment details: UPI (${sanitized.paymentReceiving.upiId}), Bank (${sanitized.paymentReceiving.bankName} - ${sanitized.paymentReceiving.accountNumber}), Assignment (${sanitized.slabs.assignment.length} slabs), Commission ${sanitized.defaultTeacherCommissionPercent}%, Driver pay \u20B9${sanitized.deliveryPartnerPay}.`
         );
       } catch (auditErr) {
         console.warn('Audit log write skipped:', auditErr);
       }
     }
+  }
+
+  async getPaymentReceiving(): Promise<PaymentReceivingConfig> {
+    const config = await this.getPricing();
+    return config.paymentReceiving || this.getDefaultPricing().paymentReceiving;
+  }
+
+  watchPaymentReceiving(callback: (config: PaymentReceivingConfig) => void): Unsubscribe {
+    return this.watchPricing(pricing => {
+      callback(pricing.paymentReceiving || this.getDefaultPricing().paymentReceiving);
+    });
+  }
+
+  getUpiPaymentUrl(amount: number, orderId: string, customConfig?: PaymentReceivingConfig): string {
+    const cfg = customConfig || this.getDefaultPricing().paymentReceiving;
+    const shortId = (orderId || '').replace(/[^a-zA-Z0-9]/g, '').slice(-6).toUpperCase();
+    const note = `SS_Order_${shortId || 'Payment'}_Bal`;
+    const cleanUpi = encodeURIComponent((cfg.upiId || 'studentsolutions@upi').trim());
+    const cleanPayee = encodeURIComponent((cfg.payeeName || 'Student Solutions').trim());
+    return `upi://pay?pa=${cleanUpi}&pn=${cleanPayee}&am=${amount}&tn=${encodeURIComponent(note)}&cu=INR`;
+  }
+
+  getUpiQrImageUrl(amount: number, orderId: string, customConfig?: PaymentReceivingConfig): string {
+    const url = this.getUpiPaymentUrl(amount, orderId, customConfig);
+    return `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(url)}`;
   }
 
   async resetToDefaults(): Promise<void> {
@@ -150,6 +199,18 @@ export class PricingConfigService {
         price: Number(item?.price) > 0 ? Number(item.price) : (fallback[idx]?.price || 100),
         label: typeof item?.label === 'string' && item.label.trim() ? item.label.trim() : (fallback[idx]?.label || `Slab ${idx + 1}`)
       }));
+    };
+
+    const rawPay = raw.paymentReceiving || {};
+    const paymentReceiving: PaymentReceivingConfig = {
+      upiId: typeof rawPay.upiId === 'string' && rawPay.upiId.trim() ? rawPay.upiId.trim() : defaults.paymentReceiving.upiId,
+      payeeName: typeof rawPay.payeeName === 'string' && rawPay.payeeName.trim() ? rawPay.payeeName.trim() : defaults.paymentReceiving.payeeName,
+      bankName: typeof rawPay.bankName === 'string' && rawPay.bankName.trim() ? rawPay.bankName.trim() : defaults.paymentReceiving.bankName,
+      accountHolderName: typeof rawPay.accountHolderName === 'string' && rawPay.accountHolderName.trim() ? rawPay.accountHolderName.trim() : defaults.paymentReceiving.accountHolderName,
+      accountNumber: typeof rawPay.accountNumber === 'string' && rawPay.accountNumber.trim() ? rawPay.accountNumber.trim() : defaults.paymentReceiving.accountNumber,
+      ifscCode: typeof rawPay.ifscCode === 'string' && rawPay.ifscCode.trim() ? rawPay.ifscCode.trim().toUpperCase() : defaults.paymentReceiving.ifscCode,
+      accountType: rawPay.accountType === 'Savings' ? 'Savings' : 'Current',
+      qrNote: typeof rawPay.qrNote === 'string' ? rawPay.qrNote.trim() : (defaults.paymentReceiving.qrNote || '')
     };
 
     return {
@@ -170,6 +231,7 @@ export class PricingConfigService {
         Number(raw.defaultTeacherCommissionPercent) > 0 && Number(raw.defaultTeacherCommissionPercent) <= 100
           ? Number(raw.defaultTeacherCommissionPercent)
           : defaults.defaultTeacherCommissionPercent,
+      paymentReceiving,
       updatedAt: raw.updatedAt,
       updatedBy: raw.updatedBy
     };

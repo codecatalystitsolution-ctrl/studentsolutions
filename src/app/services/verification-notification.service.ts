@@ -51,10 +51,10 @@ export class VerificationNotificationService {
     let bodyText = '';
 
     if (isApproved) {
-      subject = `🎉 Account Approved: Welcome to FileCrafters as ${roleLabel}`;
+      subject = `🎉 Account Approved: Welcome to Student Solutions as ${roleLabel}`;
       bodyText = `Dear ${params.applicantName || 'Partner'},
 
-Congratulations! We are delighted to inform you that your application to join the FileCrafters multi-role ecosystem as a ${roleLabel} has been reviewed and officially APPROVED by our administration team.
+Congratulations! We are delighted to inform you that your application to join the Student Solutions multi-role ecosystem as a ${roleLabel} has been reviewed and officially APPROVED by our administration team.
 
 Your Verified Account Details:
 - Registered Email: ${params.applicantEmail}
@@ -63,28 +63,28 @@ Your Verified Account Details:
 - Date of Approval: ${new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
 
 You may now sign in to your dedicated portal to access your dashboard, track ${params.role === 'Teacher' ? 'student referrals & earnings' : 'courier tasks & delivery payouts'}:
-👉 Portal Login: https://filecrafters.in/login
+👉 Portal Login: https://studentsolutions.online/login
 
 Next Steps:
 1. Log in using your registered email and password.
 2. Complete any optional profile details or payout destinations (UPI/Bank Account).
 3. ${params.role === 'Teacher' ? 'Share your unique referral code with students to start earning commissions.' : 'Check available delivery assignments in your designated service area.'}
 
-If you have any questions or require assistance, our support desk is always here to help at support@filecrafters.com.
+If you have any questions or require assistance, our support desk is always here to help at support@studentsolutions.online.
 
 Welcome aboard!
 
 Warm regards,
 Operations & Verification Team
-FileCrafters India
-Website: https://filecrafters.in
-Support: support@filecrafters.com`;
+Student Solutions India
+Website: https://studentsolutions.online
+Support: support@studentsolutions.online`;
     } else {
       const reason = params.rejectionReason?.trim() || 'Submitted registration credentials or documentation could not be verified.';
-      subject = `Important Notice: FileCrafters Application Status for ${roleLabel}`;
+      subject = `Important Notice: Student Solutions Application Status for ${roleLabel}`;
       bodyText = `Dear ${params.applicantName || 'Applicant'},
 
-Thank you for your interest in joining FileCrafters as a ${roleLabel} and for taking the time to submit your application.
+Thank you for your interest in joining Student Solutions as a ${roleLabel} and for taking the time to submit your application.
 
 After careful review by our administrative verification team, we regret to inform you that your account application could NOT be approved at this time.
 
@@ -94,16 +94,16 @@ ${reason}
 --------------------------------------------------
 
 What can you do next?
-- If you believe this decision was made in error or if you have updated credentials/documents, please reach out to our verification desk at support@filecrafters.com referencing your registered email (${params.applicantEmail}).
-- You may also submit a fresh application with correct details at https://filecrafters.in/register once the required information is prepared.
+- If you believe this decision was made in error or if you have updated credentials/documents, please reach out to our verification desk at support@studentsolutions.online referencing your registered email (${params.applicantEmail}).
+- You may also submit a fresh application with correct details at https://studentsolutions.online/register once the required information is prepared.
 
-We appreciate your interest in FileCrafters and wish you the very best.
+We appreciate your interest in Student Solutions and wish you the very best.
 
 Sincerely,
 Operations & Verification Team
-FileCrafters India
-Website: https://filecrafters.in
-Support: support@filecrafters.com`;
+Student Solutions India
+Website: https://studentsolutions.online
+Support: support@studentsolutions.online`;
     }
 
     const mailtoUrl = `mailto:${encodeURIComponent(params.applicantEmail)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyText)}`;
@@ -128,7 +128,7 @@ Support: support@filecrafters.com`;
   ): Promise<void> {
     const actor = this.auth.currentUser;
     const actorUid = actor?.uid || 'admin';
-    const actorEmail = actor?.email || 'admin@filecrafters.in';
+    const actorEmail = actor?.email || 'admin@studentsolutions.online';
 
     const auditRecord: VerificationAuditRecord = {
       recipientUid: uid,
@@ -156,7 +156,7 @@ Support: support@filecrafters.com`;
     try {
       const roleRoute = params.role === 'Teacher' ? '/teacher/referrals' : '/delivery-portal';
       const notificationTitle = params.decision === 'approved'
-        ? `🎉 Account Approved: Welcome to FileCrafters!`
+        ? `🎉 Account Approved: Welcome to Student Solutions!`
         : `Application Notice: Account Not Approved`;
 
       const notificationMessage = params.decision === 'approved'

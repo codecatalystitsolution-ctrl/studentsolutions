@@ -32,6 +32,19 @@ describe('PricingConfigService', () => {
     expect(config.deliveryCourierFee).toBe(50);
     expect(config.deliveryPartnerPay).toBe(40);
     expect(config.defaultTeacherCommissionPercent).toBe(10);
+    expect(config.paymentReceiving.upiId).toBe('studentsolutions@upi');
+    expect(config.paymentReceiving.bankName).toBe('HDFC Bank');
+  });
+
+  it('generates dynamic UPI payment URL and QR correctly', () => {
+    const upiUrl = service.getUpiPaymentUrl(250, 'order-123');
+    expect(upiUrl).toContain('upi://pay?');
+    expect(upiUrl).toContain('pa=studentsolutions%40upi');
+    expect(upiUrl).toContain('am=250');
+
+    const qrImg = service.getUpiQrImageUrl(250, 'order-123');
+    expect(qrImg).toContain('api.qrserver.com');
+    expect(qrImg).toContain(encodeURIComponent(upiUrl));
   });
 
   it('returns default pricing when database is unavailable', async () => {

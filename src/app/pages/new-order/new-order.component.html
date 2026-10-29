@@ -1,4 +1,4 @@
-﻿<div class="order-layout">
+<div class="order-layout">
   <main class="order-wizard" aria-labelledby="order-title">
     <header class="wizard-heading">
       <div class="heading-icon" aria-hidden="true">
@@ -71,14 +71,94 @@
       </section>
 
       <section class="wizard-panel review-panel" *ngIf="currentStep === 3" aria-labelledby="review-title">
-        <div class="panel-heading"><span class="panel-kicker">STEP 3 OF 3</span><h2 id="review-title">Review your order</h2><p>Check your details and requested estimate before sending them to our team.</p></div>
+        <div class="panel-heading"><span class="panel-kicker">STEP 3 OF 3</span><h2 id="review-title">Review your order &amp; 50% Advance</h2><p>Check your details, scan the QR code to pay 50% advance, and confirm your order.</p></div>
         <div class="review-card">
           <div class="review-heading"><span class="review-file-icon" aria-hidden="true">{{ currentFileTypeLabel.charAt(0) }}</span><div><strong>{{ currentFileTypeLabel }}</strong><small>{{ currentSlabLabel || 'Page range not selected' }}</small></div><button type="button" class="text-button" (click)="goToStep(1)">Change type</button></div>
           <dl class="review-details"><div><dt>Course</dt><dd>{{ orderForm.get('course')?.value }}</dd></div><div><dt>Subject</dt><dd>{{ orderForm.get('subject')?.value }}</dd></div><div><dt>{{ orderForm.get('fileType')?.value === 'practical' ? 'Experiments / syllabus' : 'Topic' }}</dt><dd>{{ orderForm.get('fileType')?.value === 'practical' ? orderForm.get('experimentDetails')?.value : orderForm.get('topic')?.value }}</dd></div><div><dt>Submitted to</dt><dd>{{ orderForm.get('submittedTo')?.value }}</dd></div><div><dt>Submitted by</dt><dd>{{ orderForm.get('submittedBy')?.value }}</dd></div><div><dt>Roll number</dt><dd>{{ orderForm.get('rollNumber')?.value }}</dd></div><div *ngIf="orderForm.get('fileType')?.value === 'project'"><dt>Binding</dt><dd>{{ orderForm.get('bindingType')?.value | titlecase }}</dd></div><div><dt>Files</dt><dd>{{ orderForm.get('fileType')?.value === 'project' ? 1 : orderForm.get('fileQuantity')?.value }}</dd></div><div *ngIf="uploadedFileNames"><dt>Uploaded PDFs</dt><dd>{{ uploadedFileNames }}</dd></div></dl>
           <button type="button" class="text-button edit-details" (click)="goToStep(2)">Edit order details</button>
         </div>
-        <div class="review-total"><div><span>Requested estimate</span><small>Your final price will be shown in the quotation.</small></div><strong>&#8377;{{ totalEstimatedPrice }}</strong></div>
-        <p class="payment-disclaimer">Our team will send a quotation. Approve it in My Orders before submitting payment details for manual review.</p>
+
+        <!-- 50% Advance & Delivery Split Summary -->
+        <div class="split-pricing-card">
+          <div class="split-row">
+            <span>Total Estimated Cost</span>
+            <strong>&#8377;{{ totalEstimatedPrice }}</strong>
+          </div>
+          <div class="split-divider"></div>
+          <div class="split-highlight-grid">
+            <div class="split-box advance">
+              <span class="badge">Pay Now (50%)</span>
+              <strong class="amount">&#8377;{{ advancePayableAmount }}</strong>
+              <small>Advance required to begin work</small>
+            </div>
+            <div class="split-box delivery">
+              <span class="badge">Pay on Delivery (50%)</span>
+              <strong class="amount">&#8377;{{ remainingDeliveryAmount }}</strong>
+              <small>Pay courier via QR at doorstep</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Dynamic 50% Advance UPI QR & Payment Card -->
+        <div class="advance-qr-card">
+          <div class="qr-header">
+            <h3>📱 Scan UPI QR to Pay 50% Advance (&#8377;{{ advancePayableAmount }})</h3>
+            <p>Scan with any UPI app (Google Pay, PhonePe, Paytm, CRED, BHIM) to pay the 50% advance.</p>
+          </div>
+
+          <div class="qr-content-layout">
+            <div class="qr-image-wrapper">
+              <img [src]="advanceQrCodeUrl" alt="50% Advance QR Code" class="qr-code-img">
+              <div class="qr-badge">&#8377;{{ advancePayableAmount }} &bull; 50% Advance</div>
+            </div>
+
+            <div class="qr-meta-stack">
+              <div class="upi-action-row">
+                <span class="upi-lbl">Company UPI ID:</span>
+                <code class="upi-code">{{ paymentReceiving.upiId || 'studentsolutions@upi' }}</code>
+                <button type="button" class="btn-copy-upi" (click)="copyUpiId()">Copy</button>
+              </div>
+
+              <div class="upi-action-row">
+                <span class="upi-lbl">UPI Intent URI:</span>
+                <code class="upi-code upi-intent-code">{{ advanceUpiUrl }}</code>
+                <button type="button" class="btn-copy-upi" (click)="copyPaymentLink()">Copy Link</button>
+              </div>
+
+              <a [href]="advanceUpiUrl" class="btn-direct-upi">
+                ⚡ Open in UPI App (GPay / PhonePe / Paytm)
+              </a>
+
+              <!-- Transaction Reference Entry -->
+              <div class="utr-input-group">
+                <label for="advance-utr">UPI Transaction Reference / UTR Number <span class="optional-badge">(Enter after payment)</span></label>
+                <input
+                  id="advance-utr"
+                  type="text"
+                  [(ngModel)]="advanceTransactionRef"
+                  [ngModelOptions]="{standalone: true}"
+                  placeholder="e.g. 12-digit UTR from GPay / PhonePe / Paytm receipt"
+                  maxlength="200"
+                  class="utr-input">
+                <small class="utr-hint">Paste your 12-digit UPI reference ID from your payment app so admin can verify instantly.</small>
+              </div>
+
+              <div class="utr-input-group">
+                <label for="student-upi">Your UPI ID <span class="optional-badge">(Optional)</span></label>
+                <input
+                  id="student-upi"
+                  type="text"
+                  [(ngModel)]="advanceUpiId"
+                  [ngModelOptions]="{standalone: true}"
+                  placeholder="e.g. name@oksbi"
+                  maxlength="200"
+                  class="utr-input">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p class="payment-disclaimer">Once submitted, you can track verification status and remaining doorstep balance anytime in My Orders.</p>
       </section>
 
       <footer class="wizard-actions">
@@ -86,7 +166,7 @@
         <button type="button" class="wizard-back" *ngIf="currentStep > 1" (click)="goToStep(currentStep - 1)"><span aria-hidden="true">&larr;</span> Back</button>
         <span class="action-spacer"></span>
         <button type="button" class="wizard-continue" *ngIf="currentStep < 3" (click)="continueStep()">Continue <span aria-hidden="true">&rarr;</span></button>
-        <button type="button" class="wizard-continue" *ngIf="currentStep === 3" (click)="submitOrder()"><span *ngIf="!isLoading">Submit order</span><span *ngIf="isLoading" class="spinner" aria-label="Submitting"></span></button>
+        <button type="button" class="wizard-continue" *ngIf="currentStep === 3" (click)="submitOrder()"><span *ngIf="!isLoading">Place Order &amp; Submit Advance</span><span *ngIf="isLoading" class="spinner" aria-label="Submitting"></span></button>
       </footer>
     </form>
   </main>

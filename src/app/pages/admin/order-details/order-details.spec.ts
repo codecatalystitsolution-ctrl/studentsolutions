@@ -8,6 +8,7 @@ import { NotificationService } from '../../../shared/notification/notification.s
 import { PaymentLedgerService } from '../../../services/payment-ledger.service';
 import { DeliveryWorkflowService } from '../../../services/delivery-workflow.service';
 import { ReferralCommissionService } from '../../../services/referral-commission.service';
+import { PricingConfigService, DEFAULT_PRICING_CONFIG, DEFAULT_PAYMENT_RECEIVING } from '../../../services/pricing-config.service';
 import { OrderDetailsComponent } from './order-details';
 
 describe('OrderDetailsComponent', () => {
@@ -25,6 +26,15 @@ describe('OrderDetailsComponent', () => {
         { provide: PaymentLedgerService, useValue: { watchOrderPayments: vi.fn(() => () => undefined), watchRefund: vi.fn(() => () => undefined), watchPaymentHistory: vi.fn(() => () => undefined), watchRefundHistory: vi.fn(() => () => undefined), updatePaymentStatus: vi.fn(), decideRefund: vi.fn() } },
         { provide: DeliveryWorkflowService, useValue: { watchAssignment: vi.fn(() => () => undefined), watchHistory: vi.fn(() => () => undefined), assign: vi.fn() } },
         { provide: ReferralCommissionService, useValue: { watchStudentAttribution: vi.fn(() => () => undefined), watchOrderCommissions: vi.fn(() => () => undefined), watchCommissionHistory: vi.fn(() => () => undefined), createManualCommission: vi.fn(), setCommissionStatus: vi.fn() } },
+        {
+          provide: PricingConfigService,
+          useValue: {
+            getDefaultPricing: () => DEFAULT_PRICING_CONFIG,
+            watchPaymentReceiving: vi.fn((cb: any) => { cb(DEFAULT_PAYMENT_RECEIVING); return () => {}; }),
+            getUpiPaymentUrl: vi.fn((amt, orderId, cfg) => `upi://pay?pa=${cfg?.upiId || 'studentsolutions@upi'}&am=${amt}`),
+            getUpiQrImageUrl: vi.fn(() => 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=test')
+          }
+        },
         { provide: ActivatedRoute, useValue: { queryParams: of({}) } },
       ],
     }).compileComponents();

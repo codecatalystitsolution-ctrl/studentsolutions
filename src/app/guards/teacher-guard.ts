@@ -4,7 +4,7 @@ import { Database, get, ref } from '@angular/fire/database';
 import { CanActivateFn, Router } from '@angular/router';
 import { catchError, defer, from, map, of, switchMap } from 'rxjs';
 
-const adminEmails = new Set(['admin@filecrafters.in', 'wmohd2514@outlook.com']);
+const adminEmails = new Set(['admin@studentsolutions.online', 'admin@studentsolutions.in', 'admin@filecrafters.in', 'wmohd2514@outlook.com']);
 
 /** Protects teacher routes and ensures only active teachers (and admins) can access. */
 export const teacherGuard: CanActivateFn = () => {

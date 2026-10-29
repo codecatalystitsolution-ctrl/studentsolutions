@@ -22,7 +22,7 @@ import { VisitorCounterService } from './services/visitor-counter.service';
 const routeChecks = [
   ['/', 'Engineering-Grade Projects'],
   ['/home', 'Engineering-Grade Projects'],
-  ['/welcome', 'FileCrafters'],
+  ['/welcome', 'Student Solutions'],
   ['/splash', 'StudentSolutions Studio'],
   ['/login', 'Welcome Back'],
   ['/login-support', 'Account Suspension Support'],

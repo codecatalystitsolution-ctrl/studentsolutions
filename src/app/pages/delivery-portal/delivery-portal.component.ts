@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { Auth, authState } from '@angular/fire/auth';
 import { Database, ref, set, push, Unsubscribe } from '@angular/fire/database';
 import { DeliveryAssignment, DeliveryHistoryEvent, DeliveryStatus, DeliveryWorkflowService } from '../../services/delivery-workflow.service';
+import { PricingConfigService, PaymentReceivingConfig } from '../../services/pricing-config.service';
 import { NotificationService } from '../../shared/notification/notification.service';
 import { AuthService } from '../../services/auth.service';
 import { ThemeService } from '../../services/theme.service';
@@ -49,6 +50,9 @@ export class DeliveryPortalComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly zone = inject(NgZone);
+  private readonly pricingConfigService = inject(PricingConfigService);
+  paymentReceiving: PaymentReceivingConfig = this.pricingConfigService.getDefaultPricing().paymentReceiving;
+  private stopPricingSub: (() => void) | null = null;
 
   // Theme signal
   readonly theme = this.themeService.theme;
@@ -95,7 +99,85 @@ export class DeliveryPortalComponent implements OnInit, OnDestroy {
     'Student requested 15-minute wait / calling back'
   ];
 
+  // 50% Advance & 50% Delivery Balance Helpers
+  getBalanceDue(assignment: DeliveryAssignment | null | undefined): number {
+    if (!assignment) return 0;
+    if (typeof assignment.balanceDue === 'number') return assignment.balanceDue;
+    if (typeof assignment.totalAmount === 'number' && assignment.totalAmount > 0) {
+      return Math.round(assignment.totalAmount * 0.5);
+    }
+    return 250;
+  }
+
+  getAdvancePaid(assignment: DeliveryAssignment | null | undefined): number {
+    if (!assignment) return 0;
+    if (typeof assignment.advancePaid === 'number') return assignment.advancePaid;
+    if (typeof assignment.totalAmount === 'number' && assignment.totalAmount > 0) {
+      return Math.floor(assignment.totalAmount * 0.5);
+    }
+    return 250;
+  }
+
+  getTotalAmount(assignment: DeliveryAssignment | null | undefined): number {
+    if (!assignment) return 0;
+    if (typeof assignment.totalAmount === 'number') return assignment.totalAmount;
+    return this.getAdvancePaid(assignment) + this.getBalanceDue(assignment);
+  }
+
+  // QR Modal & Collection state
+  selectedQrAssignment: DeliveryAssignment | null = null;
+  qrModalOpen = false;
+  collectionMethod: Record<string, 'upi_qr' | 'cash'> = {};
+  collectionRef: Record<string, string> = {};
+
+  openQrModal(assignment: DeliveryAssignment): void {
+    this.selectedQrAssignment = assignment;
+    this.qrModalOpen = true;
+  }
+
+  closeQrModal(): void {
+    this.selectedQrAssignment = null;
+    this.qrModalOpen = false;
+  }
+
+  getUpiPaymentUrl(assignment: DeliveryAssignment | null): string {
+    if (!assignment) return '';
+    const due = this.getBalanceDue(assignment);
+    return this.pricingConfigService.getUpiPaymentUrl(due, assignment.orderId, this.paymentReceiving);
+  }
+
+  getQrCodeImageUrl(assignment: DeliveryAssignment | null): string {
+    if (!assignment) return '';
+    const url = this.getUpiPaymentUrl(assignment);
+    return `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(url)}`;
+  }
+
+  async copyUpiId(): Promise<void> {
+    const upi = this.paymentReceiving?.upiId || 'studentsolutions@upi';
+    try {
+      await navigator.clipboard.writeText(upi);
+      this.notifications.show('success', `UPI ID copied: ${upi}`, 'Copied');
+    } catch {
+      this.notifications.show('info', upi, 'UPI Address');
+    }
+  }
+
+  async copyPaymentLink(url: string): Promise<void> {
+    if (!url) return;
+    try {
+      await navigator.clipboard.writeText(url);
+      this.notifications.show('success', 'UPI Intent URI copied to clipboard!', 'Copied');
+    } catch {
+      this.notifications.show('info', url, 'Payment Link');
+    }
+  }
+
   ngOnInit(): void {
+    this.stopPricingSub = this.pricingConfigService.watchPaymentReceiving(cfg => {
+      this.paymentReceiving = cfg;
+      this.cdr.detectChanges();
+    });
+
     authState(this.auth).subscribe(async user => {
       this.stopAssignments?.();
       if (!user) {
@@ -281,7 +363,7 @@ export class DeliveryPortalComponent implements OnInit, OnDestroy {
       { key: 'address', label: 'Delivery Location' }
     ];
 
-    this.csvExport.exportToCsv(`filecrafters-delivery-earnings-${new Date().toISOString().slice(0, 10)}.csv`, columns, records);
+    this.csvExport.exportToCsv(`studentsolutions-delivery-earnings-${new Date().toISOString().slice(0, 10)}.csv`, columns, records);
     this.notifications.show('success', 'Earnings statement downloaded successfully.', 'CSV Exported');
   }
 
@@ -399,14 +481,30 @@ export class DeliveryPortalComponent implements OnInit, OnDestroy {
     this.notes[assignment.orderId] = '';
     this.isUpdating.set(true);
 
+    const isDelivering = assignment.status === 'in_transit' && next === 'delivered';
+    const method = this.collectionMethod[assignment.orderId] || 'upi_qr';
+    const methodLabel = method === 'upi_qr' ? 'UPI QR Code' : 'Cash on Delivery (COD)';
+    const balance = this.getBalanceDue(assignment);
+    const collectionNote = isDelivering ? `[Collected 50% Balance ₹${balance} via ${methodLabel}] ` : '';
+    const finalNote = (collectionNote + note).trim();
+
     try {
-      const historyEvent = await this.deliveryService.updateStatus(assignment.orderId, next, note);
+      const historyEvent = isDelivering
+        ? await this.deliveryService.updateStatus(assignment.orderId, next, finalNote, {
+            method,
+            reference: this.collectionRef[assignment.orderId] || (method === 'upi_qr' ? 'UPI_QR_SCANNED' : 'CASH_HANDOVER')
+          })
+        : await this.deliveryService.updateStatus(assignment.orderId, next, finalNote);
       this.zone.run(() => {
         this.history[assignment.orderId] = {
           ...(this.history[assignment.orderId] || {}),
           [historyEvent.id]: historyEvent as DeliveryHistoryEvent
         };
         assignment.status = next;
+        if (isDelivering) {
+          assignment.paymentCollectionStatus = 'collected';
+          assignment.collectedMethod = method;
+        }
       });
       this.notifications.show('success', `Order status updated to ${this.statusLabel(next)}.`, 'Delivery Updated');
     } catch (error) {
@@ -460,7 +558,7 @@ export class DeliveryPortalComponent implements OnInit, OnDestroy {
   getWhatsAppUrl(phone: string, studentName: string, orderId: string): string {
     const digits = (phone || '').replace(/\D/g, '');
     const cleanPhone = digits.length === 10 ? `91${digits}` : digits;
-    const message = `Hello ${studentName || 'Student'}, this is your FileCrafters Delivery Courier regarding Order #${(orderId || '').slice(0, 8).toUpperCase()}. I am en route with your project files!`;
+    const message = `Hello ${studentName || 'Student'}, this is your Student Solutions Delivery Courier regarding Order #${(orderId || '').slice(0, 8).toUpperCase()}. I am en route with your project files!`;
     return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
   }
 
@@ -500,7 +598,7 @@ export class DeliveryPortalComponent implements OnInit, OnDestroy {
           orderId: demoId,
           agentUid: user.uid,
           actorUid: user.uid,
-          actorEmail: user.email || 'dispatch@filecrafters.in',
+          actorEmail: user.email || 'dispatch@studentsolutions.online',
           status: 'assigned',
           note: 'Hardcover spiral reports packed and allocated to your vehicle route.',
           createdAt: assignedAt
@@ -527,6 +625,7 @@ export class DeliveryPortalComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.stopPricingSub?.();
     this.stopAssignments?.();
     this.historySubscriptions.forEach(unsubscribe => unsubscribe());
   }

@@ -1,253 +1,703 @@
 <div class="order-details-container fade-in">
-  
-  <div class="page-header">
-    <div class="header-text">
-      <h2>Full Order Details</h2>
-      <p>Comprehensive view of every order placed for CareFinder & other projects.</p>
-    </div>
-    <div class="search-box">
-       <input type="text" [(ngModel)]="searchTerm" (input)="filterOrders()" 
-              placeholder="Search Name, Roll No or Order ID..." class="search-input">
-    </div>
-  </div>
 
+  <!-- Page Header -->
+  <header class="page-header">
+    <div class="header-text">
+      <h2>Order Insights & Operations (Full Order Details)</h2>
+      <p>Comprehensive ledger of orders, 50-50 milestone payments, quotation lifecycle & doorstep deliveries.</p>
+    </div>
+    
+    <!-- KPI Summary Cards -->
+    <div class="kpi-strip">
+      <div class="kpi-pill">
+        <span class="kpi-label">Total Orders</span>
+        <span class="kpi-val">{{ orders.length }}</span>
+      </div>
+      <div class="kpi-pill pending">
+        <span class="kpi-label">Pending Review</span>
+        <span class="kpi-val">{{ pendingOrdersCount }}</span>
+      </div>
+      <div class="kpi-pill progress">
+        <span class="kpi-label">In Progress / Print</span>
+        <span class="kpi-val">{{ inProgressOrdersCount }}</span>
+      </div>
+      <div class="kpi-pill delivered">
+        <span class="kpi-label">Delivered</span>
+        <span class="kpi-val">{{ deliveredOrdersCount }}</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Filter & Search Toolbar -->
+  <section class="toolbar-card glass-panel" aria-label="Order filters">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" [(ngModel)]="searchTerm" (input)="filterOrders()"
+             placeholder="Search by Order ID, Student Name, Roll No, Subject, Phone..." class="search-input">
+      <button type="button" class="btn-clear" *ngIf="searchTerm" (click)="searchTerm = ''; filterOrders()" title="Clear search">✕</button>
+    </div>
+
+    <div class="filter-actions">
+      <div class="select-wrap">
+        <label for="status-filter" class="filter-label">Status:</label>
+        <select id="status-filter" [(ngModel)]="statusFilter" (change)="filterOrders()" class="status-select">
+          <option value="">All Statuses</option>
+          <option value="pending">Pending</option>
+          <option value="quoted">Quoted</option>
+          <option value="in progress">In Progress</option>
+          <option value="printing">Printing</option>
+          <option value="out for delivery">Out for Delivery</option>
+          <option value="delivered">Delivered</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+
+      <span class="count-badge">Showing {{ filteredOrders.length }} of {{ orders.length }}</span>
+    </div>
+  </section>
+
+  <!-- Loading State -->
   <div class="loading-state" *ngIf="isLoading">
     <div class="spinner"></div>
-    <p>Fetching complete details...</p>
+    <p>Fetching complete order insights...</p>
   </div>
 
-  <div class="orders-grid" *ngIf="!isLoading">
-    
-    <div class="order-card glass-card" *ngFor="let order of filteredOrders">
-       
-       <div class="card-header">
-         <div class="id-date">
-           <span class="id">Order #{{ (order.id + '') | slice:1:9 | uppercase }}</span>
-           <span class="date">{{ order.createdAt | date:'medium' }}</span>
-         </div>
-         <div class="status-badge" [ngClass]="(order.status || 'pending').toLowerCase()">
-           {{ order.status || 'Pending' }}
-         </div>
-       </div>
+  <!-- Orders Data Table List -->
+  <section class="orders-table-card glass-panel" *ngIf="!isLoading">
+    <div class="table-responsive" *ngIf="filteredOrders.length > 0">
+      <table class="orders-table">
+        <thead>
+          <tr>
+            <th>Order ID & Date</th>
+            <th>Student</th>
+            <th>Project & Specs</th>
+            <th>50-50 Financials</th>
+            <th>Delivery Partner</th>
+            <th>Status</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let order of filteredOrders" (click)="openOrderModal(order)" class="order-row">
+            
+            <!-- Order ID & Date -->
+            <td class="col-id">
+              <span class="order-id-badge">#{{ shortId(order.id) | uppercase }}</span>
+              <span class="order-date-sub">{{ order.createdAt | date:'short' }}</span>
+            </td>
 
-       <div class="card-body">
-         
-         <div class="detail-section">
-           <h4>🎓 Student Details</h4>
-           <p><strong>Name</strong> {{ order.projectDetails?.submittedBy || 'N/A' }}</p>
-           <p><strong>Roll Number</strong> {{ order.projectDetails?.rollNumber || 'N/A' }}</p>
-           <p><strong>Course & Year</strong> {{ order.projectDetails?.course || 'N/A' }}</p>
-           </div>
+            <!-- Student Profile -->
+            <td class="col-student">
+              <span class="student-name">{{ order.projectDetails?.submittedBy || order.userDetails?.name || 'Student' }}</span>
+              <span class="student-meta">Roll: {{ order.projectDetails?.rollNumber || 'N/A' }}</span>
+              <span class="student-meta" *ngIf="order.userDetails?.phone || order.phone">📞 {{ order.userDetails?.phone || order.phone }}</span>
+            </td>
 
-         <div class="detail-section">
-           <h4>📁 Project Details</h4>
-           <p><strong>Subject</strong> {{ order.projectDetails?.subject || 'N/A' }}</p>
-           <p><strong>Topic / Exp. Name</strong> {{ order.projectDetails?.topic || order.projectDetails?.experimentDetails || 'N/A' }}</p>
-           <p><strong>Submitted To</strong> <span class="highlight">{{ order.projectDetails?.submittedTo || 'N/A' }}</span></p>
-         </div>
+            <!-- Project Details & Specs -->
+            <td class="col-project">
+              <span class="project-subject">{{ order.projectDetails?.subject || 'Assignment' }}</span>
+              <span class="project-specs">
+                {{ order.fileType | uppercase }} · 
+                {{ order.printSettings?.pagesLabel || order.projectDetails?.estimatedPages || 'Standard' }} pgs · 
+                {{ order.printSettings?.binding || 'None' }}
+              </span>
+            </td>
 
-         <div class="detail-section">
-          <h4>🖨️ Format Setup</h4>
-          <p><strong>File Type</strong> <span class="highlight">{{ order.fileType | titlecase }}</span></p>
-          <p><strong>Pages</strong> 
-            <span class="highlight">
-              {{ order.printSettings?.pagesLabel || order.projectDetails?.estimatedPages || 'N/A' }}
-            </span>
-          </p>
-          <p><strong>Binding Req.</strong> {{ order.printSettings?.binding || 'None' | titlecase }}</p>
-        </div>
-
-        <div class="detail-section" *ngIf="order.uploadDetails?.selfUploaded && (order.uploadDetails?.files?.length || order.uploadDetails?.uploadedFileDataUrl)">
-          <h4>📎 Uploaded PDF</h4>
-          <div class="upload-file-summary">
-            <p><strong>Files:</strong> {{ order.uploadDetails?.files?.length ? order.uploadDetails.files.length + ' file(s)' : 1 }}</p>
-            <p><strong>Names:</strong> {{ order.uploadDetails?.files?.map(file => file.name).join(', ') || order.uploadDetails?.fileName || 'Uploaded Document' }}</p>
-            <p><strong>Size:</strong> {{ order.uploadDetails?.files?.map(file => file.sizeLabel).join(', ') || order.uploadDetails?.fileSize || 'Unknown' }}</p>
-          </div>
-          <div class="upload-actions">
-            <ng-container *ngIf="order.uploadDetails?.files?.length">
-              <div class="file-list">
-                <div *ngFor="let f of order.uploadDetails.files; let i = index" class="file-row">
-                  <span class="file-name">{{ f.name }}</span>
-                  <div class="file-links">
-                    <button class="file-link download-link" type="button" (click)="downloadOrderFile(f)">Download</button>
-                  </div>
+            <!-- 50-50 Payment Ledger Breakdown -->
+            <td class="col-finances">
+              <div class="fin-stack">
+                <div class="fin-row total">
+                  <span class="fin-label">Total:</span>
+                  <span class="fin-amount price">₹{{ getTotalAmount(order) }}</span>
+                </div>
+                <div class="fin-row adv">
+                  <span class="fin-label">50% Adv:</span>
+                  <span class="fin-val">₹{{ getAdvanceAmount(order) }}</span>
+                  <span class="mini-pill" [ngClass]="getAdvanceStatus(order).toLowerCase().replace(' ', '-')">{{ getAdvanceStatus(order) }}</span>
+                </div>
+                <div class="fin-row bal">
+                  <span class="fin-label">50% Bal:</span>
+                  <span class="fin-val">₹{{ getBalanceDue(order) }}</span>
+                  <span class="mini-pill" [ngClass]="getBalanceDue(order) === 0 || order.status === 'Delivered' ? 'collected' : 'pending'">
+                    {{ getDeliveryBalanceStatus(order) }}
+                  </span>
                 </div>
               </div>
-            </ng-container>
-            <ng-container *ngIf="!order.uploadDetails?.files?.length && order.uploadDetails?.uploadedFileDataUrl">
-              <a class="file-link download-link"
-                 [href]="order.uploadDetails.uploadedFileDataUrl"
-                 [download]="order.uploadDetails.fileName || 'uploaded-file.pdf'">
-                ⬇️ Download PDF
-              </a>
-            </ng-container>
-          </div>
-        </div>
+            </td>
 
-         <div class="detail-section">
-           <h4>💳 Pricing Breakdown</h4>
-           <p><strong>Total Amount</strong> <span class="price">₹{{ order.pricing?.totalAmount || 0 }}</span></p>
-           <p><strong>Advance Req.</strong> ₹{{ order.pricing?.advancePaid || 0 }}</p>
-           <p><strong>UPI ID</strong> {{ order.paymentDetails?.upiId || 'N/A' }}</p>
-            <p><strong>Transaction RefID</strong> {{ order.paymentDetails?.transactionId || 'N/A' }}</p>
-         </div>
+            <!-- Delivery Partner -->
+            <td class="col-delivery">
+              <span class="delivery-name" *ngIf="deliveryAssignments[order.id] as assignment">
+                🚚 {{ getDeliveryAgentName(assignment.agentUid) }}
+              </span>
+              <span class="unassigned-badge" *ngIf="!deliveryAssignments[order.id]">
+                ⚠️ Unassigned
+              </span>
+            </td>
 
-         <section class="detail-section quotation-panel" aria-label="Quotation history">
-           <h4>Quotation history</h4>
-           <div *ngFor="let version of (quotations[order.id]?.versions | keyvalue)" class="quotation-history-row">
-             <p><strong>Version {{ version.value.version }}</strong> · ₹{{ version.value.amount }} {{ version.value.currency }}</p>
-             <p>{{ version.value.terms || 'No additional terms.' }}</p>
-             <small>{{ version.value.createdAt | date:'medium' }} · {{ version.value.actorEmail }}</small>
-             <span *ngIf="quotations[order.id]?.currentVersionId === version.key" class="highlight">Current offer</span>
-           </div>
-           <p *ngIf="!(quotations[order.id]?.versions | keyvalue)?.length">No quotation has been issued.</p>
-           <label [for]="'quote-amount-' + order.id">New amount (INR)</label>
-           <input [id]="'quote-amount-' + order.id" type="number" min="1" max="1000000" step="0.01"
-             [(ngModel)]="quoteAmounts[order.id]" placeholder="Enter quoted amount">
-           <label [for]="'quote-terms-' + order.id">Terms / notes for the student</label>
-           <textarea [id]="'quote-terms-' + order.id" maxlength="2000" [(ngModel)]="quoteTerms[order.id]"
-             placeholder="Explain what this quotation includes"></textarea>
-           <button type="button" (click)="createQuotation(order)" [disabled]="!quoteAmounts[order.id]">Issue new quotation</button>
-         </section>
+            <!-- Status -->
+            <td class="col-status">
+              <span class="status-badge" [ngClass]="(order.status || 'pending').toLowerCase().replace(' ', '-')">
+                {{ order.status || 'Pending' }}
+              </span>
+            </td>
 
-         <section class="detail-section quotation-panel" aria-label="Payment and refund ledger">
-           <h4>Payment and refund ledger</h4>
-           <p *ngIf="!payments[order.id]?.length">No payment ledger entries yet.</p>
-           <article *ngFor="let payment of payments[order.id]" class="quotation-history-row">
-             <strong>₹{{ payment.amount }} {{ payment.currency }}</strong>
-             <p>Transaction: {{ payment.transactionRef }} <span *ngIf="payment.upiId">· UPI: {{ payment.upiId }}</span></p>
-             <p>Status: <strong>{{ payment.status | titlecase }}</strong> · Submitted {{ payment.createdAt | date:'medium' }}</p>
-             <div class="quote-actions" *ngIf="payment.status === 'pending'">
-                <label [for]="'payment-decision-note-' + payment.id">Verification evidence reference or decision reason</label>
-                <textarea [id]="'payment-decision-note-' + payment.id" maxlength="500" [(ngModel)]="paymentDecisionNotes[payment.id]" placeholder="Record what external evidence was reviewed"></textarea>
-                <button type="button" (click)="setPaymentStatus(payment.id, 'verified', paymentDecisionNotes[payment.id] || '')" [disabled]="!paymentDecisionNotes[payment.id]?.trim()">Record manual verification</button>
-                <button type="button" (click)="setPaymentStatus(payment.id, 'rejected', paymentDecisionNotes[payment.id] || '')" [disabled]="!paymentDecisionNotes[payment.id]?.trim()">Reject payment</button>
-             </div>
-             <p class="quote-decision" *ngIf="payment.status === 'pending'">Verify against the external payment provider before marking verified. This screen does not prove payment.</p>
-             <div *ngFor="let event of (paymentHistory[payment.id] | keyvalue)" class="quote-version">
-               {{ event.value.type | titlecase }} · {{ event.value.actorEmail }} · {{ event.value.createdAt | date:'medium' }} · {{ event.value.message }}
-             </div>
-             <ng-container *ngIf="refunds[payment.id] as refund">
-               <p>Refund request: {{ refund.status | titlecase }} · {{ refund.reason }}</p>
-               <p *ngIf="refund.reviewedBy">Reviewed by {{ refund.reviewedBy }} · {{ refund.reviewedAt | date:'medium' }} · {{ refund.decisionNote }}</p>
-               <div class="quote-actions" *ngIf="refund.status === 'pending'">
-                <label [for]="'refund-decision-note-' + payment.id">Refund approval/rejection reason</label>
-                <textarea [id]="'refund-decision-note-' + payment.id" maxlength="500" [(ngModel)]="refundDecisionNotes[payment.id]" placeholder="Record the refund review decision"></textarea>
-                <button type="button" (click)="setRefundStatus(payment.id, 'approved')" [disabled]="!refundDecisionNotes[payment.id]?.trim()">Approve refund request</button>
-                <button type="button" (click)="setRefundStatus(payment.id, 'rejected')" [disabled]="!refundDecisionNotes[payment.id]?.trim()">Reject refund request</button>
-               </div>
-               <div *ngFor="let event of (refundHistory[payment.id] | keyvalue)" class="quote-version">
-                 Refund {{ event.value.type }} · {{ event.value.actorEmail }} · {{ event.value.createdAt | date:'medium' }} · {{ event.value.message }}
-               </div>
-                <section *ngIf="refund.status === 'approved'" class="refund-processing-panel" aria-label="External refund processing outcome">
-                  <p>External processing outcome: <strong>{{ (refundProcessing[payment.id]?.status || 'Not recorded') | titlecase }}</strong></p>
-                  <p *ngIf="refundProcessing[payment.id] as processing">Reference {{ processing.reference || 'Not provided' }} · {{ processing.createdAt | date:'medium' }} · {{ processing.actorEmail }}</p>
-                  <div *ngFor="let event of (refundProcessingHistory[payment.id] | keyvalue)" class="quote-version">
-                    External refund {{ event.value.type }} · {{ event.value.actorEmail }} · {{ event.value.message }} · {{ event.value.createdAt | date:'medium' }}
-                  </div>
-                  <div class="commission-entry-form" *ngIf="payment.status === 'verified' && refundProcessing[payment.id]?.status !== 'processed'">
-                    <label [for]="'refund-processing-reference-' + payment.id">External refund reference</label>
-                    <input [id]="'refund-processing-reference-' + payment.id" maxlength="200" [(ngModel)]="refundProcessingReferences[payment.id]" placeholder="Provider or bank reference">
-                    <label [for]="'refund-processing-note-' + payment.id">Processing outcome note</label>
-                    <textarea [id]="'refund-processing-note-' + payment.id" maxlength="500" [(ngModel)]="refundProcessingNotes[payment.id]" placeholder="Record the actual external refund result"></textarea>
-                    <button type="button" (click)="recordRefundProcessing(payment.id, 'processed')" [disabled]="!refundProcessingReferences[payment.id]?.trim() || !refundProcessingNotes[payment.id]?.trim()">Record refund processed</button>
-                    <button type="button" (click)="recordRefundProcessing(payment.id, 'failed')" [disabled]="!refundProcessingNotes[payment.id]?.trim()">Record refund failed</button>
-                  </div>
-                  <button type="button" *ngIf="payment.status === 'verified' && refundProcessing[payment.id]?.status === 'processed'" (click)="finalizeRefundLedger(payment.id)">Finalize refunded payment status</button>
-                </section>
-             </ng-container>
-           </article>
-         </section>
+            <!-- Actions -->
+            <td class="col-actions text-right" (click)="$event.stopPropagation()">
+              <button type="button" class="btn-inspect" (click)="openOrderModal(order)">
+                <span>Inspect Order</span>
+                <span class="arrow-icon">→</span>
+              </button>
+            </td>
 
-         <section class="detail-section quotation-panel" aria-label="Delivery assignment">
-           <h4>Delivery assignment</h4>
-           <p *ngIf="deliveryAssignments[order.id] as assignment">
-             Assigned to {{ deliveryAgents.find(agent => agent.uid === assignment.agentUid)?.fullName || assignment.agentUid }} · {{ assignment.status | titlecase }}
-           </p>
-           <label [for]="'delivery-agent-' + order.id">Active delivery agent</label>
-           <select [id]="'delivery-agent-' + order.id" [(ngModel)]="selectedDeliveryAgent[order.id]">
-             <option value="">Select an agent</option>
-             <option *ngFor="let agent of deliveryAgents" [value]="agent.uid">{{ agent.fullName }} · {{ agent.email }}</option>
-           </select>
-           <button type="button" (click)="assignDelivery(order)" [disabled]="!selectedDeliveryAgent[order.id] || ['Delivered','Cancelled'].includes(order.status)">
-             {{ deliveryAssignments[order.id] ? 'Reassign delivery' : 'Assign delivery' }}
-           </button>
-           <small *ngIf="!deliveryAgents.length">No active delivery agent accounts are available.</small>
-         </section>
-
-         <section class="detail-section quotation-panel" aria-label="Referral attribution and commission" *ngIf="order.uid">
-           <h4>Teacher referral & commission ledger</h4>
-           <ng-container *ngIf="referralAttributions[order.uid] as attribution; else noReferralAttribution">
-             <p>Referral code <strong>{{ attribution.referralCode }}</strong> · Teacher account <strong>{{ attribution.teacherUid | slice:0:10 }}</strong></p>
-             <p *ngIf="!orderCommissions[order.id]?.length">No commission record exists for this order.</p>
-             <article *ngFor="let commission of orderCommissions[order.id]" class="quotation-history-row">
-               <strong>₹{{ commission.amount }} {{ commission.currency }} · {{ commission.status | titlecase }}</strong>
-               <p>Calculation snapshot: ₹{{ commission.calculationBaseAmount }} × {{ commission.calculationRatePercent }}% = ₹{{ commission.proposedAmount }} · {{ commission.roundingPolicy }}</p>
-               <p>Payment {{ commission.paymentId | slice:0:10 }} · recorded {{ commission.createdAt | date:'medium' }}</p>
-               <p>{{ commission.memo || 'No additional note.' }}</p>
-               <button type="button" *ngIf="!hasCommissionHistory(commission.id)" (click)="repairCommissionHistory(commission)">Repair missing creation history</button>
-               <div *ngFor="let event of (commissionHistory[commission.id] | keyvalue)" class="quote-version">
-                 {{ event.value.status | titlecase }} · {{ event.value.actorEmail }} · {{ event.value.message }} · {{ event.value.createdAt | date:'medium' }}
-               </div>
-               <div class="quote-actions" *ngIf="commission.status === 'pending'">
-                 <label [for]="'commission-decision-' + commission.id">Review decision reason</label>
-                 <textarea [id]="'commission-decision-' + commission.id" maxlength="1000" [(ngModel)]="commissionDecisionNotes[commission.id]" placeholder="Record eligibility and review notes"></textarea>
-                 <button type="button" (click)="updateCommissionStatus(commission, 'approved')" [disabled]="!commissionDecisionNotes[commission.id]?.trim()">Approve commission</button>
-                 <button type="button" (click)="updateCommissionStatus(commission, 'rejected')" [disabled]="!commissionDecisionNotes[commission.id]?.trim()">Reject commission</button>
-               </div>
-               <div class="quote-actions" *ngIf="commission.status === 'approved'">
-                 <label [for]="'commission-payout-note-' + commission.id">External payout reference and note</label>
-                 <textarea [id]="'commission-payout-note-' + commission.id" maxlength="1000" [(ngModel)]="commissionDecisionNotes[commission.id]" placeholder="Record payout reference after manual transfer"></textarea>
-                 <button type="button" (click)="updateCommissionStatus(commission, 'paid')" [disabled]="!commissionDecisionNotes[commission.id]?.trim()">Record external payout complete</button>
-               </div>
-             </article>
-             <div *ngIf="hasVerifiedPayment(order.id) && !(orderCommissions[order.id]?.length)" class="commission-entry-form">
-               <p>Eligibility: one manually verified payment and an immutable teacher attribution. Formula: verified payment × the administrator-entered rate, rounded half-up to INR 0.01.</p>
-               <p>Verified payment base: ₹{{ commissionBaseAmount(order.id) ?? 'Ambiguous' }}</p>
-               <label [for]="'commission-rate-' + order.id">Commission rate (%)</label>
-               <input [id]="'commission-rate-' + order.id" type="number" min="0.01" max="100" step="0.01" [(ngModel)]="commissionRates[order.id]" placeholder="Enter reviewed rate">
-               <p *ngIf="commissionPreview(order.id) as preview">Preview only: ₹{{ preview }} INR. The administrator must review and approve this snapshot.</p>
-               <label [for]="'commission-memo-' + order.id">Calculation and eligibility note</label>
-               <textarea [id]="'commission-memo-' + order.id" maxlength="1000" [(ngModel)]="commissionMemos[order.id]" placeholder="Record the approved commission basis"></textarea>
-               <button type="button" (click)="createCommission(order)" [disabled]="!commissionPreview(order.id) || !commissionMemos[order.id]?.trim()">Record pending commission</button>
-             </div>
-             <p class="quote-decision">Commission amounts are entered and reviewed manually. No payout is initiated from this application.</p>
-           </ng-container>
-           <ng-template #noReferralAttribution><p>No immutable teacher referral attribution is recorded for this student.</p></ng-template>
-         </section>
-
-         <div class="detail-section">
-           <h4>📍 Contact & Delivery</h4>
-           <p><strong>Phone / WA</strong>
-             {{ order.userDetails?.phone || order.phone || order.userPhone || order.contact?.phone || 'N/A' }}
-             <span *ngIf="order.userDetails?.whatsapp || order.whatsapp || order.contact?.whatsapp">
-               / {{ order.userDetails?.whatsapp || order.whatsapp || order.contact?.whatsapp }}
-             </span>
-           </p>
-           <p><strong>Delivery Address</strong>
-             <span class="highlight">
-               {{ order.userDetails?.address || order.address || order.deliveryAddress || order.contact?.address || 'Not Provided' }}
-             </span>
-           </p>
-           <p><strong>Pincode</strong>
-             {{ order.userDetails?.pincode || order.pincode || order.deliveryPincode || order.contact?.pincode || 'N/A' }}
-           </p>
-         </div>
-
-       </div>
-
-       <div class="instructions-section" *ngIf="order.projectDetails?.specialInstructions && order.projectDetails?.specialInstructions !== 'None'">
-         <h4>📝 Special Instructions from Student</h4>
-         <p>"{{ order.projectDetails?.specialInstructions }}"</p>
-       </div>
-
+          </tr>
+        </tbody>
+      </table>
     </div>
 
-    <div class="empty-state glass-card" *ngIf="filteredOrders.length === 0">
-        <span class="empty-icon">🔍</span>
-        <p>No matching records found.</p>
-     </div>
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="filteredOrders.length === 0">
+      <span class="empty-icon">🔍</span>
+      <h3>No orders found</h3>
+      <p>No orders match the current search term or filter criteria.</p>
+      <button type="button" class="btn-reset" *ngIf="searchTerm || statusFilter" (click)="searchTerm = ''; statusFilter = ''; filterOrders()">
+        Reset Filters
+      </button>
+    </div>
+  </section>
 
+  <!-- ============================================================ -->
+  <!-- COMPREHENSIVE ORDER DETAILS MODAL DIALOG                     -->
+  <!-- ============================================================ -->
+  <div class="order-modal-backdrop" *ngIf="selectedOrderForModal" (click)="closeOrderModal()">
+    <div class="order-modal-card" (click)="$event.stopPropagation()">
+
+      <!-- Modal Header -->
+      <header class="modal-header">
+        <div class="modal-title-group">
+          <div class="modal-id-row">
+            <span class="modal-order-id">Order #{{ shortId(selectedOrderForModal.id) | uppercase }}</span>
+            <span class="status-badge" [ngClass]="(selectedOrderForModal.status || 'pending').toLowerCase().replace(' ', '-')">
+              {{ selectedOrderForModal.status || 'Pending' }}
+            </span>
+            <button type="button" class="btn-copy-mini" (click)="copyText(selectedOrderForModal.id, 'Full Order ID')" title="Copy ID">
+              📋 Copy ID
+            </button>
+          </div>
+          <p class="modal-timestamp">Placed on {{ selectedOrderForModal.createdAt | date:'medium' }}</p>
+        </div>
+
+        <button type="button" class="btn-close-modal" (click)="closeOrderModal()" aria-label="Close dialog">✕</button>
+      </header>
+
+      <!-- Modal Tabs Strip -->
+      <nav class="modal-tabs">
+        <button type="button" class="tab-btn" [class.active]="activeModalTab === 'overview'" (click)="setActiveModalTab('overview')">
+          📋 Overview & Specs
+        </button>
+        <button type="button" class="tab-btn" [class.active]="activeModalTab === 'payment_50'" (click)="setActiveModalTab('payment_50')">
+          💰 50-50 Payment & QR
+        </button>
+        <button type="button" class="tab-btn" [class.active]="activeModalTab === 'quotation'" (click)="setActiveModalTab('quotation')">
+          📑 Quotation Lifecycle
+        </button>
+        <button type="button" class="tab-btn" [class.active]="activeModalTab === 'delivery'" (click)="setActiveModalTab('delivery')">
+          🚚 Delivery Routing
+        </button>
+        <button type="button" class="tab-btn" [class.active]="activeModalTab === 'commission'" (click)="setActiveModalTab('commission')" *ngIf="selectedOrderForModal.uid">
+          🎓 Teacher Commission
+        </button>
+        <button type="button" class="tab-btn" [class.active]="activeModalTab === 'refund'" (click)="setActiveModalTab('refund')">
+          🔄 Refund Ledger
+        </button>
+      </nav>
+
+      <!-- Modal Body (Tab Content) -->
+      <div class="modal-body">
+
+        <!-- TAB 1: OVERVIEW & SPECS -->
+        <section *ngIf="activeModalTab === 'overview'" class="tab-pane fade-in">
+          <div class="detail-grid">
+
+            <!-- Student Profile -->
+            <div class="detail-box">
+              <h4>🎓 Student Information</h4>
+              <div class="detail-row"><span class="lbl">Full Name:</span><span class="val">{{ selectedOrderForModal.projectDetails?.submittedBy || selectedOrderForModal.userDetails?.name || 'N/A' }}</span></div>
+              <div class="detail-row"><span class="lbl">Roll Number:</span><span class="val highlight">{{ selectedOrderForModal.projectDetails?.rollNumber || 'N/A' }}</span></div>
+              <div class="detail-row"><span class="lbl">Course & Year:</span><span class="val">{{ selectedOrderForModal.projectDetails?.course || 'N/A' }}</span></div>
+              <div class="detail-row"><span class="lbl">Phone / Mobile:</span><span class="val">{{ selectedOrderForModal.userDetails?.phone || selectedOrderForModal.phone || 'N/A' }}</span></div>
+              <div class="detail-row" *ngIf="selectedOrderForModal.userDetails?.whatsapp || selectedOrderForModal.whatsapp">
+                <span class="lbl">WhatsApp:</span><span class="val">{{ selectedOrderForModal.userDetails?.whatsapp || selectedOrderForModal.whatsapp }}</span>
+              </div>
+            </div>
+
+            <!-- Project Details -->
+            <div class="detail-box">
+              <h4>📁 Project & Submission</h4>
+              <div class="detail-row"><span class="lbl">Subject:</span><span class="val highlight">{{ selectedOrderForModal.projectDetails?.subject || 'N/A' }}</span></div>
+              <div class="detail-row"><span class="lbl">Topic / Title:</span><span class="val">{{ selectedOrderForModal.projectDetails?.topic || selectedOrderForModal.projectDetails?.experimentDetails || 'N/A' }}</span></div>
+              <div class="detail-row"><span class="lbl">Submitted To:</span><span class="val">{{ selectedOrderForModal.projectDetails?.submittedTo || 'Faculty' }}</span></div>
+              <div class="detail-row"><span class="lbl">File Type:</span><span class="val">{{ selectedOrderForModal.fileType | uppercase }}</span></div>
+            </div>
+
+            <!-- Print & Binding Specifications -->
+            <div class="detail-box">
+              <h4>🖨️ Print & Binding Setup</h4>
+              <div class="detail-row"><span class="lbl">Binding Type:</span><span class="val highlight">{{ selectedOrderForModal.printSettings?.binding || 'Standard Soft Spiral' | titlecase }}</span></div>
+              <div class="detail-row"><span class="lbl">Estimated Pages:</span><span class="val">{{ selectedOrderForModal.printSettings?.pagesLabel || selectedOrderForModal.projectDetails?.estimatedPages || 'N/A' }}</span></div>
+              <div class="detail-row"><span class="lbl">Color Mode:</span><span class="val">{{ selectedOrderForModal.printSettings?.colorMode || 'Black & White / Mixed' | titlecase }}</span></div>
+              <div class="detail-row"><span class="lbl">Copies:</span><span class="val">{{ selectedOrderForModal.printSettings?.copies || 1 }} copy(ies)</span></div>
+            </div>
+
+            <!-- Contact & Doorstep Delivery Address -->
+            <div class="detail-box">
+              <h4>📍 Doorstep Delivery Details</h4>
+              <div class="detail-row"><span class="lbl">Delivery Address:</span><span class="val highlight">{{ selectedOrderForModal.userDetails?.address || selectedOrderForModal.address || 'Address not specified' }}</span></div>
+              <div class="detail-row"><span class="lbl">Pincode:</span><span class="val">{{ selectedOrderForModal.userDetails?.pincode || selectedOrderForModal.pincode || 'N/A' }}</span></div>
+              <div class="detail-row"><span class="lbl">Student UID:</span><span class="val mono">{{ selectedOrderForModal.uid || selectedOrderForModal.userId || 'N/A' }}</span></div>
+            </div>
+
+          </div>
+
+          <!-- Uploaded Document / PDF Files -->
+          <div class="detail-box-full" *ngIf="selectedOrderForModal.uploadDetails?.selfUploaded && (selectedOrderForModal.uploadDetails?.files?.length || selectedOrderForModal.uploadDetails?.uploadedFileDataUrl)">
+            <h4>📎 Uploaded Document Files (PDF)</h4>
+            <div class="upload-file-summary">
+              <p><strong>Files:</strong> {{ selectedOrderForModal.uploadDetails?.files?.length ? selectedOrderForModal.uploadDetails.files.length + ' file(s)' : '1 single document' }}</p>
+              <p><strong>Original Name:</strong> {{ selectedOrderForModal.uploadDetails?.fileName || 'Uploaded Project PDF' }}</p>
+            </div>
+            <div class="file-actions-row">
+              <ng-container *ngIf="selectedOrderForModal.uploadDetails?.files?.length">
+                <div *ngFor="let f of selectedOrderForModal.uploadDetails.files" class="file-item">
+                  <span class="file-name-label">📄 {{ f.name }} ({{ f.sizeLabel || 'PDF' }})</span>
+                  <button type="button" class="btn-action-small" (click)="downloadOrderFile(f)">⬇️ Download File</button>
+                </div>
+              </ng-container>
+              <ng-container *ngIf="!selectedOrderForModal.uploadDetails?.files?.length && selectedOrderForModal.uploadDetails?.uploadedFileDataUrl">
+                <a class="btn-action-small" [href]="selectedOrderForModal.uploadDetails.uploadedFileDataUrl" [download]="selectedOrderForModal.uploadDetails.fileName || 'project-file.pdf'">
+                  ⬇️ Download PDF Document
+                </a>
+              </ng-container>
+            </div>
+          </div>
+
+          <!-- Special Instructions -->
+          <div class="instructions-box" *ngIf="selectedOrderForModal.projectDetails?.specialInstructions && selectedOrderForModal.projectDetails?.specialInstructions !== 'None'">
+            <h4>📝 Special Student Instructions</h4>
+            <p>"{{ selectedOrderForModal.projectDetails?.specialInstructions }}"</p>
+          </div>
+        </section>
+
+        <!-- TAB 2: 50-50 PAYMENT LEDGER & QR -->
+        <section *ngIf="activeModalTab === 'payment_50'" class="tab-pane fade-in">
+          
+          <!-- 50-50 Financial Milestone Cards -->
+          <div class="milestone-cards-grid">
+            <div class="milestone-card total">
+              <span class="m-label">Total Quoted Amount</span>
+              <span class="m-val price">₹{{ getTotalAmount(selectedOrderForModal) }}</span>
+              <span class="m-sub">Comprehensive order total</span>
+            </div>
+
+            <div class="milestone-card advance">
+              <span class="m-label">50% Advance (Required to Start)</span>
+              <span class="m-val">₹{{ getAdvanceAmount(selectedOrderForModal) }}</span>
+              <div class="m-status-row">
+                <span class="badge-status" [ngClass]="getAdvanceStatus(selectedOrderForModal).toLowerCase().replace(' ', '-')">
+                  {{ getAdvanceStatus(selectedOrderForModal) }}
+                </span>
+                <span class="m-sub">Paid online by student</span>
+              </div>
+            </div>
+
+            <div class="milestone-card balance">
+              <span class="m-label">50% Doorstep Balance Due</span>
+              <span class="m-val highlight">₹{{ getBalanceDue(selectedOrderForModal) }}</span>
+              <div class="m-status-row">
+                <span class="badge-status" [ngClass]="getBalanceDue(selectedOrderForModal) === 0 || selectedOrderForModal.status === 'Delivered' ? 'collected' : 'pending'">
+                  {{ getDeliveryBalanceStatus(selectedOrderForModal) }}
+                </span>
+                <span class="m-sub">Collect at delivery</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Live Doorstep QR Code Display Card -->
+          <div class="qr-preview-panel glass-panel">
+            <div class="qr-col-img">
+              <img [src]="getDeliveryQrImage(selectedOrderForModal)" [alt]="'UPI QR for Order ' + selectedOrderForModal.id" class="live-qr-img">
+              <span class="qr-caption">Live Dynamic Doorstep QR</span>
+            </div>
+
+            <div class="qr-col-details">
+              <h4>📱 Live Doorstep Balance Payment QR</h4>
+              <p class="qr-desc">
+                When the delivery driver arrives at the customer's doorstep, this dynamic QR code allows the student to scan & pay the exact remaining 50% balance (<strong>₹{{ getBalanceDue(selectedOrderForModal) }}</strong>) directly via Google Pay, PhonePe, Paytm or any UPI app.
+              </p>
+              
+              <div class="upi-box">
+                <span class="upi-lbl">Company UPI ID:</span>
+                <code class="upi-id">{{ paymentReceiving.upiId || 'studentsolutions@upi' }}</code>
+                <button type="button" class="btn-copy-mini" (click)="copyText(paymentReceiving.upiId || 'studentsolutions@upi', 'UPI ID')">Copy UPI</button>
+              </div>
+
+              <div class="upi-box">
+                <span class="upi-lbl">UPI Intent URI:</span>
+                <code class="upi-intent">{{ getDeliveryQrUrl(selectedOrderForModal) }}</code>
+                <button type="button" class="btn-copy-mini" (click)="copyText(getDeliveryQrUrl(selectedOrderForModal), 'Payment Link')">Copy Link</button>
+              </div>
+
+              <div class="collection-status-callout" *ngIf="deliveryAssignments[selectedOrderForModal.id] as assignment">
+                <strong>Driver Collection Status: </strong>
+                <span class="highlight">{{ assignment.paymentCollectionStatus === 'collected' ? 'Collected via ' + (assignment.collectedMethod | uppercase) : 'Pending Collection at Doorstep' }}</span>
+                <span *ngIf="assignment.collectedAt" class="date-sub"> ({{ assignment.collectedAt | date:'medium' }})</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Payment Ledger Entries & Review Actions -->
+          <div class="ledger-box">
+            <h4>📜 Payment Records & Verification Ledger</h4>
+            <p *ngIf="!payments[selectedOrderForModal.id]?.length" class="empty-note">No payment transactions recorded yet for this order.</p>
+
+            <article *ngFor="let payment of payments[selectedOrderForModal.id]" class="ledger-item">
+              <div class="ledger-item-header">
+                <span class="ledger-amount">₹{{ payment.amount }} {{ payment.currency }}</span>
+                <span class="status-badge" [ngClass]="payment.status">
+                  {{ payment.status | titlecase }}
+                </span>
+                <span class="ledger-date">{{ payment.createdAt | date:'medium' }}</span>
+              </div>
+
+              <div class="ledger-meta-row">
+                <span><strong>Transaction Ref:</strong> <code>{{ payment.transactionRef || 'N/A' }}</code></span>
+                <span *ngIf="payment.upiId"><strong>UPI ID:</strong> {{ payment.upiId }}</span>
+                <span *ngIf="payment.verifiedBy"><strong>Verified By:</strong> {{ payment.verifiedBy }} ({{ payment.verifiedAt | date:'short' }})</span>
+              </div>
+
+              <!-- Manual Verification Action Box -->
+              <div class="verification-action-box" *ngIf="payment.status === 'pending'">
+                <p class="warning-callout">⚠️ Verify against your bank / external UPI merchant dashboard before approving.</p>
+                <label [for]="'pay-note-' + payment.id">Verification Reference / Evidence Note:</label>
+                <textarea [id]="'pay-note-' + payment.id" maxlength="500" [(ngModel)]="paymentDecisionNotes[payment.id]" placeholder="e.g. Verified in ICICI Bank statement ref #..."></textarea>
+                <div class="btn-group">
+                  <button type="button" class="btn-verify" (click)="setPaymentStatus(payment.id, 'verified', paymentDecisionNotes[payment.id] || '')" [disabled]="!paymentDecisionNotes[payment.id]?.trim()">
+                    ✓ Record Manual Verification
+                  </button>
+                  <button type="button" class="btn-reject" (click)="setPaymentStatus(payment.id, 'rejected', paymentDecisionNotes[payment.id] || '')" [disabled]="!paymentDecisionNotes[payment.id]?.trim()">
+                    ✕ Reject Payment
+                  </button>
+                </div>
+              </div>
+
+              <!-- History Timeline -->
+              <div class="timeline" *ngIf="(paymentHistory[payment.id] | keyvalue)?.length">
+                <h5>Audit Events:</h5>
+                <div *ngFor="let ev of (paymentHistory[payment.id] | keyvalue)" class="timeline-row">
+                  <span class="tl-type">{{ ev.value.type | titlecase }}</span>
+                  <span class="tl-actor">{{ ev.value.actorEmail }}</span>
+                  <span class="tl-msg">{{ ev.value.message }}</span>
+                  <span class="tl-time">{{ ev.value.createdAt | date:'short' }}</span>
+                </div>
+              </div>
+            </article>
+          </div>
+
+        </section>
+
+        <!-- TAB 3: QUOTATION LIFECYCLE -->
+        <section *ngIf="activeModalTab === 'quotation'" class="tab-pane fade-in">
+          
+          <div class="quotation-panel">
+            <h4>📑 Issue & Manage Quotation Versions</h4>
+            <p class="panel-desc">Students review and approve quotations before printing begins. When issuing a quote, the 50% advance and 50% doorstep balance are automatically computed.</p>
+
+            <!-- Issue New Quotation Form -->
+            <div class="quote-form-card">
+              <h5>Issue New Quotation Version</h5>
+              <div class="form-row-grid">
+                <div class="form-group">
+                  <label [for]="'modal-quote-amount-' + selectedOrderForModal.id">Total Quoted Amount (INR ₹):</label>
+                  <input [id]="'modal-quote-amount-' + selectedOrderForModal.id" type="number" min="1" max="1000000" step="0.01"
+                         [(ngModel)]="quoteAmounts[selectedOrderForModal.id]" placeholder="e.g. 500">
+                </div>
+                <div class="quote-preview-pill" *ngIf="quoteAmounts[selectedOrderForModal.id]">
+                  <span>50% Advance: ₹{{ Math.round((quoteAmounts[selectedOrderForModal.id] || 0) * 0.5) }}</span>
+                  <span>50% Balance on Delivery: ₹{{ (quoteAmounts[selectedOrderForModal.id] || 0) - Math.round((quoteAmounts[selectedOrderForModal.id] || 0) * 0.5) }}</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label [for]="'modal-quote-terms-' + selectedOrderForModal.id">Terms / Notes for Student:</label>
+                <textarea [id]="'modal-quote-terms-' + selectedOrderForModal.id" maxlength="2000" [(ngModel)]="quoteTerms[selectedOrderForModal.id]"
+                          placeholder="e.g. 50% advance required to initiate printing. Remaining 50% payable at doorstep via UPI QR or Cash."></textarea>
+              </div>
+
+              <button type="button" class="btn-primary" (click)="createQuotation(selectedOrderForModal)" [disabled]="!quoteAmounts[selectedOrderForModal.id]">
+                📤 Issue Quotation Version
+              </button>
+            </div>
+
+            <!-- Existing Quotation Versions History -->
+            <div class="quote-history-list">
+              <h5>Quotation Versions History</h5>
+              <p *ngIf="!(quotations[selectedOrderForModal.id]?.versions | keyvalue)?.length" class="empty-note">No quotations have been issued for this order yet.</p>
+
+              <div *ngFor="let ver of (quotations[selectedOrderForModal.id]?.versions | keyvalue)" class="quote-ver-card"
+                   [class.is-current]="quotations[selectedOrderForModal.id]?.currentVersionId === ver.key">
+                <div class="ver-header">
+                  <span class="ver-badge">Version {{ ver.value.version }}</span>
+                  <span class="ver-amount">₹{{ ver.value.amount }} {{ ver.value.currency }}</span>
+                  <span class="ver-current-pill" *ngIf="quotations[selectedOrderForModal.id]?.currentVersionId === ver.key">✓ CURRENT ACTIVE OFFER</span>
+                </div>
+                <p class="ver-terms">{{ ver.value.terms || '50% advance required to start printing. 50% payable on delivery.' }}</p>
+                <div class="ver-meta">
+                  <span>Issued on {{ ver.value.createdAt | date:'medium' }}</span>
+                  <span>By: {{ ver.value.actorEmail }}</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- TAB 4: DELIVERY ROUTING -->
+        <section *ngIf="activeModalTab === 'delivery'" class="tab-pane fade-in">
+          
+          <div class="delivery-routing-panel">
+            <h4>🚚 Delivery Partner Routing & Doorstep Milestones</h4>
+
+            <!-- Current Assignment Summary -->
+            <div class="assignment-status-box" *ngIf="deliveryAssignments[selectedOrderForModal.id] as assignment; else noAssignmentBox">
+              <div class="as-row">
+                <span class="as-lbl">Assigned Partner:</span>
+                <span class="as-val highlight">{{ getDeliveryAgentName(assignment.agentUid) }}</span>
+              </div>
+              <div class="as-row">
+                <span class="as-lbl">Delivery Status:</span>
+                <span class="status-badge" [ngClass]="assignment.status.toLowerCase().replace('_', '-')">{{ assignment.status | titlecase }}</span>
+              </div>
+              <div class="as-row">
+                <span class="as-lbl">50% Doorstep Payment:</span>
+                <span class="highlight">{{ assignment.paymentCollectionStatus === 'collected' ? 'Collected (' + (assignment.collectedMethod | uppercase) + ')' : 'Pending (₹' + (assignment.balanceDue || getBalanceDue(selectedOrderForModal)) + ')' }}</span>
+              </div>
+              <div class="as-row" *ngIf="assignment.collectedRef">
+                <span class="as-lbl">Collection Reference:</span>
+                <code>{{ assignment.collectedRef }}</code>
+              </div>
+            </div>
+
+            <ng-template #noAssignmentBox>
+              <div class="no-assignment-callout">
+                ⚠️ This order is currently <strong>not assigned</strong> to any delivery agent. Select an active agent below to dispatch.
+              </div>
+            </ng-template>
+
+            <!-- Agent Assignment Form -->
+            <div class="assign-form-card">
+              <h5>{{ deliveryAssignments[selectedOrderForModal.id] ? 'Reassign Delivery Partner' : 'Assign to Active Delivery Agent' }}</h5>
+              <div class="form-group">
+                <label [for]="'modal-agent-' + selectedOrderForModal.id">Select Active Delivery Partner:</label>
+                <select [id]="'modal-agent-' + selectedOrderForModal.id" [(ngModel)]="selectedDeliveryAgent[selectedOrderForModal.id]" class="form-select">
+                  <option value="">-- Choose verified delivery agent --</option>
+                  <option *ngFor="let agent of deliveryAgents" [value]="agent.uid">{{ agent.fullName }} ({{ agent.email }})</option>
+                </select>
+              </div>
+
+              <button type="button" class="btn-primary" (click)="assignDelivery(selectedOrderForModal)"
+                      [disabled]="!selectedDeliveryAgent[selectedOrderForModal.id] || ['Delivered', 'Cancelled'].includes(selectedOrderForModal.status)">
+                🚚 {{ deliveryAssignments[selectedOrderForModal.id] ? 'Confirm Reassignment' : 'Confirm Assignment & Notify Driver' }}
+              </button>
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- TAB 5: TEACHER COMMISSION -->
+        <section *ngIf="activeModalTab === 'commission' && selectedOrderForModal.uid" class="tab-pane fade-in">
+          
+          <div class="commission-panel">
+            <h4>🎓 Teacher Referral & Commission Ledger</h4>
+
+            <ng-container *ngIf="referralAttributions[selectedOrderForModal.uid] as attribution; else noReferralAttributionModal">
+              
+              <div class="attribution-box">
+                <div class="attr-row"><span class="lbl">Referral Code Used:</span><span class="val highlight">{{ attribution.referralCode }}</span></div>
+                <div class="attr-row"><span class="lbl">Teacher Account UID:</span><span class="val mono">{{ attribution.teacherUid }}</span></div>
+                <div class="attr-row"><span class="lbl">Student Attributed At:</span><span class="val">{{ attribution.createdAt | date:'medium' }}</span></div>
+              </div>
+
+              <!-- Existing Commissions for this order -->
+              <div class="commission-records-list">
+                <h5>Recorded Commission Records</h5>
+                <p *ngIf="!orderCommissions[selectedOrderForModal.id]?.length" class="empty-note">No commission records currently recorded for this order.</p>
+
+                <article *ngFor="let com of orderCommissions[selectedOrderForModal.id]" class="com-record-card">
+                  <div class="com-head">
+                    <span class="com-amount">₹{{ com.amount }} {{ com.currency }}</span>
+                    <span class="status-badge" [ngClass]="com.status">{{ com.status | titlecase }}</span>
+                    <span class="com-date">{{ com.createdAt | date:'medium' }}</span>
+                  </div>
+
+                  <p class="com-calc">Snapshot: Base ₹{{ com.calculationBaseAmount }} × {{ com.calculationRatePercent }}% = ₹{{ com.proposedAmount }}</p>
+                  <p class="com-memo" *ngIf="com.memo">Memo: "{{ com.memo }}"</p>
+
+                  <!-- Actions for Pending Commission -->
+                  <div class="com-decision-box" *ngIf="com.status === 'pending'">
+                    <label [for]="'modal-com-note-' + com.id">Review Decision Reason / Verification Notes:</label>
+                    <textarea [id]="'modal-com-note-' + com.id" maxlength="500" [(ngModel)]="commissionDecisionNotes[com.id]" placeholder="Notes on commission eligibility"></textarea>
+                    <div class="btn-group">
+                      <button type="button" class="btn-verify" (click)="updateCommissionStatus(com, 'approved')" [disabled]="!commissionDecisionNotes[com.id]?.trim()">
+                        Approve Commission
+                      </button>
+                      <button type="button" class="btn-reject" (click)="updateCommissionStatus(com, 'rejected')" [disabled]="!commissionDecisionNotes[com.id]?.trim()">
+                        Reject Commission
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Actions for Approved Commission (External Payout) -->
+                  <div class="com-decision-box" *ngIf="com.status === 'approved'">
+                    <label [for]="'modal-com-payout-' + com.id">External Payout Reference & Bank Details:</label>
+                    <textarea [id]="'modal-com-payout-' + com.id" maxlength="500" [(ngModel)]="commissionDecisionNotes[com.id]" placeholder="Bank transfer reference number"></textarea>
+                    <button type="button" class="btn-verify" (click)="updateCommissionStatus(com, 'paid')" [disabled]="!commissionDecisionNotes[com.id]?.trim()">
+                      Mark External Payout Complete
+                    </button>
+                  </div>
+
+                  <!-- History repair -->
+                  <button type="button" class="btn-secondary" *ngIf="!hasCommissionHistory(com.id)" (click)="repairCommissionHistory(com)">
+                    Repair Missing Creation History
+                  </button>
+                </article>
+              </div>
+
+              <!-- Create Commission Form if eligible -->
+              <div *ngIf="hasVerifiedPayment(selectedOrderForModal.id) && !(orderCommissions[selectedOrderForModal.id]?.length)" class="new-com-form">
+                <h5>Record Verified Teacher Commission</h5>
+                <p class="formula-note">Formula: Verified Payment Base (₹{{ commissionBaseAmount(selectedOrderForModal.id) }}) × Rate %.</p>
+
+                <div class="form-group">
+                  <label [for]="'modal-com-rate-' + selectedOrderForModal.id">Commission Rate (%):</label>
+                  <input [id]="'modal-com-rate-' + selectedOrderForModal.id" type="number" min="0.01" max="100" step="0.01"
+                         [(ngModel)]="commissionRates[selectedOrderForModal.id]" placeholder="e.g. 10">
+                </div>
+
+                <div class="preview-box" *ngIf="commissionPreview(selectedOrderForModal.id) as preview">
+                  <span>Computed Payout: <strong>₹{{ preview }} INR</strong></span>
+                </div>
+
+                <div class="form-group">
+                  <label [for]="'modal-com-memo-' + selectedOrderForModal.id">Calculation Memo & Justification:</label>
+                  <textarea [id]="'modal-com-memo-' + selectedOrderForModal.id" maxlength="500" [(ngModel)]="commissionMemos[selectedOrderForModal.id]"
+                            placeholder="Reason for rate and referral attribution verification"></textarea>
+                </div>
+
+                <button type="button" class="btn-primary" (click)="createCommission(selectedOrderForModal)"
+                        [disabled]="!commissionPreview(selectedOrderForModal.id) || !commissionMemos[selectedOrderForModal.id]?.trim()">
+                  Record Pending Commission
+                </button>
+              </div>
+
+            </ng-container>
+
+            <ng-template #noReferralAttributionModal>
+              <div class="no-attribution-note">
+                ℹ️ No teacher referral attribution was registered for this student account.
+              </div>
+            </ng-template>
+
+          </div>
+
+        </section>
+
+        <!-- TAB 6: REFUND LEDGER -->
+        <section *ngIf="activeModalTab === 'refund'" class="tab-pane fade-in">
+          
+          <div class="refund-panel">
+            <h4>🔄 Customer Refund Requests & External Processing</h4>
+
+            <p *ngIf="!payments[selectedOrderForModal.id]?.length" class="empty-note">No payments available on this order to refund.</p>
+
+            <div *ngFor="let payment of payments[selectedOrderForModal.id]" class="refund-item-card">
+              
+              <div class="rf-head">
+                <span class="rf-amount">Payment: ₹{{ payment.amount }} {{ payment.currency }}</span>
+                <span class="status-badge" [ngClass]="payment.status">{{ payment.status | titlecase }}</span>
+              </div>
+
+              <!-- Refund Request Section -->
+              <ng-container *ngIf="refunds[payment.id] as refund; else noRefundReq">
+                <div class="refund-req-box">
+                  <div class="rf-row"><span class="lbl">Refund Status:</span><span class="val highlight">{{ refund.status | titlecase }}</span></div>
+                  <div class="rf-row"><span class="lbl">Reason Given:</span><span class="val">{{ refund.reason }}</span></div>
+                  <div class="rf-row" *ngIf="refund.reviewedBy"><span class="lbl">Reviewed By:</span><span class="val">{{ refund.reviewedBy }} ({{ refund.reviewedAt | date:'short' }})</span></div>
+                  <div class="rf-row" *ngIf="refund.decisionNote"><span class="lbl">Decision Note:</span><span class="val">{{ refund.decisionNote }}</span></div>
+                </div>
+
+                <!-- Review Form for Pending Refund -->
+                <div class="decision-box" *ngIf="refund.status === 'pending'">
+                  <label [for]="'modal-rf-note-' + payment.id">Refund Decision Note / Justification:</label>
+                  <textarea [id]="'modal-rf-note-' + payment.id" maxlength="500" [(ngModel)]="refundDecisionNotes[payment.id]" placeholder="Reason for approving or rejecting refund"></textarea>
+                  <div class="btn-group">
+                    <button type="button" class="btn-verify" (click)="setRefundStatus(payment.id, 'approved')" [disabled]="!refundDecisionNotes[payment.id]?.trim()">
+                      Approve Refund
+                    </button>
+                    <button type="button" class="btn-reject" (click)="setRefundStatus(payment.id, 'rejected')" [disabled]="!refundDecisionNotes[payment.id]?.trim()">
+                      Reject Refund
+                    </button>
+                  </div>
+                </div>
+
+                <!-- External Refund Processing Tracker -->
+                <div *ngIf="refund.status === 'approved'" class="external-refund-box">
+                  <h5>External Refund Disbursement Status: <strong>{{ (refundProcessing[payment.id]?.status || 'Not Recorded') | titlecase }}</strong></h5>
+                  <p *ngIf="refundProcessing[payment.id] as proc">Reference: <code>{{ proc.reference || 'N/A' }}</code> · Logged by {{ proc.actorEmail }}</p>
+
+                  <div class="proc-form" *ngIf="payment.status === 'verified' && refundProcessing[payment.id]?.status !== 'processed'">
+                    <label [for]="'modal-rf-ref-' + payment.id">Bank / UPI Refund Reference:</label>
+                    <input [id]="'modal-rf-ref-' + payment.id" maxlength="200" [(ngModel)]="refundProcessingReferences[payment.id]" placeholder="Bank transaction ID">
+
+                    <label [for]="'modal-rf-pnote-' + payment.id">Disbursement Note:</label>
+                    <textarea [id]="'modal-rf-pnote-' + payment.id" maxlength="500" [(ngModel)]="refundProcessingNotes[payment.id]" placeholder="Disbursement outcome"></textarea>
+
+                    <div class="btn-group">
+                      <button type="button" class="btn-verify" (click)="recordRefundProcessing(payment.id, 'processed')" [disabled]="!refundProcessingReferences[payment.id]?.trim() || !refundProcessingNotes[payment.id]?.trim()">
+                        Record Refund Processed
+                      </button>
+                      <button type="button" class="btn-reject" (click)="recordRefundProcessing(payment.id, 'failed')" [disabled]="!refundProcessingNotes[payment.id]?.trim()">
+                        Record Refund Failed
+                      </button>
+                    </div>
+                  </div>
+
+                  <button type="button" class="btn-primary" *ngIf="payment.status === 'verified' && refundProcessing[payment.id]?.status === 'processed'" (click)="finalizeRefundLedger(payment.id)">
+                    Finalize Refunded Payment in Ledger
+                  </button>
+                </div>
+              </ng-container>
+
+              <ng-template #noRefundReq>
+                <p class="empty-note">No student refund request has been submitted for this payment.</p>
+              </ng-template>
+
+            </div>
+
+          </div>
+
+        </section>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <footer class="modal-footer">
+        <span class="footer-hint">Viewing detailed operations for Order #{{ shortId(selectedOrderForModal.id) | uppercase }}</span>
+        <button type="button" class="btn-secondary" (click)="closeOrderModal()">Close</button>
+      </footer>
+
+    </div>
   </div>
+
 </div>

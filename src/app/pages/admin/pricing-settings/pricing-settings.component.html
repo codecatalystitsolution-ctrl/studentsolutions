@@ -277,6 +277,89 @@
       </div>
     </div>
 
+    <!-- Section 2.5: Company Payment Receiving Details (UPI Only) -->
+    <div class="panel-card payment-receiving-panel">
+      <div class="panel-header">
+        <div>
+          <div class="badge-tag green">Central Receiving Gateway</div>
+          <h2 class="panel-title">📱 Company Payment Receiving UPI Account</h2>
+          <p class="panel-subtitle">Configure the central UPI ID where student payments and delivery doorstep collections are deposited. Changing this instantly updates QR codes across the platform.</p>
+        </div>
+        <div class="sync-indicator">
+          <span class="live-pulse"></span>
+          <span class="sync-text">Live Synchronized Across All Portals</span>
+        </div>
+      </div>
+
+      <div class="payment-receiving-grid">
+        <!-- UPI Configuration Column -->
+        <div class="form-fields-stack">
+          <h3 class="sub-heading">📱 UPI Receiving Configuration</h3>
+
+          <div class="field-item">
+            <label for="payUpiId">Primary Receiving UPI ID <span class="optional-badge">(Optional - defaults to studentsolutions@upi)</span></label>
+            <div class="input-prefix">
+              <span class="prefix">@</span>
+              <input
+                id="payUpiId"
+                type="text"
+                class="form-control"
+                placeholder="e.g. studentsolutions@upi"
+                [(ngModel)]="config.paymentReceiving.upiId" />
+            </div>
+            <small class="field-hint">Used for dynamic student 50% advance & delivery doorstep UPI QR codes.</small>
+          </div>
+
+          <div class="field-item">
+            <label for="payPayeeName">Merchant / Payee Name <span class="optional-badge">(Optional)</span></label>
+            <input
+              id="payPayeeName"
+              type="text"
+              class="form-control"
+              placeholder="e.g. Student Solutions"
+              [(ngModel)]="config.paymentReceiving.payeeName" />
+            <small class="field-hint">Displayed in Google Pay, PhonePe, and Paytm when customer scans the QR.</small>
+          </div>
+
+          <div class="field-item">
+            <label for="payQrNote">QR Transaction Description Note</label>
+            <input
+              id="payQrNote"
+              type="text"
+              class="form-control"
+              placeholder="e.g. Scan to pay order advance / balance"
+              [(ngModel)]="config.paymentReceiving.qrNote" />
+            <small class="field-hint">Prefixed to UPI transaction memos.</small>
+          </div>
+        </div>
+
+        <!-- Live Live QR Preview Card -->
+        <div class="qr-preview-card">
+          <h3 class="sub-heading">🔍 Live QR & URI Preview</h3>
+          <div class="qr-box">
+            <img [src]="previewQrImage" alt="Live Test Payment QR" class="preview-qr-img" />
+            <span class="qr-sub-text">Dynamic Preview for ₹100 Test</span>
+          </div>
+
+          <div class="preview-info-rows">
+            <div class="prev-row">
+              <span class="prev-lbl">Active UPI:</span>
+              <code class="prev-val">{{ config.paymentReceiving.upiId }}</code>
+              <button type="button" class="btn-copy-tiny" (click)="copyText(config.paymentReceiving.upiId, 'UPI ID')">Copy</button>
+            </div>
+            <div class="prev-row">
+              <span class="prev-lbl">Payee:</span>
+              <span class="prev-val font-bold">{{ config.paymentReceiving.payeeName }}</span>
+            </div>
+          </div>
+
+          <div class="propagation-callout">
+            ⚡ <strong>Instant Realtime Propagation:</strong> Any change saved here updates the UPI ID and dynamic QR codes across the Delivery Portal, Student Dashboard, and Admin Insights immediately.
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Section 3: Interactive Rate Simulator -->
     <div class="panel-card simulator-panel">
       <div class="panel-header">

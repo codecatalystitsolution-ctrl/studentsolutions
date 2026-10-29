@@ -115,11 +115,43 @@
                             </ng-container>
                           </ng-container>
                           <ng-template #paymentEntry>
-                            <label [for]="'payment-reference-' + order.id">Transaction reference</label>
+                            <div class="split-pay-notice" style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 8px; padding: 0.6rem; margin-bottom: 0.6rem; font-size: 0.8rem; color: #bae6fd;">
+                              <strong>💳 50% Advance Required:</strong>
+                              <p style="margin: 3px 0 0;">Pay <strong>50% advance (₹{{ get50AdvanceAmount(quote.amount) }})</strong> now to start printing. The remaining <strong>50% balance (₹{{ quote.amount - get50AdvanceAmount(quote.amount) }})</strong> is payable at doorstep upon delivery via UPI QR or Cash.</p>
+                            </div>
+
+                            <!-- Live Dynamic UPI QR & Payment Account Card -->
+                            <div class="advance-pay-box" style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; padding: 0.8rem; margin-bottom: 0.8rem; text-align: center;">
+                              <div style="background: #fff; padding: 8px; border-radius: 8px; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin-bottom: 0.5rem;">
+                                <img [src]="getAdvanceQrImage(quote.amount, order.id)" [alt]="'UPI QR for Order ' + order.id" style="width: 130px; height: 130px; display: block;" />
+                              </div>
+                              <div style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 4px;">
+                                Scan with GPay, PhonePe, Paytm, or BHIM to pay <strong>₹{{ get50AdvanceAmount(quote.amount) }}</strong>
+                              </div>
+                              <div style="display: flex; justify-content: center; align-items: center; gap: 6px; font-size: 0.78rem; margin-bottom: 4px; flex-wrap: wrap;">
+                                <span style="color: #94a3b8; font-weight: 600;">Company UPI ID:</span>
+                                <code style="color: #38bdf8; background: rgba(14,165,233,0.15); border: 1px solid rgba(14,165,233,0.3); padding: 2px 7px; border-radius: 6px; font-size: 0.75rem;">{{ paymentReceiving.upiId || 'studentsolutions@upi' }}</code>
+                                <button type="button" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 4px; padding: 2px 7px; font-size: 0.7rem; cursor: pointer;" (click)="copyText(paymentReceiving.upiId || 'studentsolutions@upi', 'UPI ID')">Copy</button>
+                              </div>
+
+                              <div style="display: flex; justify-content: center; align-items: center; gap: 6px; font-size: 0.78rem; margin-bottom: 8px; flex-wrap: wrap;">
+                                <span style="color: #94a3b8; font-weight: 600; white-space: nowrap;">UPI Intent URI:</span>
+                                <code style="color: #38bdf8; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(56, 189, 248, 0.25); padding: 2px 7px; border-radius: 6px; font-size: 0.72rem; max-width: 230px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block;">{{ getAdvanceQrUrl(quote.amount, order.id) }}</code>
+                                <button type="button" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 4px; padding: 2px 7px; font-size: 0.7rem; cursor: pointer; white-space: nowrap;" (click)="copyText(getAdvanceQrUrl(quote.amount, order.id), 'Payment Link')">Copy Link</button>
+                              </div>
+
+                              <div style="margin-bottom: 4px;">
+                                <a [href]="getAdvanceQrUrl(quote.amount, order.id)" style="display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; background: linear-gradient(135deg, #0284c7, #2563eb); color: #fff; text-decoration: none; font-size: 0.75rem; font-weight: 700; border-radius: 6px;">
+                                  ⚡ Open in UPI App (GPay / PhonePe / Paytm)
+                                </a>
+                              </div>
+                            </div>
+
+                            <label [for]="'payment-reference-' + order.id">50% Advance Transaction Reference</label>
                             <input [id]="'payment-reference-' + order.id" [(ngModel)]="paymentReference[order.id]" maxlength="200" pattern="[A-Za-z0-9_-]{1,200}" title="Use letters, numbers, hyphens, or underscores" placeholder="Reference from your payment app">
                             <label [for]="'payment-upi-' + order.id">UPI ID (optional)</label>
                             <input [id]="'payment-upi-' + order.id" [(ngModel)]="paymentUpi[order.id]" maxlength="200" placeholder="name@bank">
-                            <button type="button" (click)="submitQuotedPayment(order.id, quoteEntry.key)" [disabled]="!paymentReference[order.id]?.trim()">Submit payment for review</button>
+                            <button type="button" (click)="submitQuotedPayment(order.id, quoteEntry.key)" [disabled]="!paymentReference[order.id]?.trim()">Submit 50% advance for review</button>
                             <small class="quote-version">Payment details are reviewed manually; submission is not proof of payment.</small>
                           </ng-template>
                         </ng-container>
@@ -132,7 +164,33 @@
                     </ng-container>
                   </div>
                 </ng-container>
-                <ng-template #noQuotation>Not quoted</ng-template>
+                <ng-template #noQuotation>
+                  <div class="pending-advance-box" style="font-size: 0.78rem;">
+                    <div style="margin-bottom: 4px;">
+                      <span class="status-badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); padding: 2px 7px; border-radius: 4px; font-weight: 700; font-size: 0.72rem;">
+                        {{ order.paymentDetails?.advanceStatus || '50% Advance Pending' }}
+                      </span>
+                    </div>
+
+                    <div *ngIf="order.paymentDetails?.advancePaymentRef" style="color: #cbd5e1; font-size: 0.75rem; margin-top: 4px;">
+                      <span>UTR: <code>{{ order.paymentDetails?.advancePaymentRef }}</code></span>
+                      <small style="display: block; color: #94a3b8;">Under admin verification</small>
+                    </div>
+
+                    <div *ngIf="!order.paymentDetails?.advancePaymentRef">
+                      <div style="color: #94a3b8; font-size: 0.75rem; margin: 4px 0 2px;">
+                        50% Advance: <strong>&#8377;{{ get50AdvanceAmount(order.requestedPricing?.estimatedAmount || 0) }}</strong>
+                      </div>
+                      <div style="background: #fff; padding: 4px; border-radius: 6px; display: inline-block; margin-bottom: 4px;">
+                        <img [src]="getAdvanceQrImage(order.requestedPricing?.estimatedAmount || 0, order.id)" [alt]="'QR for order ' + order.id" style="width: 90px; height: 90px; display: block;" />
+                      </div>
+                      <div style="font-size: 0.72rem; color: #cbd5e1;">
+                        UPI: <code style="color: #38bdf8;">{{ paymentReceiving.upiId || 'studentsolutions@upi' }}</code>
+                        <button type="button" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 3px; padding: 1px 4px; font-size: 0.68rem; margin-left: 3px; cursor: pointer;" (click)="copyText(paymentReceiving.upiId || 'studentsolutions@upi', 'UPI ID')">Copy</button>
+                      </div>
+                    </div>
+                  </div>
+                </ng-template>
               </td>
 
               <td data-label="Delivery">

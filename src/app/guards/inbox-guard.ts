@@ -4,7 +4,7 @@ import { Database, get, ref } from '@angular/fire/database';
 import { CanActivateFn, Router } from '@angular/router';
 import { catchError, defer, from, map, of, switchMap } from 'rxjs';
 
-const adminEmails = new Set(['admin@filecrafters.in', 'wmohd2514@outlook.com']);
+const adminEmails = new Set(['admin@studentsolutions.online', 'admin@studentsolutions.in', 'admin@filecrafters.in', 'wmohd2514@outlook.com']);
 const inboxRoles = new Set(['Student', 'Teacher', 'Delivery']);
 
 export const inboxGuard: CanActivateFn = () => {

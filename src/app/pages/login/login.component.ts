@@ -74,7 +74,7 @@ if (this.loginForm.valid) {
         this.showPendingModal = true;
         this.notificationService.show(
           'info',
-          'Your account application is currently under verification by FileCrafters Admin. You will receive an email once approved.',
+          'Your account application is currently under verification by Student Solutions Admin. You will receive an email once approved.',
           'Application Under Review'
         );
         return;
@@ -100,7 +100,7 @@ if (this.loginForm.valid) {
       }
 
       // Admin emails ki list (Yahan apne actual admin emails zarur rakhein)
-      const adminEmails = ['admin@filecrafters.in', 'wmohd2514@outlook.com'];
+      const adminEmails = ['admin@studentsolutions.online', 'admin@studentsolutions.in', 'admin@filecrafters.in', 'wmohd2514@outlook.com'];
 
       const returnUrl = this.route.snapshot.queryParams['returnUrl'];
 
@@ -181,8 +181,8 @@ if (this.loginForm.valid) {
   contactSupport(): void {
     const role = this.rejectedApplicant?.role || this.pendingApplicant?.role || 'Partner';
     const email = this.rejectedApplicant?.email || this.pendingApplicant?.email || '';
-    const subject = encodeURIComponent(`FileCrafters Application Inquiry - ${role} (${email})`);
-    const mailto = `mailto:support@filecrafters.com?subject=${subject}`;
+    const subject = encodeURIComponent(`Student Solutions Application Inquiry - ${role} (${email})`);
+    const mailto = `mailto:support@studentsolutions.online?subject=${subject}`;
     if (typeof window !== 'undefined') {
       window.open(mailto, '_blank');
     }

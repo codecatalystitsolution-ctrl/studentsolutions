@@ -15,7 +15,7 @@
         </svg>
       </div>
       <div class="brand-copy">
-        <span class="brand-kicker">FILECRAFTERS</span>
+        <span class="brand-kicker">STUDENT SOLUTIONS</span>
         <strong>COURIER FLEET</strong>
       </div>
     </div>
@@ -347,15 +347,33 @@
           </span>
         </div>
 
-        <!-- Parcel Payment Status & Earning Pill -->
+        <!-- Parcel 50-50 Payment Status & Earning Pill -->
         <div class="parcel-payment-strip">
-          <span class="pay-tag-pill prepaid">
+          <span class="pay-tag-pill prepaid" title="Total order price: ₹{{ getTotalAmount(assignment) }}">
             <span>💳</span>
-            <span>Prepaid Online (Verified — ₹0 to collect)</span>
+            <span>Prepaid 50% Online: &#8377;{{ getAdvancePaid(assignment) }}</span>
           </span>
+
+          <ng-container *ngIf="assignment.paymentCollectionStatus === 'collected' || assignment.status === 'delivered'; else pendingCollectPill">
+            <span class="pay-tag-pill collected">
+              <span>&#10003;</span>
+              <span>50% Balance Collected: &#8377;{{ getBalanceDue(assignment) }} ({{ assignment.collectedMethod === 'cash' ? 'Cash' : 'UPI QR' }})</span>
+            </span>
+          </ng-container>
+          <ng-template #pendingCollectPill>
+            <span class="pay-tag-pill collect-due" title="Must collect on delivery">
+              <span>&#128176;</span>
+              <span>Collect 50% Balance: &#8377;{{ getBalanceDue(assignment) }}</span>
+            </span>
+            <button type="button" class="btn-qr-pill" (click)="openQrModal(assignment)" title="Show UPI QR Code to student">
+              <span>&#128241;</span>
+              <span>Show QR</span>
+            </button>
+          </ng-template>
+
           <span class="pay-fee-pill">
             <span>💰</span>
-            <span>₹50 Courier Fee on Delivery</span>
+            <span>&#8377;{{ feePerDelivery }} Courier Fee</span>
           </span>
         </div>
 
@@ -506,6 +524,25 @@
             </button>
           </div>
 
+          <!-- 50% Balance Payment Method Option (when in_transit) -->
+          <div class="collection-method-box" *ngIf="assignment.status === 'in_transit' && assignment.paymentCollectionStatus !== 'collected'">
+            <div class="method-header-line">
+              <strong>💵 50% Balance Collection: &#8377;{{ getBalanceDue(assignment) }}</strong>
+              <button type="button" class="btn-qr-link" (click)="openQrModal(assignment)">📱 Open Payment QR</button>
+            </div>
+            <p class="collection-hint">Verify student payment before completing delivery handover.</p>
+            <div class="method-toggles">
+              <label class="method-pill" [class.selected]="(collectionMethod[assignment.orderId] || 'upi_qr') === 'upi_qr'">
+                <input type="radio" name="paymethod-{{assignment.orderId}}" value="upi_qr" [ngModel]="collectionMethod[assignment.orderId] || 'upi_qr'" (ngModelChange)="collectionMethod[assignment.orderId] = $event" />
+                <span>📱 Scanned UPI QR</span>
+              </label>
+              <label class="method-pill" [class.selected]="collectionMethod[assignment.orderId] === 'cash'">
+                <input type="radio" name="paymethod-{{assignment.orderId}}" value="cash" [ngModel]="collectionMethod[assignment.orderId] || 'upi_qr'" (ngModelChange)="collectionMethod[assignment.orderId] = $event" />
+                <span>💵 Cash on Delivery</span>
+              </label>
+            </div>
+          </div>
+
           <!-- Action Buttons -->
           <div class="action-buttons-row">
             <!-- Exact button text matched for e2e test: page.getByRole('button', { name: /Mark Picked Up/ }) -->
@@ -593,7 +630,7 @@
             <div class="card-heading-row">
               <div>
                 <h2>Payout Receiving Method</h2>
-                <p>Configure where FileCrafters transfers your delivery earnings.</p>
+                <p>Configure where Student Solutions transfers your delivery earnings.</p>
               </div>
               <span class="secure-badge">&#128274; Verified</span>
             </div>
@@ -768,7 +805,7 @@
             <div class="card-heading-row">
               <div>
                 <h2>Payout Requests &amp; Disbursements</h2>
-                <p>Track settlement status from FileCrafters accounts desk.</p>
+                <p>Track settlement status from Student Solutions accounts desk.</p>
               </div>
               <button type="button" class="btn-export-csv" (click)="exportRevenueCsv()">
                 📥 Export CSV
@@ -850,5 +887,87 @@
         </div>
       </div>
     </ng-container>
+
+    <!-- ========================================================================= -->
+    <!-- DYNAMIC UPI QR CODE MODAL FOR 50% BALANCE PAYMENT                         -->
+    <!-- ========================================================================= -->
+    <!-- ========================================================================= -->
+    <!-- DYNAMIC UPI QR CODE MODAL FOR 50% BALANCE PAYMENT (RESPONSIVE DIALOG)     -->
+    <!-- ========================================================================= -->
+    <div class="delivery-qr-modal-overlay modal-backdrop" *ngIf="qrModalOpen && selectedQrAssignment" (click)="closeQrModal()">
+      <div class="delivery-qr-dialog qr-dialog glass-panel" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="qr-dialog-title">
+        
+        <!-- Header -->
+        <div class="dialog-header qr-dialog-header">
+          <div class="header-content">
+            <span class="dialog-badge">DOORSTEP BALANCE</span>
+            <h3 id="qr-dialog-title">UPI Payment QR</h3>
+            <p class="order-ref">Order <strong>#{{ selectedQrAssignment.orderId | slice:0:8 | uppercase }}</strong> &middot; {{ selectedQrAssignment.studentName }}</p>
+          </div>
+          <button type="button" class="btn-close-dialog modal-close-btn" (click)="closeQrModal()" aria-label="Close QR Modal">&times;</button>
+        </div>
+
+        <!-- Body -->
+        <div class="dialog-body qr-dialog-body">
+          <div class="balance-card amount-banner">
+            <span class="balance-label"><small>50% Collectible Balance</small></span>
+            <div class="balance-amount huge-amount">&#8377;{{ getBalanceDue(selectedQrAssignment) }}</div>
+            <span class="balance-subtitle">Scan &amp; pay exact balance to complete order delivery</span>
+          </div>
+
+          <div class="qr-code-wrapper">
+            <div class="qr-canvas-box qr-frame">
+              <img [src]="getQrCodeImageUrl(selectedQrAssignment)" alt="UPI Payment QR Code" class="qr-img qr-image" />
+              <div class="qr-scanner-overlay">
+                <span class="corner tl"></span>
+                <span class="corner tr"></span>
+                <span class="corner bl"></span>
+                <span class="corner br"></span>
+              </div>
+            </div>
+            <div class="qr-app-chips">
+              <span class="app-chip">Google Pay</span>
+              <span class="app-chip">PhonePe</span>
+              <span class="app-chip">Paytm</span>
+              <span class="app-chip">BHIM</span>
+              <span class="app-chip">CRED</span>
+            </div>
+          </div>
+
+          <div class="payment-details-stack">
+            <!-- Company UPI ID -->
+            <div class="detail-row upi-id-row">
+              <span class="detail-lbl upi-lbl">Company UPI ID:</span>
+              <code class="detail-val">{{ paymentReceiving.upiId || 'studentsolutions@upi' }}</code>
+              <button type="button" class="btn-action-copy btn-copy-sm" (click)="copyUpiId()" title="Copy UPI Address">&#128203; Copy</button>
+            </div>
+
+            <!-- UPI Intent URI -->
+            <div class="detail-row upi-id-row">
+              <span class="detail-lbl upi-lbl">UPI Intent URI:</span>
+              <code class="detail-val upi-intent">{{ getUpiPaymentUrl(selectedQrAssignment) }}</code>
+              <button type="button" class="btn-action-copy btn-copy-sm" (click)="copyPaymentLink(getUpiPaymentUrl(selectedQrAssignment))" title="Copy Payment Link">Copy Link</button>
+            </div>
+
+            <!-- Direct 1-Tap UPI App Action -->
+            <a [href]="getUpiPaymentUrl(selectedQrAssignment)" class="btn-open-upi-app">
+              ⚡ Open in UPI App (GPay / PhonePe / Paytm)
+            </a>
+
+            <!-- Payee Verified Note -->
+            <div class="payee-verified-badge scan-instructions">
+              <span class="verified-icon">&#10003;</span>
+              <span>Payee: <strong>{{ paymentReceiving.payeeName || 'Student Solutions' }}</strong> &middot; Verified Business Account</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="dialog-footer qr-dialog-footer">
+          <button type="button" class="btn-dialog-secondary" (click)="closeQrModal()">Close</button>
+          <button type="button" class="btn-dialog-primary btn-primary" (click)="closeQrModal()">&#10004; Done</button>
+        </div>
+      </div>
+    </div>
   </main>
 </div>

@@ -32,7 +32,7 @@ describe('adminGuard', () => {
   });
 
   it('allows access for allowed administrator emails', async () => {
-    for (const email of ['admin@filecrafters.in', 'wmohd2514@outlook.com']) {
+    for (const email of ['admin@studentsolutions.online', 'admin@filecrafters.in', 'wmohd2514@outlook.com']) {
       authMock.testUser = { uid: 'admin-uid', email };
       const result = await firstValueFrom(
         TestBed.runInInjectionContext(() => adminGuard({} as any, {} as any)) as Observable<boolean | UrlTree>

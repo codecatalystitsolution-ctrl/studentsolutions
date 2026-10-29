@@ -29,7 +29,7 @@ export class AdminLoginComponent {
   }
 
   // Yahan apne authorized admin emails dalein
-  allowedAdmins = ['admin@filecrafters.in', 'wmohd2514@outlook.com']; 
+  allowedAdmins = ['admin@studentsolutions.online', 'admin@studentsolutions.in', 'admin@filecrafters.in', 'wmohd2514@outlook.com']; 
 
   async onAdminLogin() {
     if (!this.email || !this.password) {

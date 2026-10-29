@@ -11,7 +11,7 @@ export const VISITOR_SESSION_STORAGE_KEY = 'fc_unique_visitor_session';
 export const VISITOR_COUNTING_WINDOW_MS = 24 * 60 * 60 * 1000; // 24-hour unique counting window
 export const BASELINE_VISITOR_COUNT = 1420;
 
-const adminEmails = new Set(['admin@filecrafters.in', 'wmohd2514@outlook.com']);
+const adminEmails = new Set(['admin@studentsolutions.online', 'admin@studentsolutions.in', 'admin@filecrafters.in', 'wmohd2514@outlook.com']);
 
 @Injectable({ providedIn: 'root' })
 export class VisitorCounterService {

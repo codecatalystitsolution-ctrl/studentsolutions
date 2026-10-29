@@ -4,7 +4,7 @@ import { Database, equalTo, get, limitToFirst, onValue, orderByChild, push, quer
 import { AuditTrailService } from './audit-trail.service';
 import { NotificationInboxService } from './notification-inbox.service';
 
-const adminEmails = new Set(['admin@filecrafters.in', 'wmohd2514@outlook.com']);
+const adminEmails = new Set(['admin@studentsolutions.online', 'admin@studentsolutions.in', 'admin@filecrafters.in', 'wmohd2514@outlook.com']);
 
 export interface ReferralCode {
   code: string;

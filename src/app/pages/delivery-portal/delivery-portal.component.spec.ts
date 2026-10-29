@@ -4,6 +4,7 @@ import { Auth } from '@angular/fire/auth';
 import { Database } from '@angular/fire/database';
 import { DeliveryPortalComponent } from './delivery-portal.component';
 import { DeliveryWorkflowService, DeliveryAssignment } from '../../services/delivery-workflow.service';
+import { PricingConfigService, DEFAULT_PRICING_CONFIG, DEFAULT_PAYMENT_RECEIVING } from '../../services/pricing-config.service';
 import { NotificationService } from '../../shared/notification/notification.service';
 import { AuthService } from '../../services/auth.service';
 import { ThemeService } from '../../services/theme.service';
@@ -97,7 +98,16 @@ describe('DeliveryPortalComponent', () => {
         { provide: DeliveryWorkflowService, useValue: deliveryServiceMock },
         { provide: NotificationService, useValue: notificationServiceMock },
         { provide: AuthService, useValue: authServiceMock },
-        { provide: ThemeService, useValue: { theme: () => 'dark', toggleTheme: vi.fn() } }
+        { provide: ThemeService, useValue: { theme: () => 'dark', toggleTheme: vi.fn() } },
+        {
+          provide: PricingConfigService,
+          useValue: {
+            getDefaultPricing: () => DEFAULT_PRICING_CONFIG,
+            watchPaymentReceiving: vi.fn((cb: any) => { cb(DEFAULT_PAYMENT_RECEIVING); return () => {}; }),
+            getUpiPaymentUrl: vi.fn((amt, orderId, cfg) => `upi://pay?pa=${cfg?.upiId || 'studentsolutions@upi'}&am=${amt}`),
+            getUpiQrImageUrl: vi.fn(() => 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=test')
+          }
+        }
       ]
     }).compileComponents();
 

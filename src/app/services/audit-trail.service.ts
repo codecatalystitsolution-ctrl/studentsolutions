@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Auth } from '@angular/fire/auth';
 import { Database, onValue, push, query, ref, serverTimestamp, set, Unsubscribe, limitToLast } from '@angular/fire/database';
 
-const adminEmails = new Set(['admin@filecrafters.in', 'wmohd2514@outlook.com']);
+const adminEmails = new Set(['admin@studentsolutions.online', 'admin@studentsolutions.in', 'admin@filecrafters.in', 'wmohd2514@outlook.com']);
 
 export interface AuditEvent {
   actorUid: string;

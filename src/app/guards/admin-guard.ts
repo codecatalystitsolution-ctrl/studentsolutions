@@ -5,6 +5,8 @@ import { map } from 'rxjs/operators';
 import { NotificationService } from '../shared/notification/notification.service';
 
 const allowedAdminEmails = new Set([
+  'admin@studentsolutions.online',
+  'admin@studentsolutions.in',
   'admin@filecrafters.in',
   'wmohd2514@outlook.com'
 ]);

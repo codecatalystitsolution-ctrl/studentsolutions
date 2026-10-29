@@ -18,7 +18,9 @@ describe('PricingSettingsComponent', () => {
       getDefaultPricing: vi.fn().mockReturnValue(JSON.parse(JSON.stringify(DEFAULT_PRICING_CONFIG))),
       getPricing: vi.fn().mockResolvedValue(JSON.parse(JSON.stringify(DEFAULT_PRICING_CONFIG))),
       savePricing: vi.fn().mockResolvedValue(undefined),
-      resetToDefaults: vi.fn().mockResolvedValue(undefined)
+      resetToDefaults: vi.fn().mockResolvedValue(undefined),
+      getUpiPaymentUrl: vi.fn().mockReturnValue('upi://pay?pa=studentsolutions@upi&pn=Student%20Solutions&am=100'),
+      getUpiQrImageUrl: vi.fn().mockReturnValue('https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=test')
     };
 
     notificationMock = {
@@ -80,5 +82,38 @@ describe('PricingSettingsComponent', () => {
     expect(component.simFinalEstimatedPrice).toBe(450);
     expect(component.simTeacherCommissionEarned).toBe(45); // 10% of 450
     expect(component.simDriverEarnings).toBe(40);
+  });
+
+  it('validates payment receiving UPI ID and rejects invalid format', async () => {
+    component.config.paymentReceiving.upiId = 'invalid-upi';
+    await component.saveChanges();
+    expect(pricingServiceMock.savePricing).not.toHaveBeenCalled();
+    expect(notificationMock.show).toHaveBeenCalledWith('error', expect.stringContaining('UPI ID'), 'UPI ID Required');
+  });
+
+  it('updates company receiving payment details and saves successfully', async () => {
+    component.config.paymentReceiving.upiId = 'company@hdfcbank';
+    component.config.paymentReceiving.payeeName = 'Student Solutions Payments';
+    component.config.paymentReceiving.bankName = 'ICICI Bank';
+    component.config.paymentReceiving.accountNumber = '987654321012';
+    component.config.paymentReceiving.ifscCode = 'ICIC0001234';
+    component.config.paymentReceiving.accountHolderName = 'Student Solutions LLP';
+
+    await component.saveChanges();
+    expect(pricingServiceMock.savePricing).toHaveBeenCalledWith(component.config);
+    expect(notificationMock.show).toHaveBeenCalledWith('success', expect.any(String), 'Rates Saved');
+  });
+
+  it('allows saving when bank details are omitted (optional bank account)', async () => {
+    component.config.paymentReceiving.upiId = 'onlyupi@bank';
+    component.config.paymentReceiving.payeeName = 'Student Solutions';
+    component.config.paymentReceiving.bankName = '';
+    component.config.paymentReceiving.accountNumber = '';
+    component.config.paymentReceiving.ifscCode = '';
+    component.config.paymentReceiving.accountHolderName = '';
+
+    await component.saveChanges();
+    expect(pricingServiceMock.savePricing).toHaveBeenCalledWith(component.config);
+    expect(notificationMock.show).toHaveBeenCalledWith('success', expect.any(String), 'Rates Saved');
   });
 });

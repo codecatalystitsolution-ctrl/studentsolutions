@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef, NgZone } from '@angular/core'; // ChangeDetectorRef add kiya
+import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef, NgZone } from '@angular/core'; // ChangeDetectorRef add kiya
 import { CommonModule, DatePipe, UpperCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
@@ -9,6 +9,7 @@ import { NotificationService } from '../../../shared/notification/notification.s
 import { QuotationDecision, QuotationService, QuotationVersion } from '../../../services/quotation.service';
 import { LedgerEvent, PaymentLedgerService, PaymentRecord, RefundProcessingRecord } from '../../../services/payment-ledger.service';
 import { DeliveryAssignment, DeliveryWorkflowService } from '../../../services/delivery-workflow.service';
+import { PricingConfigService, PaymentReceivingConfig } from '../../../services/pricing-config.service';
 import { Database, ref, query, orderByChild, equalTo, limitToFirst, onValue, off, set } from '@angular/fire/database';
 
 interface Order {
@@ -30,6 +31,16 @@ interface Order {
   orderDate?: string;
   uid?: string;
   studentID?: string;
+  requestedPricing?: { estimatedAmount?: number; currency?: string };
+  paymentDetails?: {
+    status?: string;
+    advanceAmount?: number;
+    doorstepDue?: number;
+    advancePaymentRef?: string;
+    advanceUpiId?: string;
+    advanceStatus?: string;
+  };
+  pricing?: any;
 }
 
 @Component({
@@ -54,6 +65,9 @@ export class OrderHistoryComponent implements OnInit, OnDestroy {
   private quotationService = inject(QuotationService);
   private paymentLedger = inject(PaymentLedgerService);
   private deliveryWorkflow = inject(DeliveryWorkflowService);
+  private pricingConfig = inject(PricingConfigService);
+  paymentReceiving: PaymentReceivingConfig = this.pricingConfig.getDefaultPricing().paymentReceiving;
+  private stopPricingListener: (() => void) | null = null;
   quotations: Record<string, { currentVersionId: string; versions: Record<string, QuotationVersion> }> = {};
   quotationDecisions: Record<string, Record<string, QuotationDecision | null>> = {};
   private quotationSubscriptions = new Map<string, () => void>();
@@ -75,10 +89,16 @@ export class OrderHistoryComponent implements OnInit, OnDestroy {
   private refundProcessingHistorySubscriptions = new Map<string, () => void>();
   deliveryAssignments: Record<string, DeliveryAssignment | null> = {};
   deliveryHistory: Record<string, Record<string, any>> = {};
+  readonly Math = Math;
   private deliverySubscriptions = new Map<string, () => void>();
   private deliveryHistorySubscriptions = new Map<string, () => void>();
 
   ngOnInit(): void {
+    this.stopPricingListener = this.pricingConfig.watchPaymentReceiving(cfg => {
+      this.paymentReceiving = cfg;
+      this.cdr.detectChanges();
+    });
+
     authState(this.auth).subscribe(user => {
       if (user) {
         const uid = user.uid; // Firebase Auth UID
@@ -247,7 +267,31 @@ export class OrderHistoryComponent implements OnInit, OnDestroy {
     ).length;
   }
 
+  get50AdvanceAmount(amount: number): number {
+    return Math.round((amount || 0) * 0.5);
+  }
+
+  getAdvanceQrUrl(amount: number, orderId: string): string {
+    const adv = this.get50AdvanceAmount(amount);
+    return this.pricingConfig.getUpiPaymentUrl(adv, orderId, this.paymentReceiving);
+  }
+
+  getAdvanceQrImage(amount: number, orderId: string): string {
+    const adv = this.get50AdvanceAmount(amount);
+    return this.pricingConfig.getUpiQrImageUrl(adv, orderId, this.paymentReceiving);
+  }
+
+  async copyText(text: string, label: string): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(text);
+      this.notificationService.show('success', `${label} copied!`, 'Copied');
+    } catch {
+      this.notificationService.show('info', text, label);
+    }
+  }
+
   ngOnDestroy(): void {
+    this.stopPricingListener?.();
     if (this.ordersRef) {
       off(this.ordersRef);
     }

@@ -16,5 +16,5 @@ import { SplashScreenService } from './services/splash-screen.service';
 export class App {
   private readonly themeService = inject(ThemeService);
   protected readonly splashService = inject(SplashScreenService);
-  protected readonly title = signal('filecrafters-web');
+  protected readonly title = signal('Student Solutions');
 }

@@ -28,6 +28,13 @@ export interface DeliveryAssignment {
   phone: string;
   address: string;
   pincode: string;
+  totalAmount?: number;
+  advancePaid?: number;
+  balanceDue?: number;
+  paymentCollectionStatus?: 'pending' | 'collected';
+  collectedMethod?: string;
+  collectedRef?: string;
+  collectedAt?: string;
   lastHistoryEventId?: string;
   lastHistoryStatus?: DeliveryStatus;
   lastHistoryActorUid?: string;
@@ -75,6 +82,10 @@ export class DeliveryWorkflowService {
     const eventRef = push(ref(this.db, `deliveryHistory/${order.id}`));
     if (!eventRef.key) throw new Error('Could not allocate a delivery assignment history event.');
 
+    const totalAmount = Number(currentOrder.pricing?.totalAmount || currentOrder.requestedPricing?.estimatedAmount || 0);
+    const advancePaid = Number(currentOrder.pricing?.advancePaid || Math.round(totalAmount * 0.5));
+    const balanceDue = Math.max(0, totalAmount - advancePaid);
+
     const assignment: DeliveryAssignment = {
       orderId: order.id,
       uid: order.uid,
@@ -87,6 +98,10 @@ export class DeliveryWorkflowService {
       phone: currentOrder.userDetails?.phone || currentOrder.phone || '',
       address: currentOrder.userDetails?.address || currentOrder.address || '',
       pincode: currentOrder.userDetails?.pincode || currentOrder.pincode || '',
+      totalAmount,
+      advancePaid,
+      balanceDue,
+      paymentCollectionStatus: balanceDue > 0 ? 'pending' : 'collected',
       lastHistoryEventId: eventRef.key,
       lastHistoryStatus: 'assigned',
       lastHistoryActorUid: actor.uid,
@@ -111,7 +126,12 @@ export class DeliveryWorkflowService {
     void this.audit.recordAdmin('delivery_assigned', 'order', order.id, `Delivery assigned to agent ${agentUid}.`);
   }
 
-  async updateStatus(orderId: string, status: DeliveryStatus, note: string): Promise<DeliveryHistoryEvent> {
+  async updateStatus(
+    orderId: string,
+    status: DeliveryStatus,
+    note: string,
+    paymentCollection?: { method: 'upi_qr' | 'cash'; reference?: string }
+  ): Promise<DeliveryHistoryEvent> {
     const actor = this.auth.currentUser;
     if (!actor) throw new Error('Sign in to update an assigned delivery.');
     const assignmentRef = ref(this.db, `deliveryAssignments/${orderId}`);
@@ -147,6 +167,12 @@ export class DeliveryWorkflowService {
       lastHistoryNote: normalizedNote,
       lastHistoryCreatedAt: timestamp
     };
+    if (paymentCollection) {
+      historyProjection.paymentCollectionStatus = 'collected';
+      historyProjection.collectedMethod = paymentCollection.method;
+      historyProjection.collectedRef = paymentCollection.reference || '';
+      historyProjection.collectedAt = timestamp;
+    }
     try {
       await update(ref(this.db), Object.fromEntries(
         Object.entries(historyProjection).map(([field, value]) => [`deliveryAssignments/${orderId}/${field}`, value])

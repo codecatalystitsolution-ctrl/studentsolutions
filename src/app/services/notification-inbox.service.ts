@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Auth } from '@angular/fire/auth';
 import { Database, get, onValue, push, ref, serverTimestamp, set, Unsubscribe, update } from '@angular/fire/database';
 
-const adminEmails = new Set(['admin@filecrafters.in', 'wmohd2514@outlook.com']);
+const adminEmails = new Set(['admin@studentsolutions.online', 'admin@studentsolutions.in', 'admin@filecrafters.in', 'wmohd2514@outlook.com']);
 const allowedRoutes = new Set(['/dashboard/my-orders', '/dashboard/my-tickets', '/delivery-portal', '/teacher/referrals', '/admin/order-details']);
 
 export type NotificationType = 'quotation' | 'payment' | 'refund' | 'delivery' | 'support' | 'commission' | 'system';
